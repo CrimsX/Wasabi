@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-	IO.Socket socket = IO.io('http://localhost:3000');
-
 void main() {
   runApp(const MyApp());
 }
@@ -59,6 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  late IO.Socket _socket;
 
   void _incrementCounter() {
     setState(() {
@@ -69,7 +68,23 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
-  }	
+  }
+
+  _connectSocket() {
+    _socket.onConnect((data) => print('Connection established'));
+    _socket.onConnectError((data) => print('Connect Error: $data'));
+    _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _socket = IO.io('http://localhost:3000',
+    IO.OptionBuilder().setTransports(['websocket']).setQuery(
+    {'username': "Bob"}).build(),
+    );
+    _connectSocket();
+  }
 
   @override
   Widget build(BuildContext context) {
