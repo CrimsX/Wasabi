@@ -57,7 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  final IO.Socket _socket = IO.io("http://localhost:3000", IO.OptionBuilder().setTransports(['websocket']).build());
+  late IO.Socket _socket;
 
   void _incrementCounter() {
     setState(() {
@@ -70,11 +70,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _connectSocket() {
-  	_socket.onConnect((data) => print('Connection established'));
-	_socket.onConnectError((data) => print('Connect Error: $data'));
-	_socket.onDisconnect((data) => print('Socket.IO server disconnected'));
-	}
+  _connectSocket() {
+    _socket.onConnect((data) => print('Connection established'));
+    _socket.onConnectError((data) => print('Connect Error: $data'));
+    _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _socket = IO.io('http://localhost:3000',
+    IO.OptionBuilder().setTransports(['websocket']).setQuery(
+    {'username': "Bob"}).build(),
+    );
+    _connectSocket();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        //onPressed: _incrementCounter,
-	onPressed: _connectSocket,
+        onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

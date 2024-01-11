@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const IO = new Server(httpServer);
 
 IO.on('connection', (socket) => {
-	console.log('a user connected');
+	console.log('Username: ', socket.handshake.query.username);
 });
 
 httpServer.listen(3000, () => {
