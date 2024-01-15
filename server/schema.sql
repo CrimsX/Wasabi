@@ -1,5 +1,7 @@
 CREATE DATABASE wasabi;
 
+USE wasabi;
+
 CREATE TABLE client (
     UserID VARCHAR(20) PRIMARY KEY,
     Firstname VARCHAR(1000) NOT NULL,
