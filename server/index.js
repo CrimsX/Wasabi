@@ -9,9 +9,15 @@ const messages = []
 
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
-  console.log(username)
+
   socket.on('message', (data) => {
-    console.log(data)
+    const message = {
+      message: data.message,
+      sender: username,
+      sentAt: Date.now()
+    }
+    messages.push(message)
+    IO.emit('message', message)
   })
 });
 

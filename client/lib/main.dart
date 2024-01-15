@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _socket.onConnect((data) => print('Connection established'));
     _socket.onConnectError((data) => print('Connect Error: $data'));
     _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
+    _socket.on('message', (data) => print(data));
   }
 
   @override
@@ -92,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
     {'username': "Bob"}).build(),
     );
     _connectSocket();
-    _sendMessage();
   }
 
   @override
