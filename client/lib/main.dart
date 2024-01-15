@@ -70,6 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  _sendMessage() {
+    print("test");
+      _socket.emit('message', {
+          'message': "test",
+          'sender': "Bob"
+        });
+  }
+  
   _connectSocket() {
     _socket.onConnect((data) => print('Connection established'));
     _socket.onConnectError((data) => print('Connect Error: $data'));
@@ -84,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     {'username': "Bob"}).build(),
     );
     _connectSocket();
+    _sendMessage();
   }
 
   @override
@@ -134,7 +143,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        //onPressed: _incrementCounter,
+        onPressed: () {
+            _sendMessage();
+          },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

@@ -5,8 +5,14 @@ const httpServer = require('http').createServer(app);
 const { Server } = require("socket.io");
 const IO = new Server(httpServer);
 
+const messages = []
+
 IO.on('connection', (socket) => {
-	console.log('Username: ', socket.handshake.query.username);
+	const username = socket.handshake.query.username
+  console.log(username)
+  socket.on('message', (data) => {
+    console.log(data)
+  })
 });
 
 httpServer.listen(3000, () => {
