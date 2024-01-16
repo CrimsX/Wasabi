@@ -13,9 +13,10 @@ IO.on('connection', (socket) => {
   socket.on('message', (data) => {
     const message = {
       message: data.message,
-      sender: username,
+      senderUsername: username,
       sentAt: Date.now()
     }
+    console.log(message)
     messages.push(message)
     IO.emit('message', message)
   })
