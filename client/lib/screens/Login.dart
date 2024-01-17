@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:client/providers/home.dart';
+
+import 'package:client/screens/home.dart';
+
+/*
 void main() => runApp(
   MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Homepage(),
   ),
 );
+*/
 
+void main() => runApp(MaterialApp(home: Homepage(),));
+
+_login(BuildContext context) {
+  //final provider = Provider.of<LoginProvider>(context, listen: false);
+  //provider.setErrorMessage('');
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ChangeNotifierProvider(
+        create: (context) => HomeProvider(),
+        child: HomeScreen(),
+      ),
+    ),
+  );
+}
+  
 class Homepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -96,6 +119,7 @@ class Homepage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       // Handle login button action
+                      _login(context);
                     },
                     child: Text('Log In'),
                   ),
