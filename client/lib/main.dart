@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:client/providers/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -70,10 +71,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  _sendMessage() {
+    //print("test");
+      _socket.emit('message', {
+          'message': "test",
+          'sender': "Bob"
+        });
+  }
+  
   _connectSocket() {
     _socket.onConnect((data) => print('Connection established'));
     _socket.onConnectError((data) => print('Connect Error: $data'));
     _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
+    //_socket.on(
+    //  'message',
+    //  (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+    //    Message.fromJson(data),
+    //    ),
+    //  );
   }
 
   @override
@@ -134,7 +149,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        //onPressed: _incrementCounter,
+        onPressed: () {
+            _sendMessage();
+          },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

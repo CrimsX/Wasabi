@@ -12,8 +12,21 @@ const httpServer = http.createServer(app);
 
 const IO = new Server(httpServer);
 
+const messages = []
+
 IO.on('connection', (socket) => {
-	console.log('Username: ', socket.handshake.query.username);
+	const username = socket.handshake.query.username
+
+  socket.on('message', (data) => {
+    const message = {
+      message: data.message,
+      senderUsername: username,
+      sentAt: Date.now()
+    }
+    console.log(message)
+    messages.push(message)
+    IO.emit('message', message)
+  })
 });
 
 httpServer.listen(3000, () => {
