@@ -9,3 +9,4 @@ nodemon
 
 Flutter:
 socket.io
+provider
