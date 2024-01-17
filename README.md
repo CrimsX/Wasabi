@@ -28,7 +28,9 @@ git clone https://github.com/CrimsX/Wasabi
 - Start the server
 
 ```shell
-npm start
+npm start \
+or \
+npx nodemon
 ```
 
 - Start the app

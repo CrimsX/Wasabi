@@ -3,6 +3,9 @@ Node js:
 express
 http
 socket.io
+mysql2
+dotenv
+nodemon
 
 Flutter:
 socket.io
