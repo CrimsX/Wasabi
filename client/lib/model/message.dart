@@ -13,7 +13,7 @@ class Message {
         return Message(
           message: message['message'],
           senderUsername: message['senderUsername'],
-          sentAt: DateTime.fromMillisecondsSinceEpoch(message['sentAt'] * 1000),
+          sentAt: DateTime.fromMillisecondsSinceEpoch(message['sentAt']),
         );
       }
   }
