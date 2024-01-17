@@ -16,6 +16,7 @@ const messages = []
 
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
+  console.log(username, "connected")
 
   socket.on('message', (data) => {
     const message = {
@@ -32,3 +33,7 @@ IO.on('connection', (socket) => {
 httpServer.listen(3000, () => {
 	console.log('listening on *:3000');
 });
+
+//httpServer.listen(3000, '0.0.0.0', () => {
+//  console.log('Listening to port: ' + 3000);
+//});

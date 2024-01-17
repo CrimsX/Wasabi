@@ -5,6 +5,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client/providers/home.dart';
 import 'package:client/model/message.dart';
 
+import 'dart:io';
+
 class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -20,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _socket = IO.io('http://localhost:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
-    {'username': "Bob"}).build(),
+    {'username': 'Bob'}).build(),
     );
     _connectSocket();
   }
@@ -138,16 +140,74 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           Expanded(
+            child: Consumer<HomeProvider>(
+              builder: (_, provider, __) => ListView.separated(
+                padding: const EdgeInsets.all(16),
+                //itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = provider.messages[index];
+                  return Wrap(
+                    alignment: message.senderUsername == 'Sender'
+                      ? WrapAlignment.end
+                      : WrapAlignment.start,
+                    children: [
+                      Card(
+                        color: message.senderUsername == 'Sender'
+                          ? Theme.of(context).primaryColorLight
+                          : Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment:
+                              message.senderUsername == 'Sender'
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(message.message),
+                              //Text(
+                                //DateFormat('hh:mm a').format(message.sentAt),
+                              //  style: Theme.of(context).textTheme.bodySmall,
+                              //),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ); 
+                },
+                separatorBuilder: (_, index) => const SizedBox(
+                height: 5,
+                ),
+                itemCount: provider.messages.length,
+              ),
+            ),
+          ),
+          
+          //Container(
+          //  decoration: BoxDecoration(
+          //    color: Colors.grey.shade200,
+          //  ),
+          //), 
+
+         /* 
+          Expanded(
+            child: Consumer<HomeProvider>(
+
+            ),
+          ), */
+          Expanded(
             /* Background Colour */
             child: Container(
               //color: Color(0xFF031003),
               color: Color(0xFF90EE90),
               child: ListView.builder(
-                reverse: true,
+                reverse: false,
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   return Align(
                     alignment: Alignment.centerRight,
+                    //alignment: Alignment.topRight,
                     child: Container(
                       margin: EdgeInsets.only(
                         top: 8.0,
