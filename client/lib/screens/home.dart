@@ -8,6 +8,9 @@ import 'package:client/model/message.dart';
 import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
+  String username = 'test';
+  HomeScreen({Key? key, required this.username}) : super(key: key);
+
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -19,10 +22,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    print(widget.username);
     super.initState();
     _socket = IO.io('http://localhost:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
-    {'username': 'Bob'}).build(),
+    {'username': widget.username}).build(),
     );
     _connectSocket();
   }
@@ -31,12 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
     //print("test");
      _socket.emit('message', {
           'message': _controller.text,
-          'sender': 'Sender',
+          'sender': widget.username,
         });
 
     setState(() {
         _messages.add({
-            'sender': 'Sender',
+            'sender': widget.username,
             'message': _controller.text,
           });
         _controller.clear();
@@ -147,12 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, index) {
                   final message = provider.messages[index];
                   return Wrap(
-                    alignment: message.senderUsername == 'Sender'
+                    alignment: message.senderUsername == widget.username
                       ? WrapAlignment.end
                       : WrapAlignment.start,
                     children: [
                       Card(
-                        color: message.senderUsername == 'Sender'
+                        color: message.senderUsername == widget.username
                           ? Theme.of(context).primaryColorLight
                           : Colors.white,
                         child: Padding(
@@ -160,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment:
-                              message.senderUsername == 'Sender'
+                              message.senderUsername == widget.username
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
@@ -196,8 +200,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ),
           ), */
+
+
+          /*
           Expanded(
-            /* Background Colour */
+            // Background Colour
             child: Container(
               //color: Color(0xFF031003),
               color: Color(0xFF90EE90),
@@ -249,6 +256,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          */
+
           Container(
             padding: EdgeInsets.all(8.0),
             color: Color(0xFF0a3107),

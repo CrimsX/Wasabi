@@ -16,7 +16,7 @@ void main() => runApp(
 
 void main() => runApp(MaterialApp(home: Homepage(),));
 
-_login(BuildContext context) {
+_login(BuildContext context, TextEditingController usernameController) {
   //final provider = Provider.of<LoginProvider>(context, listen: false);
   //provider.setErrorMessage('');
   Navigator.push(
@@ -24,13 +24,18 @@ _login(BuildContext context) {
     MaterialPageRoute(
       builder: (_) => ChangeNotifierProvider(
         create: (context) => HomeProvider(),
-        child: HomeScreen(),
+        child: HomeScreen(
+          username: usernameController.text.trim(),
+          //username: "Bob",
+        ),
       ),
     ),
   );
 }
   
 class Homepage extends StatelessWidget {
+  final TextEditingController usernameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +98,7 @@ class Homepage extends StatelessWidget {
                     children: [
                       SizedBox(height: 20),
                       TextFormField(
+                        controller: usernameController,
                         decoration: InputDecoration(
                           labelText: 'Username',
                           fillColor: Colors.white,
@@ -119,7 +125,7 @@ class Homepage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       // Handle login button action
-                      _login(context);
+                      _login(context, usernameController);
                     },
                     child: Text('Log In'),
                   ),
