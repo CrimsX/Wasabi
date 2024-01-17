@@ -1,38 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:client/providers/home.dart';
+import 'package:client/model/message.dart';
 
-runApp(MyApp());
+class HomeScreen extends StatefulWidget {
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
 
-  void _sendMessage() {
-    setState(() {
-      _messages.add({
-        'sender': 'Sender',
-        'message': _controller.text,
-      });
-      _controller.clear();
-    });
+  late IO.Socket _socket;
+
+  @override
+  void initState() {
+    super.initState();
+    _socket = IO.io('http://localhost:3000',
+    IO.OptionBuilder().setTransports(['websocket']).setQuery(
+    {'username': "Bob"}).build(),
+    );
+    _connectSocket();
   }
 
+  _sendMessage() {
+    //print("test");
+     _socket.emit('message', {
+          'message': _controller.text,
+          'sender': 'Sender',
+        });
+
+    setState(() {
+        _messages.add({
+            'sender': 'Sender',
+            'message': _controller.text,
+          });
+        _controller.clear();
+      });
+  }
+  
+  _connectSocket() {
+    _socket.onConnect((data) => print('Connection established'));
+    _socket.onConnectError((data) => print('Connect Error: $data'));
+    _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
+    _socket.on(
+      'message',
+      (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+        Message.fromJson(data),
+      ),
+    );
+  }
+
+
+  @override
   Widget _buildHoverableTile({
     required String title,
     required VoidCallback onTap,
@@ -52,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return Scaffold(
       backgroundColor: Color(0xFF031003),
       appBar: AppBar(
@@ -116,8 +138,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Expanded(
+            /* Background Colour */
             child: Container(
-              color: Color(0xFF031003),
+              //color: Color(0xFF031003),
+              color: Color(0xFF90EE90),
               child: ListView.builder(
                 reverse: true,
                 itemCount: _messages.length,

@@ -23,7 +23,7 @@ IO.on('connection', (socket) => {
       senderUsername: username,
       sentAt: Date.now()
     }
-    //console.log(message)
+    console.log(message)
     messages.push(message)
     IO.emit('message', message)
   })

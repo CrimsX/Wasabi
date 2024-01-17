@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart'
-import 'package:client/lib/screens/messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:client/providers/home.dart';
+
+import 'package:client/screens/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +20,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
        primarySwatch: Colors.green,
       ),
-      home: ChangeNotiferProvider(
+      home: ChangeNotifierProvider(
         create: (context) => HomeProvider(),
-        child: const HomeScreen(),
+        child: HomeScreen(),
       ),
     );
   }
