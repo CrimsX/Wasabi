@@ -10,3 +10,4 @@ nodemon
 Flutter:
 socket.io
 provider
+intl

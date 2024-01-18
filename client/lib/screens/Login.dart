@@ -26,7 +26,6 @@ _login(BuildContext context, TextEditingController usernameController) {
         create: (context) => HomeProvider(),
         child: HomeScreen(
           username: usernameController.text.trim(),
-          //username: "Bob",
         ),
       ),
     ),
@@ -150,4 +149,3 @@ class Homepage extends StatelessWidget {
     );
   }
 }
-

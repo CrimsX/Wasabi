@@ -5,10 +5,10 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:client/providers/home.dart';
 import 'package:client/model/message.dart';
 
-import 'dart:io';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
-  String username = 'test';
+  String username = '';
   HomeScreen({Key? key, required this.username}) : super(key: key);
 
   State<HomeScreen> createState() => _HomeScreenState();
@@ -32,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _sendMessage() {
-    //print("test");
      _socket.emit('message', {
           'message': _controller.text,
           'sender': widget.username,
@@ -147,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Consumer<HomeProvider>(
               builder: (_, provider, __) => ListView.separated(
                 padding: const EdgeInsets.all(16),
-                //itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = provider.messages[index];
                   return Wrap(
@@ -169,10 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : CrossAxisAlignment.start,
                             children: [
                               Text(message.message),
-                              //Text(
-                                //DateFormat('hh:mm a').format(message.sentAt),
-                              //  style: Theme.of(context).textTheme.bodySmall,
-                              //),
+                              Text(
+                                DateFormat('hh:mm a').format(message.sentAt),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                             ],
                           ),
                         ),
@@ -186,22 +184,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: provider.messages.length,
               ),
             ),
-          ),
+          ), 
           
-          //Container(
-          //  decoration: BoxDecoration(
-          //    color: Colors.grey.shade200,
-          //  ),
-          //), 
-
-         /* 
-          Expanded(
-            child: Consumer<HomeProvider>(
-
-            ),
-          ), */
-
-
           /*
           Expanded(
             // Background Colour
