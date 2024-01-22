@@ -5,6 +5,7 @@ import 'package:client/providers/home.dart';
 
 import 'package:client/screens/home.dart';
 
+import'package:flutter/services.dart';
 /*
 void main() => runApp(
   MaterialApp(
@@ -15,6 +16,8 @@ void main() => runApp(
 */
 
 void main() => runApp(MaterialApp(home: Homepage(),));
+
+void initState() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
 _login(BuildContext context, TextEditingController usernameController) {
   //final provider = Provider.of<LoginProvider>(context, listen: false);
