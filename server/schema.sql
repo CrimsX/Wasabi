@@ -12,7 +12,7 @@ CREATE TABLE client (
 CREATE TABLE friends (
     UserID VARCHAR(20),
     FriendID VARCHAR(20)
-)
+  );
 
 CREATE TABLE encryption (
     EncryptID INTEGER PRIMARY KEY,

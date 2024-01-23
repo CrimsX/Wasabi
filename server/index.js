@@ -11,18 +11,17 @@ const messages = []
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
   console.log("User connected:", username)
-
+  
   const active = new Set();
   active.add(username);
   
-  io.emit("Active connections:", Array.from(active));
+  IO.emit("Active connections:", Array.from(active));
 
   socket.on('disconnect', () => {
     console.log("User disconnected:", username);
     active.delete(username);
-    io.emit("Active connections:", Array.from(active));
-  })
-});
+    IO.emit("Active connections:", Array.from(active));
+  });
 
   /**
    * when 'message' emitted from client, creates JSON object containing message info,

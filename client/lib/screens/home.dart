@@ -35,7 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
     print(widget.username);
     super.initState();
     _socket = IO.io(
-      //'http://localhost:3000',
+
+      'http://localhost:3000',
       //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),
