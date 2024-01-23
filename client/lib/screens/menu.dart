@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'profile.dart';
 import 'collaborate.dart';
 import 'groupmessage.dart';
-import 'login.dart';
+import 'login2.dart';
 import 'messaging.dart';
 import 'notifications.dart';
 import 'settings.dart';
