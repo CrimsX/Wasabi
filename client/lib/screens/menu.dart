@@ -3,7 +3,7 @@ import 'profile.dart';
 import 'collaborate.dart';
 import 'groupmessage.dart';
 import 'login2.dart';
-import 'messaging.dart';
+import 'messaging2.dart';
 import 'notifications.dart';
 import 'settings.dart';
 
