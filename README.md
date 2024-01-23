@@ -43,5 +43,6 @@ source schema.sql
 - Start the app
 
 ```shell
+flutter pub get
 flutter run
 ```
