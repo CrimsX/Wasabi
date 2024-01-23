@@ -34,29 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
     {'username': widget.username}).build(),
     );
     _connectSocket();
-    _joinRoom(widget.username);
+    //_joinRoom(widget.username);
     _socket.emit('friends', widget.username);
   }
 
-  _sendMessage() {
-    if (_controller.text == '') {
-      return;
-    }
-     _socket.emit('message', {
-          'message': _controller.text,
-          'sender': widget.username,
-          'receiver': currentChatFriend,
-          'chatroom': currentChatRoom
-        });
-
-    setState(() {
-        _messages.add({
-            'sender': widget.username,
-            'message': _controller.text,
-          });
-        _controller.clear();
-      });
-  }
+  ///Socet Connection
 
   _connectSocket() {
     _socket.onConnect((data) => print('Connection established'));
@@ -83,16 +65,49 @@ class _HomeScreenState extends State<HomeScreen> {
       'chatCreated',
       (data) => _connectToChat(data)
     );
+    _socket.on(
+      'fetchchat',
+      (data) =>
+      _loadChatHistory(data)
+    );
   }
 
+  ///Helper functions
+
+  ///emits message to server when send button hit
+  _sendMessage() {
+    if (_controller.text == '') {
+      return;
+    }
+     _socket.emit('message', {
+          'message': _controller.text,
+          'sender': widget.username,
+          'receiver': currentChatFriend,
+          'chatroom': currentChatRoom
+        });
+
+    setState(() {
+        _messages.add({
+            'sender': widget.username,
+            'message': _controller.text,
+          });
+        _controller.clear();
+      });
+  }
+
+  ///sends chat room number to server to join socket.io room
   _joinRoom(room) {
     _socket.emit('join', room);
   }
 
+  ///sends chat room number to server to leave socket.io room
   _leaveRoom(room) {
     _socket.emit('leave', room);
   }
 
+  ///checks if chat room exists between two users
+  ///if not, it will create a new chatid in data base
+  ///connects client to socket io room
   _connectToChat(data) {
     if (data.length == 0) {
       _createChatRoom(data);
@@ -100,30 +115,49 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     currentChatRoom = data[0]['ChatID'].toString();
     _joinRoom(currentChatRoom);
+    _fetchChat(currentChatRoom);
   }
 
+  ///creates a chatID in db serving as unique chatroom between two users
   _createChatRoom(data) {
     _socket.emit('createChat', {'User1': widget.username, 'User2': currentChatFriend});
   }
 
+  ///Gets chat history between user and the chat that is currently focused
+  _fetchChat(chatID) {
+    _socket.emit('fetchchat', {'chatID': chatID});
+  }
+
+  ///Gets chat history between user and chat partner from the db
+  ///adds message to the screen after fetching
+  _loadChatHistory(data) {
+    for (var message in data) {
+      Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+        Message.fromJson(message));
+    }
+  }
+
+
+  ///build list of friends based on userID
+  ///builds tiles on the end drawer for each friend in the db
   List<Widget> _buildFriendList(data) {
     for (var friend in data) {
       _friendsList.add(
         _buildHoverableTile(
                 title: friend['FriendID'],
                 onTap: () {
-                  if (currentChatRoom != '') {
+                  //check if previously connected to another chat and leaves chat room if it is
+                  if (currentChatFriend !=  friend['FriendID']) {
+                    if (currentChatRoom != '') {
                     _leaveRoom(currentChatRoom);
                   }
-                  currentChatFriend = friend['FriendID'];
-                  _socket.emit('chat', {'User1': widget.username,
-                  'User2': currentChatFriend});
-
-
-                  setState(() {
-                    _messages.clear();
-                  });
-
+                    // Clears chat screen when clicking onto new chat
+                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
+                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    currentChatFriend = friend['FriendID'];
+                    _socket.emit('chat', {'User1': widget.username,
+                      'User2': currentChatFriend});
+                  }
                   Navigator.pop(context);
                 },
               ));
@@ -132,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
 
-  @override
   Widget _buildHoverableTile({
     required String title,
     required VoidCallback onTap,
