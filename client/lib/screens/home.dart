@@ -1,3 +1,8 @@
+/// Redesigned Home.dart. Instead of drawers i used rows for the friend list
+/// The navigation is not a drawer as well, it's in the header now
+/// I added a + button on top that would add friends, which will open a pop up.
+/// But it does not have the backend yet.
+
 
 
 import 'package:flutter/material.dart';
@@ -13,15 +18,20 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+
+
+
+
 class HomeScreen extends StatefulWidget {
   String username = '';
 
   HomeScreen({Key? key, required this.username}) : super(key: key);
-
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// key for the drawer:
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
   final List<Widget> _friendsList =  [];
@@ -150,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ///build list of friends based on userID
   ///builds tiles on the end drawer for each friend in the db
+
   List<Widget> _buildFriendList(data) {
     for (var friend in data) {
       _friendsList.add(
@@ -194,10 +205,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+ /// the drawer and header
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF031003),
+      /// key:
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Wasabi',
@@ -208,120 +222,206 @@ class _HomeScreenState extends State<HomeScreen> {
             fontFamily: 'Roboto',
           ),
         ),
-        backgroundColor: Color(0xFF0a3107),
+        backgroundColor: Colors.green,
         iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-            Builder(
-              builder: (context) => IconButton(
-                    icon: Icon(Icons.face),
-                    onPressed: () => Scaffold.of(context).openEndDrawer(),
-                    tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-                  ),
-            ),
-          ],
+        leading: IconButton(
+          icon: Icon(Icons.add),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Add Friend'),
+                content: TextField(
+                  decoration: InputDecoration(labelText: 'Friend ID'),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      //_addFriend(/* get the entered value */);
+                      Navigator.of(context).pop();
+                    },
+        child: Text('Add'),
       ),
-      drawer: Drawer(
-        child: Container(
-          color: Color(0xFF0a3107),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              _buildHoverableTile(
-                title: 'My Profile',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildHoverableTile(
-                title: 'Direct Message',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildHoverableTile(
-                title: 'Group Message',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildHoverableTile(
-                title: 'Collaborate',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildHoverableTile(
-                title: 'Settings',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildHoverableTile(
-                title: 'Logout',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: Text('Cancel'),
+      ),
+      ],
+    );
+  },
+  );
+},
+tooltip: 'Add Friend',
+),
+
+        actions: [
+          IconButton(
+            icon: Icon(Icons.message),
+            onPressed: () {
+              // Handle Direct Message tap
+            },
+            color: Colors.white,
           ),
-        ),
+          IconButton(
+            icon: Icon(Icons.groups_2_rounded),
+            onPressed: () {
+              // Handle Group Message tap
+            },
+            color: Colors.white,
+          ),
+          IconButton(
+            icon: Icon(Icons.folder_copy_rounded),
+            onPressed: () {
+              // Handle Collaborate tap
+            },
+            color: Colors.white,
+          ),
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              // Handle Settings tap
+            },
+            color: Colors.white,
+          ),
+          IconButton(
+            icon: Icon(Icons.exit_to_app_rounded),
+            onPressed: () {
+              // Handle Logout tap
+            },
+            color: Colors.white,
+          ),
+        ],
       ),
 
-      endDrawer: Drawer(
-        child: Container(
-          color: Color(0xFF0a3107),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children:
-              _friendsList
-          ),
-        ),
-      ),
-      body: Column(
+
+
+
+
+      body: Row(
         children: [
+          // Left side for friend list
+          Container(
+            width: 200, // Adjust the width as needed
+            child: Drawer(
+              child: Container(
+                color: Colors.grey,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: _friendsList,
+                ),
+              ),
+            ),
+          ),
+
           Expanded(
-            child: Consumer<HomeProvider>(
-              builder: (_, provider, __) => ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemBuilder: (context, index) {
-                  final message = provider.messages[index];
-                  return Wrap(
-                    alignment: message.senderUsername == widget.username
-                      ? WrapAlignment.end
-                      : WrapAlignment.start,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Consumer<HomeProvider>(
+                    builder: (_, provider, __) => ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemBuilder: (context, index) {
+                        final message = provider.messages[index];
+                        return Wrap(
+                          alignment: message.senderUsername == widget.username
+                              ? WrapAlignment.end
+                              : WrapAlignment.start,
+                          children: [
+                            Card(
+                              color: message.senderUsername == widget.username
+                                  ? Theme.of(context).primaryColorLight
+                                  : Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: message.senderUsername == widget.username
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
+                                  children: [
+                                    Text(message.message),
+                                    Text(
+                                      DateFormat('hh:mm a').format(message.sentAt),
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      separatorBuilder: (_, index) => const SizedBox(
+                        height: 5,
+                      ),
+                      itemCount: provider.messages.length,
+                    ),
+                  ),
+                ),
+
+                /// container design for the textfield bottom:
+
+                Container(
+                  padding: EdgeInsets.all(8.0),
+                  color: Colors.white,
+                  child: Row(
                     children: [
-                      Card(
-                        color: message.senderUsername == widget.username
-                          ? Theme.of(context).primaryColorLight
-                          : Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment:
-                              message.senderUsername == widget.username
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
-                            children: [
-                              Text(message.message),
-                              Text(
-                                DateFormat('hh:mm a').format(message.sentAt),
-                                style: Theme.of(context).textTheme.bodySmall,
+                      IconButton(
+                        icon: Icon(
+                          Icons.image,
+                          color: Colors.green,
+                        ),
+                        onPressed: () {
+                          // Handle image button tap
+                        },
+                      ),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white60,
+                            borderRadius: BorderRadius.circular(20.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
                               ),
                             ],
                           ),
+                          child: TextField(
+                            controller: _controller,
+                            style: TextStyle(color: Colors.black),
+                            decoration: InputDecoration(
+                              hintText: 'Message',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              border: InputBorder.none,
+                            ),
+                          ),
                         ),
                       ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.send,
+                          color: Colors.green,
+                        ),
+                        onPressed: _sendMessage,
+                      ),
                     ],
-                  );
-                },
-                separatorBuilder: (_, index) => const SizedBox(
-                height: 5,
+                  ),
                 ),
-                itemCount: provider.messages.length,
-              ),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
 
           /*
           Expanded(
@@ -379,33 +479,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           */
 
-          Container(
-            padding: EdgeInsets.all(8.0),
-            color: Colors.white,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    style: TextStyle(color: Colors.grey),
-                    decoration: InputDecoration(
-                      hintText: 'Type your message...',
-                      hintStyle: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.send,
-                    color: Colors.green,
-                  ),
-                  onPressed: _sendMessage,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'home.dart';
+import 'package:client/screens/home.dart';
 
 
 void main() {
@@ -109,18 +110,21 @@ class WelcomePage extends StatelessWidget {
                 // );
               },
             ),
+
+            /// This is the button goes to home.dart and passed on the username.
             ListTile(
               title: Text('Messages'),
               leading: Icon(Icons.notifications),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => // MessagesScreen(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+                );
               },
             ),
+
             ListTile(
               title: Text('Settings'),
               leading: Icon(Icons.settings),

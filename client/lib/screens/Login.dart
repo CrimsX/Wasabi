@@ -1,6 +1,17 @@
+/// Just redesigned log in
+/// When Log in is clicked , we still go to home instead of menu
+/// Tried fixing it, and was able to go to menu.dart and pass on the user name,
+/// However when i navigate to home.dart from menu.dart
+/// I can open the screen but there was an error.
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+
+/// path to menu.dart changed it :
+//import 'package:client/screens/menu.dart';
+
+/// the original path to home.dart :
 import 'package:client/providers/home.dart';
 
 import 'package:client/screens/home.dart';
@@ -22,19 +33,21 @@ class _HomepageState extends State<Homepage> {
 
   _login(BuildContext context, TextEditingController usernameController) {
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (context) => HomeProvider(),
-          child: HomeScreen(
-            username: usernameController.text.trim(),
-          ),
-        ),
+    context,
+    MaterialPageRoute(
+    builder: (_) => ChangeNotifierProvider(
+    create: (context) => HomeProvider(),
+    child: HomeScreen(
+     username: usernameController.text.trim(),
+    ),
       ),
+    ),
     );
-  }
+    }
 
-  @override
+
+
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
