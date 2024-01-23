@@ -7,6 +7,10 @@ import 'package:client/model/message.dart';
 
 import 'package:intl/intl.dart';
 
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+
 class HomeScreen extends StatefulWidget {
   String username = '';
 
@@ -27,9 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     super.initState();
-    _socket = IO.io('http://localhost:3000',
+    _socket = IO.io(
+      //'http://localhost:3000',
+      //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),
     );
