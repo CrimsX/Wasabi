@@ -1,30 +1,28 @@
 import express from 'express'
 import http from 'http'
 import {Server} from 'socket.io'
-import {getQuery, storeMessage, getFriends, getChatRoom, createChat} from './database.js'
+import {storeMessage, getFriends, getChatRoom, createChat, fetchChat} from './database.js'
 
-//const express = require('express');
 const app = express();
-
-//const httpServer = require('http').createServer(app);
 const httpServer = http.createServer(app);
-//const { Server } = require("socket.io");
-
-
 const IO = new Server(httpServer);
-
 const messages = []
 
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
   console.log(username, "connected")
 
+  /**
+   * when 'message' emitted from client, creates JSON object containing message info,
+   * stores message info to db, and emits it back to the chat to both users in chat room.
+   */
   socket.on('message', (data) => {
     const message = {
       message: data.message,
       senderUsername: username,
       receiverUsername: data.receiver,
-      sentAt: Date.now()
+      sentAt: Date.now(),
+      chatID: parseInt(data.chatroom, 10)
     };
     console.log(message);
     storeMessage(message);
@@ -32,35 +30,61 @@ IO.on('connection', (socket) => {
     IO.to(data.chatroom).emit('message', message)
   })
 
+  /**
+   * Used to join chat room when friend is clicked
+   */
   socket.on('join', (room) => {
     console.log('Joining room: ' + room)
     socket.join(room);
     console.log(socket.rooms);
   })
 
+  /**
+   * Used to leave chat room when another friend is clicked
+   */
   socket.on('leave', (room) => {
     console.log('Leaving room: ' + room)
     socket.leave(room);
     console.log(socket.rooms);
   })
 
+  /**
+   * Retrieves friend list for the requesting client when client is first launched
+   */
   socket.on('friends', async (user) => {
     console.log('fetching friends of: ' + user);
     const result = await getFriends(user);
-    IO.to(user).emit('friends', result);
+    IO.to(socket.id).emit('friends', result);
   })
 
+  /**
+   * Queries db for chatID between the two users
+   */
   socket.on('chat', async (users) => {
-  console.log("Joining Chat with " + users.User2);
-  const result = await getChatRoom(users);
-  IO.to(users.User1).emit('chat', result);
+    console.log("Joining Chat with " + users.User2);
+    const result = await getChatRoom(users);
+    console.log(result)
+    IO.to(socket.id).emit('chat', result);
   })
 
+  /**
+   * creates chatID between two users if one does not exist in db
+   */
   socket.on('createChat', async (users) => {
     console.log("Creating chat room with" + users.User2);
-    const result = await createChat(users)
-    IO.to(users.User1).emit('chatCreated', result);
+    const result = await createChat(users);
+    IO.to(socket.id).emit('chatCreated', result);
     })
+
+  /**
+   * retrieves chat history between two users
+   */
+  socket.on('fetchchat', async (data) => {
+    console.log('fetching chat from chatID: ' + data.chatID);
+    const result = await fetchChat(parseInt(data.chatID, 10));
+    console.log(result);
+    IO.to(socket.id).emit('fetchchat', result);
+  })
 });
 
 httpServer.listen(3000, () => {

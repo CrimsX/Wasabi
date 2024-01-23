@@ -11,8 +11,7 @@ CREATE TABLE client (
 
 CREATE TABLE friends (
     UserID VARCHAR(20),
-    FriendID VARCHAR(20),
-    ChatExists Boolean
+    FriendID VARCHAR(20)
 )
 
 CREATE TABLE encryption (
@@ -23,10 +22,11 @@ CREATE TABLE encryption (
 
 CREATE TABLE messages (
     MessageID INTEGER PRIMARY KEY AUTO_INCREMENT,
-    DateReceived VARCHAR(15) NOT NULL,
+    DateReceived BIGINT NOT NULL,
     DataSent VARCHAR(500) NOT NULL,
     MsgContent VARCHAR(500) NOT NULL,
     EncryptID Integer,
+    ChatID Integer,
     FOREIGN KEY (EncryptID) REFERENCES encryption(EncryptID)
     );
 
