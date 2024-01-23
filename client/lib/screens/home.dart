@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   String username = '';
+
   HomeScreen({Key? key, required this.username}) : super(key: key);
 
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,6 +22,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  final List<Widget> _friendsList =  [];
+  String currentChatRoom = '';
+  String currentChatFriend= '';
+  dynamic friend;
 
   late IO.Socket _socket;
 
@@ -36,23 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
     {'username': widget.username}).build(),
     );
     _connectSocket();
+    //_joinRoom(widget.username);
+    _socket.emit('friends', widget.username);
   }
 
-  _sendMessage() {
-     _socket.emit('message', {
-          'message': _controller.text,
-          'sender': widget.username,
-        });
+  ///Socet Connection
 
-    setState(() {
-        _messages.add({
-            'sender': widget.username,
-            'message': _controller.text,
-          });
-        _controller.clear();
-      });
-  }
-  
   _connectSocket() {
     _socket.onConnect((data) => print('Connection established'));
     _socket.onConnectError((data) => print('Connect Error: $data'));
@@ -63,10 +57,122 @@ class _HomeScreenState extends State<HomeScreen> {
         Message.fromJson(data),
       ),
     );
+
+    _socket.on(
+      'friends',
+      (data) => _buildFriendList(data)
+    );
+
+    _socket.on(
+      'chat',
+      (data) => _connectToChat(data)
+    );
+
+    _socket.on(
+      'chatCreated',
+      (data) => _connectToChat(data)
+    );
+    _socket.on(
+      'fetchchat',
+      (data) =>
+      _loadChatHistory(data)
+    );
+  }
+
+  ///Helper functions
+
+  ///emits message to server when send button hit
+  _sendMessage() {
+    if (_controller.text == '') {
+      return;
+    }
+     _socket.emit('message', {
+          'message': _controller.text,
+          'sender': widget.username,
+          'receiver': currentChatFriend,
+          'chatroom': currentChatRoom
+        });
+
+    setState(() {
+        _messages.add({
+            'sender': widget.username,
+            'message': _controller.text,
+          });
+        _controller.clear();
+      });
+  }
+
+  ///sends chat room number to server to join socket.io room
+  _joinRoom(room) {
+    _socket.emit('join', room);
+  }
+
+  ///sends chat room number to server to leave socket.io room
+  _leaveRoom(room) {
+    _socket.emit('leave', room);
+  }
+
+  ///checks if chat room exists between two users
+  ///if not, it will create a new chatid in data base
+  ///connects client to socket io room
+  _connectToChat(data) {
+    if (data.length == 0) {
+      _createChatRoom(data);
+      return;
+    }
+    currentChatRoom = data[0]['ChatID'].toString();
+    _joinRoom(currentChatRoom);
+    _fetchChat(currentChatRoom);
+  }
+
+  ///creates a chatID in db serving as unique chatroom between two users
+  _createChatRoom(data) {
+    _socket.emit('createChat', {'User1': widget.username, 'User2': currentChatFriend});
+  }
+
+  ///Gets chat history between user and the chat that is currently focused
+  _fetchChat(chatID) {
+    _socket.emit('fetchchat', {'chatID': chatID});
+  }
+
+  ///Gets chat history between user and chat partner from the db
+  ///adds message to the screen after fetching
+  _loadChatHistory(data) {
+    for (var message in data) {
+      Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+        Message.fromJson(message));
+    }
   }
 
 
-  @override
+  ///build list of friends based on userID
+  ///builds tiles on the end drawer for each friend in the db
+  List<Widget> _buildFriendList(data) {
+    for (var friend in data) {
+      _friendsList.add(
+        _buildHoverableTile(
+                title: friend['FriendID'],
+                onTap: () {
+                  //check if previously connected to another chat and leaves chat room if it is
+                  if (currentChatFriend !=  friend['FriendID']) {
+                    if (currentChatRoom != '') {
+                    _leaveRoom(currentChatRoom);
+                  }
+                    // Clears chat screen when clicking onto new chat
+                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
+                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    currentChatFriend = friend['FriendID'];
+                    _socket.emit('chat', {'User1': widget.username,
+                      'User2': currentChatFriend});
+                  }
+                  Navigator.pop(context);
+                },
+              ));
+    }
+    return _friendsList;
+    }
+
+
   Widget _buildHoverableTile({
     required String title,
     required VoidCallback onTap,
@@ -86,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF031003),
       appBar: AppBar(
@@ -100,6 +206,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         backgroundColor: Color(0xFF0a3107),
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+            Builder(
+              builder: (context) => IconButton(
+                    icon: Icon(Icons.face),
+                    onPressed: () => Scaffold.of(context).openEndDrawer(),
+                    tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+                  ),
+            ),
+          ],
       ),
       drawer: Drawer(
         child: Container(
@@ -147,6 +263,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+
+      endDrawer: Drawer(
+        child: Container(
+          color: Color(0xFF0a3107),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children:
+              _friendsList
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -183,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ],
-                  ); 
+                  );
                 },
                 separatorBuilder: (_, index) => const SizedBox(
                 height: 5,
@@ -191,8 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: provider.messages.length,
               ),
             ),
-          ), 
-          
+          ),
+
           /*
           Expanded(
             // Background Colour
