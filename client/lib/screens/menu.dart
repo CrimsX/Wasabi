@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'profile.dart';
-import 'collaborate.dart';
-import 'groupmessage.dart';
-import 'login2.dart';
-import 'messaging2.dart';
-import 'notifications.dart';
-import 'settings.dart';
+import 'login.dart';
+import 'home.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -148,7 +144,7 @@ class WelcomePage extends StatelessWidget {
           children: [
             Center(
               child: Image.asset(
-                'assets/Wasabi.png', // replace with your logo image path
+                'assets/Welcome.png', // replace with your logo image path
                 width: 300,
                 height: 300,
               ),

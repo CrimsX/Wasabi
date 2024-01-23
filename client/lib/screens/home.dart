@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -379,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Container(
             padding: EdgeInsets.all(8.0),
-            color: Color(0xFF0a3107),
+            color: Colors.white,
             child: Row(
               children: [
                 Expanded(

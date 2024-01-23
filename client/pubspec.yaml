@@ -96,3 +96,5 @@ flutter:
   assets:
     - assets/Wasabi.png
     - assets/WasabiIcon.png
+    - assets/Hi.png
+    - assets/Welcome.png
