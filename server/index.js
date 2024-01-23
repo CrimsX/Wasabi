@@ -16,7 +16,18 @@ const messages = []
 
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
-  console.log(username, "connected")
+  console.log("User connected:", username)
+
+  const active = new Set();
+  active.add(username);
+  
+  io.emit("Active connections:", Array.from(active));
+
+  socket.on('disconnect', () => {
+    console.log("User disconnected:", username);
+    active.delete(username);
+    io.emit("Active connections:", Array.from(active));
+  });
 
   socket.on('message', (data) => {
     const message = {
@@ -27,12 +38,11 @@ IO.on('connection', (socket) => {
     console.log(message)
     messages.push(message)
     IO.emit('message', message)
-  })
+  });
 });
 
-
 httpServer.listen(3000, () => {
-	console.log('listening on *:3000');
+	console.log('Server is listening on *:3000');
 });
 
 /*

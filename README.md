@@ -33,6 +33,13 @@ or
 npx nodemon
 ```
 
+- Create databases
+
+```shell
+mysql
+source schema.sql
+```
+
 - Start the app
 
 ```shell
