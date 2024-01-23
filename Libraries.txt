@@ -11,3 +11,4 @@ Flutter:
 socket.io
 provider
 intl
+iconsax_flutter

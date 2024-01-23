@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:client/providers/home.dart';
+import 'package:client/providers/home2.dart';
 
 void main() {
   runApp(const MyApp());
