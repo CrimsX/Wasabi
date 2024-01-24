@@ -84,3 +84,21 @@ export async function fetchChat(chatID) {
         ORDER BY messages.MessageID;", [chatID]);
     return result;
 }
+
+export async function addFriend(friendID, userID) {
+    //Check if friends username exists
+    const [result] = await pool.query("SELECT UserID from client WHERE userID = ? OR userID = ?", [userID, friendID]);
+    if (result.length > 1) {
+        //check if they are already friends
+        const [result2] = await pool.query("SELECT * FROM friends WHERE UserID = ? AND FriendID = ?;", [userID, friendID]);
+        if (result2.length > 0){
+            return false;
+        }
+        await pool.query("INSERT INTO friends VALUES (?, ?);", [userID, friendID]);
+        await pool.query("INSERT INTO friends VALUES (?, ?);", [friendID, userID]);
+        return true;
+    }
+    else {
+        return false;
+    }
+}

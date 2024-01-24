@@ -1,7 +1,7 @@
 import express from 'express'
 import http from 'http'
 import {Server} from 'socket.io'
-import {storeMessage, getFriends, getChatRoom, createChat, fetchChat} from './database.js'
+import {storeMessage, getFriends, getChatRoom, createChat, fetchChat, addFriend} from './database.js'
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -11,10 +11,10 @@ const messages = []
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
   console.log("User connected:", username)
-  
+
   const active = new Set();
   active.add(username);
-  
+
   IO.emit("Active connections:", Array.from(active));
 
   socket.on('disconnect', () => {
@@ -95,6 +95,18 @@ IO.on('connection', (socket) => {
     const result = await fetchChat(parseInt(data.chatID, 10));
     console.log(result);
     IO.to(socket.id).emit('fetchchat', result);
+  })
+
+  /**
+   * checks db for userID and adds them as a friend if exist in db
+   */
+  socket.on('addfriend', async (data) => {
+    const result = await addFriend(data.friendID, data.userID);
+    const response = {
+      result: result,
+      friendID: data.friendID
+    };
+    IO.to(socket.id).emit('addfriends', response);
   })
 });
 
