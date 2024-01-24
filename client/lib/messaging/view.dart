@@ -51,11 +51,8 @@ class _ extends StatelessWidget {
 
 class HomeScreen extends StatefulWidget {
   String username = '';
-  String serverIP = '';
 
-  //HomeScreen({Key? key, required this.username}) : super(key: key);
-  HomeScreen({required this.username, required this.serverIP});
-
+  HomeScreen({Key? key, required this.username}) : super(key: key);
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -79,15 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
-
-    if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000";
-      }
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
-      widget.serverIP,
-      //'http://localhost:3000',
+      'http://localhost:3000',
       //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),
@@ -180,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ///connects client to socket io room
   _connectToChat(data) {
     if (data.length == 0) {
+      print(data);
       _createChatRoom(data);
       return;
     }
@@ -261,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Clears chat screen when clicking onto new chat
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatFriend = friend['FriendID'];
+                    currentChatFriend = friendID;
                     _socket.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
                   }
@@ -406,7 +399,7 @@ tooltip: 'Add Friend',
             onPressed: () {
               _socket.disconnect();
               // Handle logout tap
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => Homepage(), // Replace with your logout screen
