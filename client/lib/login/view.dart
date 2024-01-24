@@ -56,7 +56,8 @@ class _HomepageState extends State<Homepage> {
         builder: (_) => ChangeNotifierProvider(
           create: (context) => HomeProvider(),
             child: WelcomePage(
-              loggedInUsername: usernameController.text.trim()
+              loggedInUsername: usernameController.text.trim(),
+              serverIP: serverIPController.text.trim()
             ),
           /*child: HomeScreen(
             username: usernameController.text.trim(),
