@@ -9,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:client/providers/home.dart';
-import 'package:client/model/message.dart';
+//import 'package:client/providers/home.dart';
+//import 'package:client/model/message.dart';
+import 'package:client/login/view_model.dart';
+import 'package:client/login/model.dart';
 
 import 'package:intl/intl.dart';
 
