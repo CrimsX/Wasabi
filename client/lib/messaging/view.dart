@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
 }
 
 class _ extends StatelessWidget {
-    
+
 }
 */
 
@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controllerAddFriend = TextEditingController();
   final List<Widget> _friendsList = [];
   String currentChatRoom = '';
   String currentChatFriend= '';
@@ -115,6 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
       'fetchchat',
       (data) =>
       _loadChatHistory(data)
+    );
+
+    _socket.on('addfriends', (data) =>
+      _addFriendResponse(data)
     );
   }
 
@@ -183,11 +188,73 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  ///sends request to server to add friend to db
+  _addFriendRequest(friendID){
+    if (friendID == widget.username) {
+      return;
+    }
+    _socket.emit('addfriend', {'userID': widget.username,'friendID': friendID});
+  }
+
+  ///when server responds, updates friendslist side panel
+  ///displays popup message if friend is not added
+  _addFriendResponse(result) {
+    if (result['result']) {
+      setState(() {
+        _friendsList.add(_buildFriendTile(result['friendID']));
+      });
+    }
+    else {
+      _showPopupMessage(context, result['friendID']);
+    }
+  }
+
+  // Function to show the popup message
+  void _showPopupMessage(BuildContext context, String friendID) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Failed to add friend'),
+          content: Text(friendID + ' could not be added'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _buildFriendTile(friendID){
+    return _buildHoverableTile(
+                title: friendID,
+                onTap: () {
+                  //check if previously connected to another chat and leaves chat room if it is
+                  if (currentChatFriend !=  friendID) {
+                    if (currentChatRoom != '') {
+                    _leaveRoom(currentChatRoom);
+                  }
+                    // Clears chat screen when clicking onto new chat
+                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
+                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    currentChatFriend = friend['FriendID'];
+                    _socket.emit('chat', {'User1': widget.username,
+                      'User2': currentChatFriend});
+                  }
+                },
+              );
+  }
+
 
   ///build list of friends based on userID
   ///builds tiles on the end drawer for each friend in the db
 
-  List<Widget> _buildFriendList(data) {
+  _buildFriendList(data) {
     for (var friend in data) {
       _friendsList.add(
         _buildHoverableTile(
@@ -209,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ));
     }
     _friendsListCompleter.complete(_friendsList);
-    return _friendsList;
+    setState(() {});
     }
 
 
@@ -259,12 +326,14 @@ class _HomeScreenState extends State<HomeScreen> {
               return AlertDialog(
                 title: Text('Add Friend'),
                 content: TextField(
+                  controller: _controllerAddFriend,
                   decoration: InputDecoration(labelText: 'Friend ID'),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () {
-                      //_addFriend(/* get the entered value */);
+                      _addFriendRequest(_controllerAddFriend.text);
+                      _controllerAddFriend.clear();
                       Navigator.of(context).pop();
                     },
         child: Text('Add'),
