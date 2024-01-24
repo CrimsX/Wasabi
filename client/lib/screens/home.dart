@@ -17,7 +17,7 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-
+import 'dart:async';
 
 
 
@@ -34,27 +34,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final List<Widget> _friendsList =  [];
+  final List<Widget> _friendsList = [];
   String currentChatRoom = '';
   String currentChatFriend= '';
   dynamic friend;
 
   late IO.Socket _socket;
+ late Completer<List<Widget>> _friendsListCompleter;
 
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     super.initState();
+    _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
-
       'http://localhost:3000',
       //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),
     );
     _connectSocket();
-    //_joinRoom(widget.username);
     _socket.emit('friends', widget.username);
   }
 
@@ -85,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'chatCreated',
       (data) => _connectToChat(data)
     );
+
     _socket.on(
       'fetchchat',
       (data) =>
@@ -179,10 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     _socket.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
                   }
-                  Navigator.pop(context);
                 },
               ));
     }
+    _friendsListCompleter.complete(_friendsList);
     return _friendsList;
     }
 
@@ -196,11 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Text(
         title,
         style: TextStyle(
-          color: selected ? Colors.green : Colors.grey,
+          color: selected ? Colors.green : const Color.fromARGB(255, 255, 255, 255),
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
-      tileColor: selected ? Colors.grey.withOpacity(0.5) : Color(0xFF0a3107),
+      tileColor: selected ? Colors.white : Color.fromARGB(255, 67, 153, 70),
       onTap: onTap,
     );
   }
@@ -255,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 },
 tooltip: 'Add Friend',
+
 ),
 
         actions: [
@@ -297,24 +299,31 @@ tooltip: 'Add Friend',
       ),
 
 
-
-
-
       body: Row(
         children: [
           // Left side for friend list
           Container(
             width: 200, // Adjust the width as needed
             child: Drawer(
-              child: Container(
-                color: Colors.grey,
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: _friendsList,
-                ),
-              ),
+              child: FutureBuilder<List<Widget>>(
+              future: _friendsListCompleter.future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Loading indicator
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  // Display the friends list once data is available
+                  return ListView(
+                    padding: EdgeInsets.zero,
+                    children: snapshot.data ?? [],
+                  );
+            }
+          },
+        ),
+      ),
             ),
-          ),
+
 
           Expanded(
             child: Column(
@@ -478,15 +487,3 @@ tooltip: 'Add Friend',
             ),
           ),
           */
-
-
-
-
-
-
-
-
-
-
-
-

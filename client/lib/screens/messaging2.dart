@@ -278,7 +278,6 @@ class _HomeScreenState extends State<HomeScreen> {
       /// I moved the end drawer to the left, so it's just drawer but what's inside is the same
       drawer: Drawer(
         child: Container(
-          color: Colors.grey,
           child: ListView(
             padding: EdgeInsets.zero,
             children: _friendsList,
