@@ -1,44 +1,53 @@
+/// Just redesigned log in
+/// When Log in is clicked , we still go to home instead of menu
+/// Tried fixing it, and was able to go to menu.dart and pass on the user name,
+/// However when i navigate to home.dart from menu.dart
+/// I can open the screen but there was an error.
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+
+/// path to menu.dart changed it :
+//import 'package:client/screens/menu.dart';
+
+/// the original path to home.dart :
 import 'package:client/providers/home.dart';
 
 import 'package:client/screens/home.dart';
 
-import'package:flutter/services.dart';
-/*
-void main() => runApp(
-  MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Homepage(),
-  ),
-);
-*/
+import 'package:flutter/services.dart';
 
 void main() => runApp(MaterialApp(home: Homepage(),));
 
-void initState() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+class Homepage extends StatefulWidget {
+  @override
+  _HomepageState createState() => _HomepageState();
+}
 
-_login(BuildContext context, TextEditingController usernameController) {
-  //final provider = Provider.of<LoginProvider>(context, listen: false);
-  //provider.setErrorMessage('');
-  Navigator.push(
+class _HomepageState extends State<Homepage> {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController serverIPController = TextEditingController();
+  bool isPasswordVisible = false;
+
+  _login(BuildContext context, TextEditingController usernameController) {
+    Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (_) => ChangeNotifierProvider(
-        create: (context) => HomeProvider(),
-        child: HomeScreen(
-          username: usernameController.text.trim(),
-        ),
+    builder: (_) => ChangeNotifierProvider(
+    create: (context) => HomeProvider(),
+    child: HomeScreen(
+     username: usernameController.text.trim(),
+    ),
       ),
     ),
-  );
-}
-  
-class Homepage extends StatelessWidget {
-  final TextEditingController usernameController = TextEditingController();
+    );
+    }
 
-  @override
+
+
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,101 +58,177 @@ class Homepage extends StatelessWidget {
             children: <Widget>[
               Container(
                 height: 300,
-                color: Colors.green,
+                color: Colors.lightGreen,
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
                     padding: EdgeInsets.only(top: 50),
                     child: Column(
                       children: [
-                        Text(
-                          "Wasabi",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 60,  // Adjusted font size
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Image.asset(
+                          'assets/Wasabi.png',
+                          width: 200,
+                          height: 220,
                         ),
                         SizedBox(height: 10),
-                        Text(
-                          "Log In",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,  // Adjusted font size
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ],
                     ),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(30.0),
-                child: Container(
-                  height: 200,
-                  width: 600,
-                  padding: EdgeInsets.symmetric(horizontal: 40.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 3,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20),
-                      TextFormField(
-                        controller: usernameController,
-                        decoration: InputDecoration(
-                          labelText: 'Username',
-                          fillColor: Colors.white,
-                          filled: true,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          fillColor: Colors.white,
-                          filled: true,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-              ),
+
+              // For enter username:
               SizedBox(height: 20),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle login button action
-                      _login(context, usernameController);
-                    },
-                    child: Text('Log In'),
-                  ),
-                  SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      // Handle forgot password action
-                    },
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: Colors.green,
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        hintText: 'Enter your Username',
+                        labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: Icon(Icons.person, color: Colors.black, size: 18),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        floatingLabelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 1.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+
+                    // for enter password:
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: !isPasswordVisible,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        hintText: 'Enter your password',
+                        labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: Icon(Icons.lock, color: Colors.black, size: 18),
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isPasswordVisible = !isPasswordVisible;
+                            });
+                          },
+                          child: Icon(
+                            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            color: Colors.black,
+                            size: 18,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        floatingLabelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 1.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    // For server IP:
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: serverIPController,
+                      decoration: InputDecoration(
+                        labelText: 'Server IP (optional)',
+                        hintText: 'Enter server IP',
+                        labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: Icon(Icons.data_usage, color: Colors.black, size: 18),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        floatingLabelStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 1.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    // For Create Account:
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            // Navigate to CreateAccountScreen
+                            // await Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => CreateAccountScreen(),
+                            //   ),
+                            // );
+
+                            // After returning from CreateAccountScreen, you can add any desired logic here
+                          },
+                          child: Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: Colors.lightGreen,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // For Log in:
+                    SizedBox(height: 30),
+                    MaterialButton(
+                      onPressed: () {
+                        _login(context, usernameController);
+                      },
+                      height: 45,
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      color: Colors.lightGreen,
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20), // Added bottom padding to the container
+                  ],
+                ),
               ),
             ],
           ),

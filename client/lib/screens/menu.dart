@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'profile.dart';
-import 'collaborate.dart';
-import 'groupmessage.dart';
-import 'login2.dart';
-import 'messaging2.dart';
-import 'notifications.dart';
-import 'settings.dart';
+import 'login.dart';
+import 'home.dart';
+import 'package:client/screens/home.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -113,18 +110,21 @@ class WelcomePage extends StatelessWidget {
                 // );
               },
             ),
+
+            /// This is the button goes to home.dart and passed on the username.
             ListTile(
               title: Text('Messages'),
               leading: Icon(Icons.notifications),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => // MessagesScreen(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+                );
               },
             ),
+
             ListTile(
               title: Text('Settings'),
               leading: Icon(Icons.settings),
@@ -148,7 +148,7 @@ class WelcomePage extends StatelessWidget {
           children: [
             Center(
               child: Image.asset(
-                'assets/Wasabi.png', // replace with your logo image path
+                'assets/Welcome.png', // replace with your logo image path
                 width: 300,
                 height: 300,
               ),
