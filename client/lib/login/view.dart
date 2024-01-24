@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 
-import 'package:client/screens/home.dart';
+//import 'package:client/screens/home.dart';
+import 'package:client/home/view.dart';
 import 'package:flutter/services.dart';
 
 // Don't delete yet
@@ -54,9 +55,13 @@ class _HomepageState extends State<Homepage> {
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (context) => HomeProvider(),
-          child: HomeScreen(
+            child: WelcomePage(
+              loggedInUsername: usernameController.text.trim()
+            ),
+          /*child: HomeScreen(
             username: usernameController.text.trim(),
           ),
+          */
         ),
       ),
     );
