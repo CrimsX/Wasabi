@@ -3,14 +3,18 @@
 /// I added a + button on top that would add friends, which will open a pop up.
 /// But it does not have the backend yet.
 
-
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'view_model.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:client/providers/home.dart';
-import 'package:client/model/message.dart';
+//import 'package:client/providers/home.dart';
+//import 'package:client/model/message.dart';
+import 'package:client/login/view_model.dart';
+import 'package:client/login/model.dart';
 
 import 'package:intl/intl.dart';
 
@@ -20,7 +24,28 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 
 
+/* don't delete yet
+void main() {
+  runApp(MyApp());
+}
 
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create:(context) => _ViewModel(),
+      child: MaterialApp(
+        title: "",
+          home: _(),
+      ),
+    );
+  }
+}
+
+class _ extends StatelessWidget {
+    
+}
+*/
 
 class HomeScreen extends StatefulWidget {
   String username = '';
