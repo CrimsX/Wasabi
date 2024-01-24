@@ -7,6 +7,7 @@ import 'package:client/messaging/view.dart';
 
 import 'package:client/login/view_model.dart';
 import 'package:client/login/model.dart';
+import 'package:client/login/view.dart';
 
 /*
 void main() {
@@ -72,12 +73,12 @@ class WelcomePage extends StatelessWidget {
             icon: Icon(Icons.exit_to_app),
             onPressed: () {
               // Handle logout button click
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => LogIn(), // Replace with your logout screen
-              //   ),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Homepage(), // Replace with your logout screen
+                ),
+              );
             },
           ),
         ],
