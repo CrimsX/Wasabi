@@ -398,7 +398,7 @@ tooltip: 'Add Friend',
             onPressed: () {
               _socket.disconnect();
               // Handle logout tap
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => Homepage(), // Replace with your logout screen
