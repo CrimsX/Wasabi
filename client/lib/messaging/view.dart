@@ -376,6 +376,9 @@ tooltip: 'Add Friend',
                                       ? CrossAxisAlignment.end
                                       : CrossAxisAlignment.start,
                                   children: [
+                                    Text(message.senderUsername,
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                    ),
                                     Text(message.message),
                                     Text(
                                       DateFormat('hh:mm a').format(message.sentAt),
