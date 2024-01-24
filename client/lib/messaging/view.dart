@@ -23,6 +23,8 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
+import 'package:client/login/view.dart';
+
 
 /* don't delete yet
 void main() {
@@ -325,7 +327,14 @@ tooltip: 'Add Friend',
           IconButton(
             icon: Icon(Icons.exit_to_app_rounded),
             onPressed: () {
-              // Handle Logout tap
+              _socket.disconnect();
+              // Handle logout tap
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Homepage(), // Replace with your logout screen
+                ),
+              );
             },
             color: Colors.white,
           ),
