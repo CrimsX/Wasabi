@@ -51,8 +51,11 @@ class _ extends StatelessWidget {
 
 class HomeScreen extends StatefulWidget {
   String username = '';
+  String serverIP = '';
 
-  HomeScreen({Key? key, required this.username}) : super(key: key);
+  //HomeScreen({Key? key, required this.username}) : super(key: key);
+  HomeScreen({required this.username, required this.serverIP});
+
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -76,10 +79,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
+
+    if (widget.serverIP == '') {
+        widget.serverIP = "http://localhost:3000";
+      }
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
-      'http://localhost:3000',
+      widget.serverIP,
+      //'http://localhost:3000',
       //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),

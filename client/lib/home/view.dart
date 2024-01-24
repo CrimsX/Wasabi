@@ -40,7 +40,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: WelcomePage(loggedInUsername: 'Username'),
+      home: WelcomePage(loggedInUsername: 'Username',
+      serverIP: 'IP'),
       debugShowCheckedModeBanner: false, // Remove debug banner
     );
   }
@@ -48,8 +49,9 @@ class MyApp extends StatelessWidget {
 
 class WelcomePage extends StatelessWidget {
   final String loggedInUsername;
+  final String serverIP;
 
-  WelcomePage({required this.loggedInUsername});
+  WelcomePage({required this.loggedInUsername, required this.serverIP});
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +152,8 @@ class WelcomePage extends StatelessWidget {
                     builder: (_) => ChangeNotifierProvider(
                       create: (context) => HomeProvider(),
                       child: HomeScreen(
-                        username: loggedInUsername
+                        username: loggedInUsername,
+                        serverIP: serverIP
                       ),
                     ),
                     //builder: (context) => HomeScreen(username: loggedInUsername),
