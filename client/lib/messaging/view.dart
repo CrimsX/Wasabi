@@ -67,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late IO.Socket _socket;
  late Completer<List<Widget>> _friendsListCompleter;
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -139,11 +141,18 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         _controller.clear();
       });
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
   ///sends chat room number to server to join socket.io room
   _joinRoom(room) {
     _socket.emit('join', room);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
   ///sends chat room number to server to leave socket.io room
@@ -356,6 +365,7 @@ tooltip: 'Add Friend',
                 Expanded(
                   child: Consumer<HomeProvider>(
                     builder: (_, provider, __) => ListView.separated(
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(16),
                       itemBuilder: (context, index) {
                         final message = provider.messages[index];
