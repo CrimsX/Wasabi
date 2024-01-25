@@ -163,9 +163,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ///sends chat room number to server to join socket.io room
   _joinRoom(room) {
     _socket.emit('join', room);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    });
   }
 
   ///sends chat room number to server to leave socket.io room
@@ -204,6 +201,9 @@ class _HomeScreenState extends State<HomeScreen> {
       Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
     }
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
   ///sends request to server to add friend to db
