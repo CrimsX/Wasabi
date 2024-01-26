@@ -79,8 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000";
-      }
+        widget.serverIP = "http://localhost:3000/";
+      } else {
+          widget.serverIP = "http://" + widget.serverIP + ":3000/";
+        }
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
