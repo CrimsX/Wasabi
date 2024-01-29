@@ -368,10 +368,18 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 },
 tooltip: 'Add Friend',
-
 ),
-
-        actions: [
+        actions:[
+          IconButton(
+            icon: Icon(Icons.call),
+            onPressed: () {},
+            color: Colors.white
+          ),
+          IconButton(
+              icon: Icon(Icons.video_call),
+              onPressed: () {},
+              color: Colors.white
+          ),
           IconButton(
             icon: Icon(Icons.message),
             onPressed: () {
