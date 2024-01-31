@@ -52,7 +52,7 @@ CREATE TABLE sentmessages (
     );
 
 CREATE TABLE servertable (
-    ServerID INTEGER PRIMARY KEY,
+    ServerID INTEGER PRIMARY KEY AUTO_INCREMENT,
     ServerName VARCHAR(50) NOT NULL,
     CreationDate VARCHAR(15)
     );
@@ -99,3 +99,27 @@ CREATE TABLE ReceiveCall (
     FOREIGN Key (CallID) REFERENCES client(UserID),
     FOREIGN Key (ReceiverID) REFERENCES client(UserID)
     );
+
+CREATE TABLE groupmsgencryption (
+    EncryptID INTEGER PRIMARY KEY,
+    EncryptedMsg VARCHAR(500),
+    EncryptionKey VARCHAR(500)
+    );
+
+CREATE TABLE groupmsgs (
+    GroupMsgID INTEGER PRIMARY KEY AUTO_INCREMENT,
+    DateReceived BIGINT NOT NULL,
+    DataSent VARCHAR(500) NOT NULL,
+    MsgContent VARCHAR(500) NOT NULL,
+    EncryptID Integer,
+    ServerID Integer,
+    FOREIGN KEY (ServerID) REFERENCES servertable(ServerID),
+    FOREIGN KEY (EncryptID) REFERENCES groupmsgencryption(EncryptID)
+    );
+
+CREATE TABLE groupmsgsender (
+    UserID VARCHAR(20),
+    GroupMsgID INTEGER,
+    FOREIGN KEY (UserID) REFERENCES client(UserID),
+    FOREIGN KEY (GroupMsgID) REFERENCES groupmsgs(GroupMsgID)
+);
