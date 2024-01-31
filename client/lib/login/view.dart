@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model.dart';
-
+import '../createAccount/view.dart';
 //import 'package:client/screens/home.dart';
 import 'package:client/home/view.dart';
 import 'package:flutter/services.dart';
@@ -205,14 +205,13 @@ class _HomepageState extends State<Homepage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: () async {
-                            // Navigate to CreateAccountScreen
-                            // await Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => CreateAccountScreen(),
-                            //   ),
-                            // );
+                          onPressed: () {
+                             Navigator.push(
+                               context,
+                               MaterialPageRoute(
+                                 builder: (context) => createAccount(),
+                               ),
+                             );
 
 
                           },
