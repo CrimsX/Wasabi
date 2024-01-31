@@ -8,14 +8,14 @@ import 'package:client/home/view.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MaterialApp(home: Homepage(),));
+void main() => runApp(MaterialApp(home: createAccount(),));
 
-class Homepage extends StatefulWidget {
+class createAccount extends StatefulWidget {
   @override
-  _HomepageState createState() => _HomepageState();
+  _createAccountState createState() => _createAccountState(); // add state
 }
 
-class _HomepageState extends State<Homepage> {
+class _createAccountState extends State<createAccount> { // state / create account
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
