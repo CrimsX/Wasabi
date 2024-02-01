@@ -102,3 +102,37 @@ export async function addFriend(friendID, userID) {
         return false;
     }
 }
+
+export async function getServers(userID) {
+    const [rows] = await pool.query("SELECT servertable.ServerID, servertable.ServerName \
+    FROM partof \
+    JOIN servertable ON partof.ServerID = servertable.ServerID \
+    WHERE UserID = ?;", [userID])
+    return rows
+}
+
+async function getCurrentGroupMsgID(data) {
+    const [id] = await pool.query('SELECT GroupMsgID FROM groupmsgs WHERE DateReceived = ?;', [data.sentAt.toString()])
+    return id
+}
+
+export async function storeGroupMessage(data) {
+    await pool.query('INSERT INTO groupmsgs (DateReceived, DataSent, MsgContent, EncryptID, ServerID) \
+    VALUES (?, ?, ?, ?, ?);' , [data.sentAt, 'text', data.message, null, data.serverID]);
+
+    const result = await getCurrentGroupMsgID(data);
+    const msgID = result[0].GroupMsgID;
+
+    await pool.query('INSERT INTO groupmsgsender (UserID, GroupMsgID) \
+    VALUES (?, ?);' , [data.senderUsername, msgID]);
+}
+
+export async function fetchGroupChat(serverID) {
+    const [result] = await pool.query("SELECT groupmsgs.MsgContent as message, groupmsgsender.UserID as senderUsername, \
+        groupmsgs.DateReceived as sentAt , groupmsgs.ServerID as serverID\
+        FROM groupmsgs \
+        JOIN groupmsgsender ON groupmsgs.GroupMsgID = groupmsgsender.GroupMsgID \
+        WHERE ServerID = ?\
+        ORDER BY groupmsgs.GroupMsgID;", [serverID]);
+    return result;
+}

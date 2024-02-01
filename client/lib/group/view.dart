@@ -35,7 +35,7 @@ class _GroupState extends State<Group> {
   dynamic server;
 
   late IO.Socket _socket;
- late Completer<List<Widget>> _serverListCompleter;
+  late Completer<List<Widget>> _serverListCompleter;
 
   ScrollController _scrollController = ScrollController();
 
@@ -66,15 +66,10 @@ class _GroupState extends State<Group> {
     _socket.onConnectError((data) => print('Connect Error: $data'));
     _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
     _socket.on(
-      'groupmessage',
+      'groupmsg',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
-    );
-
-    _socket.on(
-      'groupchat',
-      (data) => _connectToGroupChat(data)
     );
 
     _socket.on(
@@ -83,9 +78,13 @@ class _GroupState extends State<Group> {
     );
 
     _socket.on(
-      'fetchchat',
+      'fetchgroupchat',
       (data) =>
       _loadChatHistory(data)
+    );
+
+    _socket.on('addServer', (data) =>
+      _addServerResponse(data)
     );
 
   }
@@ -100,7 +99,7 @@ class _GroupState extends State<Group> {
      _socket.emit('groupmsg', {
           'message': _controller.text,
           'sender': widget.username,
-          'server': currentChatServer
+          'serverID': currentChatServer
         });
 
     setState(() {
@@ -118,7 +117,7 @@ class _GroupState extends State<Group> {
 
   ///sends serverID to server to join socket.io room
   _joinRoom(room) {
-    _socket.emit('join', room);
+    _socket.emit('joingroupchat', room);
     WidgetsBinding.instance!.addPostFrameCallback((_) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     });
@@ -132,10 +131,9 @@ class _GroupState extends State<Group> {
   ///checks if chat room exists between two users
   ///if not, it will create a new chatid in data base
   ///connects client to socket io room
-  _connectToGroupChat(data) { //might not need for server
-    currentChatServer = data[0]['ChatID'].toString();
-    _joinRoom(currentChatServer);
-    _fetchGroupChat(currentChatServer);
+  _connectToGroupChat(serverID) {
+    _joinRoom(serverID);
+    _fetchGroupChat(serverID);
   }
 
 
@@ -207,8 +205,7 @@ class _GroupState extends State<Group> {
                   Provider.of<HomeProvider>(context, listen: false).messages.clear();
                   Provider.of<HomeProvider>(context, listen: false).notifyListeners();
                   currentChatServer = serverID;
-                  _socket.emit('groupchat', {'User1': widget.username,
-                      'User2': currentChatServer});
+                  _connectToGroupChat(currentChatServer);
                   });
     }
 
@@ -220,18 +217,21 @@ class _GroupState extends State<Group> {
     for (var server in data) {
       _serverList.add(
         _buildHoverableTile(
-                title: server['ServerID'],
+                title: server['ServerName'],
                 onTap: () {
+                  if (currentChatServer == server['ServerID'].toString()) {
+                    return;
+                  }
                   //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatServer !=  server['ServerID']) {
-                    _leaveRoom(currentChatServer);
+                  if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
+                    _socket.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatServer = server['ServerID'];
-                    _socket.emit('groupchat', {'User1': widget.username,
-                      'Server': currentChatServer});
+                    currentChatServer = server['ServerID'].toString();
+                    print(currentChatServer);
+                    _connectToGroupChat(currentChatServer);
                 },
               ));
     }
