@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _controllerAddFriend = TextEditingController();
   final List<Widget> _friendsList = [];
+  final FocusNode _focusNode = FocusNode();
   String currentChatRoom = '';
   String currentChatFriend= '';
   dynamic friend;
@@ -218,9 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ///displays popup message if friend is not added
   _addFriendResponse(result) {
     if (result['result']) {
-      setState(() {
-        _friendsList.add(_buildFriendTile(result['friendID']));
-      });
+      _friendsList.add(_buildFriendTile(result['friendID']));
+      setState(() {});
     }
     else {
       _showPopupMessage(context, result['friendID']);
@@ -263,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     currentChatFriend = friendID;
                     _socket.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
+                    FocusScope.of(context).requestFocus(_focusNode);
                   }
                 },
               );
@@ -289,6 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     currentChatFriend = friend['FriendID'];
                     _socket.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
+                    FocusScope.of(context).requestFocus(_focusNode);
                   }
                 },
               ));
@@ -345,6 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text('Add Friend'),
                 content: TextField(
                   controller: _controllerAddFriend,
+                  autofocus: true,
                   decoration: InputDecoration(labelText: 'Friend ID'),
                 ),
                 actions: [
@@ -534,6 +537,7 @@ tooltip: 'Add Friend',
                           ),
                           child: TextField(
                             controller: _controller,
+                            focusNode: _focusNode,
                             style: TextStyle(color: Colors.black),
                             decoration: InputDecoration(
                               hintText: 'Message',

@@ -31,6 +31,7 @@ class _GroupState extends State<Group> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _controllerAddServer = TextEditingController();
   final List<Widget> _serverList = [];
+  final FocusNode _focusNode = FocusNode();
   String currentChatServer= '';
   dynamic server;
 
@@ -206,6 +207,7 @@ class _GroupState extends State<Group> {
                   Provider.of<HomeProvider>(context, listen: false).notifyListeners();
                   currentChatServer = serverID;
                   _connectToGroupChat(currentChatServer);
+                  FocusScope.of(context).requestFocus(_focusNode);
                   });
     }
 
@@ -232,6 +234,7 @@ class _GroupState extends State<Group> {
                     currentChatServer = server['ServerID'].toString();
                     print(currentChatServer);
                     _connectToGroupChat(currentChatServer);
+                    FocusScope.of(context).requestFocus(_focusNode);
                 },
               ));
     }
@@ -476,6 +479,7 @@ tooltip: 'Add Server',
                           ),
                           child: TextField(
                             controller: _controller,
+                            focusNode: _focusNode,
                             style: TextStyle(color: Colors.black),
                             decoration: InputDecoration(
                               hintText: 'Message',
