@@ -1,7 +1,17 @@
 import express from 'express'
 import http from 'http'
 import {Server} from 'socket.io'
-import {storeMessage, getFriends, getChatRoom, createChat, fetchChat, addFriend} from './database.js'
+import {
+  storeMessage,
+  getFriends,
+  getChatRoom,
+  createChat,
+  fetchChat,
+  addFriend,
+  getServers,
+  storeGroupMessage,
+  fetchGroupChat
+} from './database.js'
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -72,6 +82,7 @@ IO.on('connection', (socket) => {
    * Queries db for chatID between the two users
    */
   socket.on('chat', async (users) => {
+    console.log(users);
     console.log("Joining Chat with " + users.User2);
     const result = await getChatRoom(users);
     console.log(result)
@@ -108,6 +119,55 @@ IO.on('connection', (socket) => {
     };
     IO.to(socket.id).emit('addfriends', response);
   })
+
+  socket.on('servers', async (user) => {
+    console.log('fetching servers of: ' + user);
+    const result = await getServers(user); //TODO: make query
+    console.log(result);
+    IO.to(socket.id).emit('servers', result);
+  })
+
+  socket.on('joingroupchat', (serverID) => {
+    const groupchatID = 'G' + serverID;
+    console.log('joining chat: ' + groupchatID);
+    socket.join(groupchatID);
+  })
+
+  socket.on('leavegroupchat', (serverID) => {
+    const groupchatID = 'G' + serverID;
+    console.log('leaving chat: ' + groupchatID);
+    socket.leave(groupchatID);
+  })
+
+  socket.on('groupmsg', (data) => {
+    const message = {
+    message: data.message,
+    senderUsername: username,
+    sentAt: Date.now(),
+    serverID: parseInt(data.serverID, 10)
+    };
+    console.log(message.serverID);
+    storeGroupMessage(message) //TODO make query
+    const room = 'G' + data.serverID.toString();
+    IO.to(room).emit('groupmsg', message)
+    })
+
+    socket.on('fetchgroupchat', async (data) => {
+      console.log('fetching chat from serverID: ' + data.serverID);
+      const result = await fetchGroupChat(parseInt(data.serverID, 10)); //TODO make query
+      console.log(result);
+      IO.to(socket.id).emit('fetchgroupchat', result);
+    })
+
+  socket.on('addserver', async (data) => {
+    const result = await addServer(data.serverID, data.userID); //TODO make query
+    const response = {
+      result: result,
+      serverID: data.serverID
+    };
+    IO.to(socket.id).emit('addServer', response);
+  })
+
 });
 
 httpServer.listen(3000, () => {

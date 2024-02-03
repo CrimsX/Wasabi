@@ -4,6 +4,7 @@ import 'view_model.dart';
 
 import 'package:client/login/view.dart';
 import 'package:client/messaging/view.dart';
+import 'package:client/group/view.dart';
 
 import 'package:client/login/view_model.dart';
 import 'package:client/login/model.dart';
@@ -138,6 +139,26 @@ class WelcomePage extends StatelessWidget {
                 //     builder: (context) => CollaborateScreen(),
                 //   ),
                 // );
+              },
+            ),
+
+            ListTile(
+              title: Text('Groups'),
+              leading: Icon(Icons.groups_2),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (context) => HomeProvider(),
+                      child: Group(
+                        username: loggedInUsername,
+                        serverIP: serverIP
+                      ),
+                    ),
+                    //builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+                );
               },
             ),
 
