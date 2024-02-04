@@ -25,6 +25,13 @@ import 'dart:async';
 
 import 'package:client/login/view.dart';
 
+// Random
+import 'dart:math';
+
+import 'package:client/voice/view.dart';
+import 'package:client/services/network.dart';
+
+
 
 /* don't delete yet
 void main() {
@@ -53,6 +60,7 @@ class HomeScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
 
+
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({required this.username, required this.serverIP});
   State<HomeScreen> createState() => _HomeScreenState();
@@ -75,13 +83,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ScrollController _scrollController = ScrollController();
 
+  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
+
+
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000";
-      }
+        widget.serverIP = "http://localhost:3000/";
+      } else {
+          widget.serverIP = "http://" + widget.serverIP + ":3000/";
+        }
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
@@ -164,9 +177,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ///sends chat room number to server to join socket.io room
   _joinRoom(room) {
     _socket.emit('join', room);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    });
   }
 
   ///sends chat room number to server to leave socket.io room
@@ -205,6 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
       Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
     }
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
   ///sends request to server to add friend to db
@@ -321,6 +334,11 @@ class _HomeScreenState extends State<HomeScreen> {
  /// the drawer and header
   @override
   Widget build(BuildContext context) {
+    NetworkService.instance.init(
+      websocketUrl: widget.serverIP,
+      selfCallerID:selfCallerID,
+    );
+
     return Scaffold(
       /// key:
       key: _scaffoldKey,

@@ -10,7 +10,7 @@ import 'view_model.dart';
 import '../createAccount/view.dart';
 //import 'package:client/screens/home.dart';
 import 'package:client/home/view.dart';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 
 // Don't delete yet
 /*
@@ -36,7 +36,7 @@ class _ extends StatelessWidget {
 }
 */
 
-void main() => runApp(MaterialApp(home: Homepage(),));
+//void main() => runApp(MaterialApp(home: Homepage(),));
 
 class Homepage extends StatefulWidget {
   @override
