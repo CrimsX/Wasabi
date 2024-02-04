@@ -1,49 +1,21 @@
-/// Just redesigned log in
-/// When Log in is clicked , we still go to home instead of menu
-/// Tried fixing it, and was able to go to menu.dart and pass on the user name,
-/// However when i navigate to home.dart from menu.dart
-/// I can open the screen but there was an error.
-
+import 'package:client/login/view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model.dart';
-import '../createAccount/view.dart';
+
 //import 'package:client/screens/home.dart';
 import 'package:client/home/view.dart';
-//import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
-// Don't delete yet
-/*
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MaterialApp(home: createAccount(),));
 
-class MyApp extends StatelessWidget {
+class createAccount extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create:(context) => _ViewModel(),
-      child: MaterialApp(
-        title: "",
-          home: _(),
-      ),
-    );
-  }
+  _createAccountState createState() => _createAccountState(); // add state
 }
 
-class _ extends StatelessWidget {
-    
-}
-*/
-
-//void main() => runApp(MaterialApp(home: Homepage(),));
-
-class Homepage extends StatefulWidget {
-  @override
-  _HomepageState createState() => _HomepageState();
-}
-
-class _HomepageState extends State<Homepage> {
+class _createAccountState extends State<createAccount> { // state / create account
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
@@ -53,19 +25,61 @@ class _HomepageState extends State<Homepage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (context) => HomeProvider(),
-            child: WelcomePage(
-              loggedInUsername: usernameController.text.trim(),
-              serverIP: serverIPController.text.trim()
-            ),
-          /*child: HomeScreen(
-            username: usernameController.text.trim(),
-          ),
-          */
+        builder: (_) => WelcomePage(
+          loggedInUsername: usernameController.text.trim(),
+          serverIP: serverIPController.text.trim(),
         ),
       ),
     );
+  }
+
+  _showAccountCreatedDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.green, // Set the background color to green
+          title: Text(
+            "Account Created!",
+            style: TextStyle(color: Colors.white), // Set text color to white
+          ),
+          content: Text(
+            "Your account has been successfully created.",
+            style: TextStyle(color: Colors.white), // Set text color to white
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(
+                "OK",
+                style: TextStyle(color: Colors.white), // Set text color to white
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _createAccount(BuildContext context) {
+    String username = usernameController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      // Show an error message if either username or password is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please enter both username and password."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // If both fields are filled, show the "Account Created" dialog
+      _showAccountCreatedDialog(context);
+      // Add logic to create account if needed
+    }
   }
 
   @override
@@ -77,9 +91,21 @@ class _HomepageState extends State<Homepage> {
           height: MediaQuery.of(context).size.height,
           child: Column(
             children: <Widget>[
+              // Add the AppBar with a back button
+              AppBar(
+                backgroundColor: Colors.white,
+                elevation: 0, // Remove shadow
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new_outlined, color: Colors.green),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+
               Container(
                 height: 300,
-                color: Colors.lightGreen,
+                color: Colors.white,
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
@@ -87,7 +113,7 @@ class _HomepageState extends State<Homepage> {
                     child: Column(
                       children: [
                         Image.asset(
-                          'assets/Wasabi.png',
+                          'assets/Hi.png',
                           width: 200,
                           height: 220,
                         ),
@@ -95,6 +121,26 @@ class _HomepageState extends State<Homepage> {
                       ],
                     ),
                   ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+              Text(
+                'Create your Account',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Roboto',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Create your account to start collaborating',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Roboto',
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
 
@@ -108,7 +154,7 @@ class _HomepageState extends State<Homepage> {
                       controller: usernameController,
                       decoration: InputDecoration(
                         labelText: 'Username',
-                        hintText: 'Enter your Username',
+                        hintText: 'Create Username',
                         labelStyle: TextStyle(
                           color: Colors.black,
                           fontSize: 14,
@@ -137,7 +183,7 @@ class _HomepageState extends State<Homepage> {
                       obscureText: !isPasswordVisible,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        hintText: 'Enter your password',
+                        hintText: 'Create password',
                         labelStyle: TextStyle(
                           color: Colors.black,
                           fontSize: 14,
@@ -171,67 +217,11 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
 
-                    // For server IP:
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: serverIPController,
-                      decoration: InputDecoration(
-                        labelText: 'Server IP (optional)',
-                        hintText: 'Enter server IP',
-                        labelStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        prefixIcon: Icon(Icons.data_usage, color: Colors.black, size: 18),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        floatingLabelStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 1.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-
-                    // For Create Account:
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                             Navigator.push(
-                               context,
-                               MaterialPageRoute(
-                                 builder: (context) => createAccount(),
-                               ),
-                             );
-
-
-                          },
-                          child: Text(
-                            'Create Account',
-                            style: TextStyle(
-                              color: Colors.lightGreen,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // For Log in:
+                    // For Create Account button:
                     SizedBox(height: 30),
                     MaterialButton(
                       onPressed: () {
-                        _login(context, usernameController);
+                        _createAccount(context);
                       },
                       height: 45,
                       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
@@ -240,7 +230,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                       color: Colors.lightGreen,
                       child: Text(
-                        'Login',
+                        'Create Account',
                         style: TextStyle(
                           color: Colors.white,
                         ),

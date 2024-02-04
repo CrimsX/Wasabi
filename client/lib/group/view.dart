@@ -1,102 +1,54 @@
-/// Redesigned Home.dart. Instead of drawers i used rows for the friend list
-/// The navigation is not a drawer as well, it's in the header now
-/// I added a + button on top that would add friends, which will open a pop up.
-/// But it does not have the backend yet.
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'view_model.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 //import 'package:client/providers/home.dart';
 //import 'package:client/model/message.dart';
 import 'package:client/login/view_model.dart';
 import 'package:client/login/model.dart';
-
 import 'package:intl/intl.dart';
-
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'dart:async';
-
 import 'package:client/login/view.dart';
 
-// Random
-import 'dart:math';
-
-import 'package:client/voice/view.dart';
-import 'package:client/services/network.dart';
 
 
-
-/* don't delete yet
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create:(context) => _ViewModel(),
-      child: MaterialApp(
-        title: "",
-          home: _(),
-      ),
-    );
-  }
-}
-
-class _ extends StatelessWidget {
-
-}
-*/
-
-class HomeScreen extends StatefulWidget {
+class Group extends StatefulWidget {
   String username = '';
   String serverIP = '';
 
-
-  //HomeScreen({Key? key, required this.username}) : super(key: key);
-  HomeScreen({required this.username, required this.serverIP});
-  State<HomeScreen> createState() => _HomeScreenState();
+  //Group({Key? key, required this.username}) : super(key: key);
+  Group({required this.username, required this.serverIP});
+  State<Group> createState() => _GroupState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _GroupState extends State<Group> {
   /// key for the drawer:
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _controllerAddFriend = TextEditingController();
-  final List<Widget> _friendsList = [];
+  final TextEditingController _controllerAddServer = TextEditingController();
+  final List<Widget> _serverList = [];
   final FocusNode _focusNode = FocusNode();
-  String currentChatRoom = '';
-  String currentChatFriend= '';
-  dynamic friend;
+  String currentChatServer= '';
+  dynamic server;
 
   late IO.Socket _socket;
- late Completer<List<Widget>> _friendsListCompleter;
+  late Completer<List<Widget>> _serverListCompleter;
 
   ScrollController _scrollController = ScrollController();
-
-  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
-
 
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000/";
-      } else {
-          widget.serverIP = "http://" + widget.serverIP + ":3000/";
-        }
+        widget.serverIP = "http://localhost:3000";
+      }
     super.initState();
-    _friendsListCompleter = Completer<List<Widget>>();
+    _serverListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
       widget.serverIP,
       //'http://localhost:3000',
@@ -105,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     {'username': widget.username}).build(),
     );
     _connectSocket();
-    _socket.emit('friends', widget.username);
+    _socket.emit('servers', widget.username);
   }
 
   ///Socet Connection
@@ -115,36 +67,27 @@ class _HomeScreenState extends State<HomeScreen> {
     _socket.onConnectError((data) => print('Connect Error: $data'));
     _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
     _socket.on(
-      'message',
+      'groupmsg',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
     );
 
     _socket.on(
-      'friends',
-      (data) => _buildFriendList(data)
+      'servers',
+      (data) => _buildServerList(data)
     );
 
     _socket.on(
-      'chat',
-      (data) => _connectToChat(data)
-    );
-
-    _socket.on(
-      'chatCreated',
-      (data) => _connectToChat(data)
-    );
-
-    _socket.on(
-      'fetchchat',
+      'fetchgroupchat',
       (data) =>
       _loadChatHistory(data)
     );
 
-    _socket.on('addfriends', (data) =>
-      _addFriendResponse(data)
+    _socket.on('addServer', (data) =>
+      _addServerResponse(data)
     );
+
   }
 
   ///Helper functions
@@ -154,11 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_controller.text == '') {
       return;
     }
-     _socket.emit('message', {
+     _socket.emit('groupmsg', {
           'message': _controller.text,
           'sender': widget.username,
-          'receiver': currentChatFriend,
-          'chatroom': currentChatRoom
+          'serverID': currentChatServer
         });
 
     setState(() {
@@ -174,12 +116,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  ///sends chat room number to server to join socket.io room
+  ///sends serverID to server to join socket.io room
   _joinRoom(room) {
-    _socket.emit('join', room);
+    _socket.emit('joingroupchat', room);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
   }
 
-  ///sends chat room number to server to leave socket.io room
+  ///sends serverID to server to leave socket.io room
   _leaveRoom(room) {
     _socket.emit('leave', room);
   }
@@ -187,25 +132,15 @@ class _HomeScreenState extends State<HomeScreen> {
   ///checks if chat room exists between two users
   ///if not, it will create a new chatid in data base
   ///connects client to socket io room
-  _connectToChat(data) {
-    if (data.length == 0) {
-      print(data);
-      _createChatRoom(data);
-      return;
-    }
-    currentChatRoom = data[0]['ChatID'].toString();
-    _joinRoom(currentChatRoom);
-    _fetchChat(currentChatRoom);
+  _connectToGroupChat(serverID) {
+    _joinRoom(serverID);
+    _fetchGroupChat(serverID);
   }
 
-  ///creates a chatID in db serving as unique chatroom between two users
-  _createChatRoom(data) {
-    _socket.emit('createChat', {'User1': widget.username, 'User2': currentChatFriend});
-  }
 
   ///Gets chat history between user and the chat that is currently focused
-  _fetchChat(chatID) {
-    _socket.emit('fetchchat', {'chatID': chatID});
+  _fetchGroupChat(serverID) {
+    _socket.emit('fetchgroupchat', {'serverID': serverID});
   }
 
   ///Gets chat history between user and chat partner from the db
@@ -215,39 +150,37 @@ class _HomeScreenState extends State<HomeScreen> {
       Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
     }
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    });
   }
 
-  ///sends request to server to add friend to db
-  _addFriendRequest(friendID){
-    if (friendID == widget.username) {
+  ///sends request to server to add server to db
+  _addServerRequest(serverID){
+    if (serverID == widget.username) {
       return;
     }
-    _socket.emit('addfriend', {'userID': widget.username,'friendID': friendID});
+    _socket.emit('addserver', {'userID': widget.username,'serverID': serverID});
   }
 
-  ///when server responds, updates friendslist side panel
-  ///displays popup message if friend is not added
-  _addFriendResponse(result) {
+  ///when server responds, updates serverslist side panel
+  ///displays popup message if server is not added
+  _addServerResponse(result) {
     if (result['result']) {
-      _friendsList.add(_buildFriendTile(result['friendID']));
-      setState(() {});
+      setState(() {
+        _serverList.add(_buildServerTile(result['serverID']));
+      });
     }
     else {
-      _showPopupMessage(context, result['friendID']);
+      _showPopupMessage(context, result['serverID']);
     }
   }
 
   // Function to show the popup message
-  void _showPopupMessage(BuildContext context, String friendID) {
+  void _showPopupMessage(BuildContext context, String serverID) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Failed to add friend'),
-          content: Text(friendID + ' could not be added'),
+          title: Text('Failed to add server'),
+          content: Text(serverID + ' could not be added'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -261,54 +194,51 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _buildFriendTile(friendID){
+  _buildServerTile(serverID){
     return _buildHoverableTile(
-                title: friendID,
+                title: serverID,
                 onTap: () {
                   //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatFriend !=  friendID) {
-                    if (currentChatRoom != '') {
-                    _leaveRoom(currentChatRoom);
+                  if (currentChatServer !=  serverID) {
+                    _leaveRoom(currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
-                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatFriend = friendID;
-                    _socket.emit('chat', {'User1': widget.username,
-                      'User2': currentChatFriend});
-                    FocusScope.of(context).requestFocus(_focusNode);
-                  }
-                },
-              );
-  }
+                  Provider.of<HomeProvider>(context, listen: false).messages.clear();
+                  Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                  currentChatServer = serverID;
+                  _connectToGroupChat(currentChatServer);
+                  FocusScope.of(context).requestFocus(_focusNode);
+                  });
+    }
 
 
-  ///build list of friends based on userID
-  ///builds tiles on the end drawer for each friend in the db
+  ///build list of servers based on userID
+  ///builds tiles on the end drawer for each server in the db
 
-  _buildFriendList(data) {
-    for (var friend in data) {
-      _friendsList.add(
+  _buildServerList(data) {
+    for (var server in data) {
+      _serverList.add(
         _buildHoverableTile(
-                title: friend['FriendID'],
+                title: server['ServerName'],
                 onTap: () {
+                  if (currentChatServer == server['ServerID'].toString()) {
+                    return;
+                  }
                   //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatFriend !=  friend['FriendID']) {
-                    if (currentChatRoom != '') {
-                    _leaveRoom(currentChatRoom);
+                  if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
+                    _socket.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatFriend = friend['FriendID'];
-                    _socket.emit('chat', {'User1': widget.username,
-                      'User2': currentChatFriend});
+                    currentChatServer = server['ServerID'].toString();
+                    print(currentChatServer);
+                    _connectToGroupChat(currentChatServer);
                     FocusScope.of(context).requestFocus(_focusNode);
-                  }
                 },
               ));
     }
-    _friendsListCompleter.complete(_friendsList);
+    _serverListCompleter.complete(_serverList);
     setState(() {});
     }
 
@@ -334,11 +264,6 @@ class _HomeScreenState extends State<HomeScreen> {
  /// the drawer and header
   @override
   Widget build(BuildContext context) {
-    NetworkService.instance.init(
-      websocketUrl: widget.serverIP,
-      selfCallerID:selfCallerID,
-    );
-
     return Scaffold(
       /// key:
       key: _scaffoldKey,
@@ -362,17 +287,16 @@ class _HomeScreenState extends State<HomeScreen> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Add Friend'),
+                title: Text('Add Server'),
                 content: TextField(
-                  controller: _controllerAddFriend,
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: 'Friend ID'),
+                  controller: _controllerAddServer,
+                  decoration: InputDecoration(labelText: 'Server ID'),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () {
-                      _addFriendRequest(_controllerAddFriend.text);
-                      _controllerAddFriend.clear();
+                      _addServerRequest(_controllerAddServer.text);
+                      _controllerAddServer.clear();
                       Navigator.of(context).pop();
                     },
         child: Text('Add'),
@@ -388,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
   },
   );
 },
-tooltip: 'Add Friend',
+tooltip: 'Add Server',
 ),
         actions:[
           IconButton(
@@ -449,19 +373,19 @@ tooltip: 'Add Friend',
 
       body: Row(
         children: [
-          // Left side for friend list
+          // Left side for server list
           Container(
             width: 200, // Adjust the width as needed
             child: Drawer(
               child: FutureBuilder<List<Widget>>(
-              future: _friendsListCompleter.future,
+              future: _serverListCompleter.future,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator(); // Loading indicator
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  // Display the friends list once data is available
+                  // Display the servers list once data is available
                   return ListView(
                     padding: EdgeInsets.zero,
                     children: snapshot.data ?? [],
@@ -584,59 +508,3 @@ tooltip: 'Add Friend',
     );
   }
 }
-
-          /*
-          Expanded(
-            // Background Colour
-            child: Container(
-              //color: Color(0xFF031003),
-              color: Color(0xFF90EE90),
-              child: ListView.builder(
-                reverse: false,
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    //alignment: Alignment.topRight,
-                    child: Container(
-                      margin: EdgeInsets.only(
-                        top: 8.0,
-                        bottom: 8.0,
-                        left: 80.0,
-                        right: 8.0,
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0a3107),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.0),
-                          topRight: Radius.circular(20.0),
-                          bottomLeft: Radius.circular(20.0),
-                          bottomRight: Radius.circular(0.0),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${_messages[index]['sender']}:',
-                            style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 6.0),
-                          Text(
-                            _messages[index]['message'] ?? '',
-                            style:
-                            TextStyle(color: Colors.grey, fontSize: 16.0),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          */
