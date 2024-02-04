@@ -12,3 +12,4 @@ socket.io
 provider
 intl
 iconsax_flutter
+flutter_webrtc

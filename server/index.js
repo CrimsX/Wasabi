@@ -2,11 +2,25 @@ import express from 'express'
 import http from 'http'
 import {Server} from 'socket.io'
 import {storeMessage, getFriends, getChatRoom, createChat, fetchChat, addFriend} from './database.js'
+//import Peer from 'peerjs'
+//import { v4 as uuidv4 } from 'uuid'
 
 const app = express();
 const httpServer = http.createServer(app);
 const IO = new Server(httpServer);
 const messages = []
+//const peer = new Peer()
+
+//app.get('/', (req, res) => {
+//  res.sendFile(__dirname + 'index.html');
+//});
+//
+//const peerServer = Peer(server, {
+//  debug: true,
+//});
+//
+//app.use('/peerjs', peerServer);
+//
 
 IO.on('connection', (socket) => {
 	const username = socket.handshake.query.username
@@ -108,7 +122,30 @@ IO.on('connection', (socket) => {
     };
     IO.to(socket.id).emit('addfriends', response);
   })
+
+ // socket.on('offer', (offer, targetPeer) => {
+ //   socket.to(targetPeer).emit('offer', offer);
+ // });
+
+ // socket.on('answer', (answer, targetPeer) => {
+ //   socket.to(targetPeer).emit('answer', answer);
+ // });
+
+ // socket.on('ice-candidate', (candidate, targetPeer) => {
+ //   socket.to(targetPeer). emit('ice candidate', candidate)
+ // });
 });
+
+//app.set('view engine', 'pug')
+//app.use(express.static('public'))
+//
+//app.get('/', (req, res) => {
+//  res.redirect('/${uuidV4()}')
+//})
+//
+//app.get('/:room', (req,res) => {
+//  res.render('room', { roomId: req.params.room })
+//})
 
 httpServer.listen(3000, () => {
 	console.log('Server is listening on *:3000');

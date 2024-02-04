@@ -25,6 +25,13 @@ import 'dart:async';
 
 import 'package:client/login/view.dart';
 
+// Random
+import 'dart:math';
+
+import 'package:client/voice/view.dart';
+import 'package:client/services/network.dart';
+
+
 
 /* don't delete yet
 void main() {
@@ -53,6 +60,7 @@ class HomeScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
 
+
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({required this.username, required this.serverIP});
   State<HomeScreen> createState() => _HomeScreenState();
@@ -73,6 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
  late Completer<List<Widget>> _friendsListCompleter;
 
   ScrollController _scrollController = ScrollController();
+
+  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
+
 
   @override
   void initState() {
@@ -321,6 +332,11 @@ class _HomeScreenState extends State<HomeScreen> {
  /// the drawer and header
   @override
   Widget build(BuildContext context) {
+    NetworkService.instance.init(
+      websocketUrl: widget.serverIP,
+      selfCallerID:selfCallerID,
+    );
+
     return Scaffold(
       /// key:
       key: _scaffoldKey,
