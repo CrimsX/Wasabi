@@ -30,6 +30,7 @@ import 'dart:math';
 
 import 'package:client/voice/view.dart';
 import 'package:client/services/network.dart';
+import 'package:client/voice/join.dart';
 
 
 
@@ -99,8 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _friendsListCompleter = Completer<List<Widget>>();
     _socket = IO.io(
       widget.serverIP,
-      //'http://localhost:3000',
-      //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
     IO.OptionBuilder().setTransports(['websocket']).setQuery(
     {'username': widget.username}).build(),
     );
@@ -398,7 +397,15 @@ tooltip: 'Add Friend',
           ),
           IconButton(
               icon: Icon(Icons.video_call),
-              onPressed: () {},
+              onPressed: () {
+                // Handle video tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => JoinScreen(selfCallerId: selfCallerID),
+                  ),
+                );
+              },
               color: Colors.white
           ),
           IconButton(

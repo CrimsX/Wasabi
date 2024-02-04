@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class NetworkService {
-  // instance of Socket
   Socket? socket;
 
   NetworkService._();

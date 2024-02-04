@@ -1,5 +1,5 @@
 import express from 'express'
-import http from 'http'
+//import http from 'http'
 import {Server} from 'socket.io'
 
 import {
@@ -14,31 +14,72 @@ import {
   fetchGroupChat
 } from './database.js'
 
+let port = process.env.PORT || 3000;
+
 const app = express();
-const httpServer = http.createServer(app);
-const IO = new Server(httpServer);
+//const httpServer = http.createServer(app);
+//const IO = new Server(httpServer);
+//
 const messages = []
-//const peer = new Peer()
 
-//app.get('/', (req, res) => {
-//  res.sendFile(__dirname + 'index.html');
-//});
-//
-//const peerServer = Peer(server, {
-//  debug: true,
-//});
-//
-//app.use('/peerjs', peerServer);
-//
+let IO = new (Server) (port, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
-IO.on('connection', (socket) => {
-	const username = socket.handshake.query.username
+IO.use((socket, next) => {
+  if (socket.handshake.query) {
+    let callerId = socket.handshake.query.callerId;
+    socket.user = callerId;
+    next();
+  }
+});
+
+//console.log('Server is listening on *:3000');
+
+IO.on("connection", (socket) => {
+  console.log(socket.user, "Connected");
+  socket.join(socket.user);
+
+  const username = socket.handshake.query.username
   console.log("User connected:", username)
 
   const active = new Set();
   active.add(username);
 
   IO.emit("Active connections:", Array.from(active));
+
+  socket.on("makeCall", (data) => {
+    let calleeId = data.calleeId;
+    let sdpOffer = data.sdpOffer;
+
+    socket.to(calleeId).emit("newCall", {
+      callerId: socket.user,
+      sdpOffer: sdpOffer,
+    });
+  });
+
+  socket.on("answerCall", (data) => {
+    let callerId = data.callerId;
+    let sdpAnswer = data.sdpAnswer;
+
+    socket.to(callerId).emit("callAnswered", {
+      callee: socket.user,
+      sdpAnswer: sdpAnswer,
+    });
+  });
+
+  socket.on("IceCandidate", (data) => {
+    let calleeId = data.calleeId;
+    let iceCandidate = data.iceCandidate;
+
+    socket.to(calleeId).emit("IceCandidate", {
+      sender: socket.user,
+      iceCandidate: iceCandidate,
+    });
+  });
 
   socket.on('disconnect', () => {
     console.log("User disconnected:", username);
@@ -181,24 +222,3 @@ IO.on('connection', (socket) => {
     IO.to(socket.id).emit('addServer', response);
   })
 });
-
-//app.set('view engine', 'pug')
-//app.use(express.static('public'))
-//
-//app.get('/', (req, res) => {
-//  res.redirect('/${uuidV4()}')
-//})
-//
-//app.get('/:room', (req,res) => {
-//  res.render('room', { roomId: req.params.room })
-//})
-
-httpServer.listen(3000, () => {
-	console.log('Server is listening on *:3000');
-});
-
-/*
-httpServer.listen(3000, '0.0.0.0', () => {
-  console.log('Listening to port: ' + 3000);
-});
-*/
