@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'view.dart';
 import '../../services/network.dart';
-
+/*
 class JoinScreen extends StatefulWidget {
   final String selfCallerId;
 
@@ -147,3 +147,4 @@ class _JoinScreenState extends State<JoinScreen> {
     );
   }
 }
+*/

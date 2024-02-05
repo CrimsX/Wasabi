@@ -22,6 +22,9 @@ const app = express();
 //
 const messages = []
 
+let callerId;
+let onlineUsers = {};
+
 let IO = new (Server) (port, {
   cors: {
     origin: "*",
@@ -31,7 +34,7 @@ let IO = new (Server) (port, {
 
 IO.use((socket, next) => {
   if (socket.handshake.query) {
-    let callerId = socket.handshake.query.callerId;
+    callerId = socket.handshake.query.callerId;
     socket.user = callerId;
     next();
   }
@@ -46,6 +49,9 @@ IO.on("connection", (socket) => {
   const username = socket.handshake.query.username
   console.log("User connected:", username)
 
+  onlineUsers[username] = callerId;
+  //console.log(Object.keys(onlineUsers));
+
   const active = new Set();
   active.add(username);
 
@@ -59,6 +65,8 @@ IO.on("connection", (socket) => {
       callerId: socket.user,
       sdpOffer: sdpOffer,
     });
+    //console.log(sdpOffer);
+    console.log("Call sent");
   });
 
   socket.on("answerCall", (data) => {
@@ -83,6 +91,8 @@ IO.on("connection", (socket) => {
 
   socket.on('disconnect', () => {
     console.log("User disconnected:", username);
+    delete onlineUsers[username];
+
     active.delete(username);
     IO.emit("Active connections:", Array.from(active));
   });
@@ -221,4 +231,23 @@ IO.on("connection", (socket) => {
     };
     IO.to(socket.id).emit('addServer', response);
   })
+
+  socket.on("requestVoIPID", (data) => {
+    console.log("THIS WORKING");
+    /*
+    for (var i = 0, keys = Object.keys(onlineUsers), ii = keys.length; i < ii; i++) {
+      console.log(keys[i] + '|' + onlineUsers[keys[i]].list);
+    }
+    */
+    var keys = Object.keys(onlineUsers);
+    keys.forEach(key=>{
+      if (key == data) {
+        IO.to(socket.id).emit('r_VoIPID', onlineUsers[key]);
+      //console.log(key + '|' + onlineUsers[key]);
+      }
+    })
+
+    //IO.to(socket.id).emit('r_VoIPID', "TEST");
+    //console.log('FriendID: ' + data.friendID);
+  });
 });

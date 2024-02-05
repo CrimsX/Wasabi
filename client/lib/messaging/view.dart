@@ -35,6 +35,8 @@ import 'package:client/voice/view.dart';
 import 'package:client/services/network.dart';
 import 'package:client/voice/join.dart';
 
+import 'package:client/widgets/menuBar.dart';
+
 
 
 /* don't delete yet
@@ -86,9 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ScrollController _scrollController = ScrollController();
 
+  // maybe hash name salted with current time
   final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
+  final String remoteCallerID = 'Offline';
  
   Socket? _socket;
+
+  // VoIP
+  dynamic incomingSDPOffer;
 
   @override
   void initState() {
@@ -113,9 +120,27 @@ class _HomeScreenState extends State<HomeScreen> {
     _connectSocket();
 
     _socket!.emit('friends', widget.username);
+    
+    _socket!.on("newCall", (data) {
+      print(data);
+        if (mounted) {
+            //print("received");
+            setState(() => incomingSDPOffer = data);
+        }
+        //print(incomingSDPOffer);
+    });
+    /*
+    NetworkService.instance.socket!.on("newCall", (data) {
+      if (mounted) {
+        setState(() => incomingSDPOffer = data);
+      }
+    });
+    */
   }
 
   ///Socet Connection
+  //
+  // should be able to move this to network.dart
   _connectSocket() {
     //_socket?.onConnect((data) => print('Connection established'));
     //_socket?.onConnectError((data) => print('Connect Error: $data'));
@@ -152,7 +177,17 @@ class _HomeScreenState extends State<HomeScreen> {
       'addfriends',
       (data) => _addFriendResponse(data)
     );
-    
+
+
+    //_socket!.emit("requestFriendVoIPID", widget.username);
+
+    /*
+    _socket!.on(
+      'receivefriendVoIPID',
+      (data) => _requestFriendVoIPID(data)
+    );
+    */
+      
   }
 
   ///Helper functions
@@ -320,6 +355,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
     }
 
+    _requestFriendVoIPID(data) {
+      _socket!.emit('receivefriendVoIPID', widget.username);
+      //NetworkService.instance.setRemoteCallerID = data;
+    }
 
   Widget _buildHoverableTile({
     required String title,
@@ -339,6 +378,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Join VoIP
+  _joinCall({
+    required String callerId,
+    required String calleeId,
+    dynamic offer,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VoIP(
+          callerId: callerId,
+          calleeId: calleeId,
+          offer: offer,
+        ),
+      ),
+    );
+  }
+
  /// the drawer and header
   @override
   Widget build(BuildContext context) {
@@ -349,6 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
       selfCallerID: selfCallerID,
     );
     */
+    print(incomingSDPOffer);
 
     return Scaffold(
       /// key:
@@ -368,103 +426,44 @@ class _HomeScreenState extends State<HomeScreen> {
         iconTheme: IconThemeData(color: Colors.white),
         leading: IconButton(
           icon: Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Add Friend'),
-                content: TextField(
-                  controller: _controllerAddFriend,
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: 'Friend ID'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _addFriendRequest(_controllerAddFriend.text);
-                      _controllerAddFriend.clear();
-                      Navigator.of(context).pop();
-                    },
-        child: Text('Add'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: Text('Cancel'),
-      ),
-      ],
-    );
-  },
-  );
-},
-tooltip: 'Add Friend',
-),
-        actions:[
-          IconButton(
-            icon: Icon(Icons.call),
-            onPressed: () {},
-            color: Colors.white
-          ),
-          IconButton(
-              icon: Icon(Icons.video_call),
-              onPressed: () {
-                // Handle video tap
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => JoinScreen(selfCallerId: selfCallerID),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                 title: Text('Add Friend'),
+                 content: TextField(
+                   controller: _controllerAddFriend,
+                   autofocus: true,
+                    decoration: InputDecoration(labelText: 'Friend ID'),
                   ),
+                  actions: [
+                    TextButton(
+                     onPressed: () {
+                       _addFriendRequest(_controllerAddFriend.text);
+                       _controllerAddFriend.clear();
+                       Navigator.of(context).pop();
+                     },
+                     child: Text('Add'),
+                   ),
+                   TextButton(
+                     onPressed: () {
+                       Navigator.of(context).pop();
+                     },
+                     child: Text('Cancel'),
+                   ),
+                  ],
                 );
               },
-              color: Colors.white
-          ),
-          IconButton(
-            icon: Icon(Icons.message),
-            onPressed: () {
-              // Handle Direct Message tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.groups_2_rounded),
-            onPressed: () {
-              // Handle Group Message tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.folder_copy_rounded),
-            onPressed: () {
-              // Handle Collaborate tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              // Handle Settings tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.exit_to_app_rounded),
-            onPressed: () {
-              _socket!.disconnect();
-              // Handle logout tap
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Homepage(), // Replace with your logout screen
-                ),
-              );
-            },
-            color: Colors.white,
-          ),
+            );
+          },
+          tooltip: 'Add Friend',
+        ),
+
+        actions:[
+          menuBar(),
         ],
       ),
-
 
       body: Row(
         children: [
@@ -473,24 +472,23 @@ tooltip: 'Add Friend',
             width: 200, // Adjust the width as needed
             child: Drawer(
               child: FutureBuilder<List<Widget>>(
-              future: _friendsListCompleter.future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Loading indicator
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  // Display the friends list once data is available
-                  return ListView(
-                    padding: EdgeInsets.zero,
-                    children: snapshot.data ?? [],
-                  );
-            }
-          },
-        ),
-      ),
+                future: _friendsListCompleter.future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator(); // Loading indicator
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    // Display the friends list once data is available
+                    return ListView(
+                      padding: EdgeInsets.zero,
+                      children: snapshot.data ?? [],
+                    );
+                  }
+                },
+              ),
             ),
-
+          ),
 
           Expanded(
             child: Column(
@@ -595,14 +593,48 @@ tooltip: 'Add Friend',
                     ],
                   ),
                 ),
-              ],
+              ], 
             ),
           ),
+          /*
+          if (incomingSDPOffer != null)
+            Positioned(
+              child: ListTile(
+                title: Text(
+                  "Incoming Call from ${incomingSDPOffer["callerId"]}",
+                 ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.call_end),
+                      color: Colors.redAccent,
+                      onPressed: () {
+                        setState(() => incomingSDPOffer = null);
+                        },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.call),
+                      color: Colors.greenAccent,
+                      onPressed: () {
+                        _joinCall(
+                          callerId: incomingSDPOffer["callerId"]!,
+                          calleeId: NetworkService.instance.getselfCallerID,
+                          offer: incomingSDPOffer["sdpOffer"],
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+            */
         ],
       ),
     );
   }
 }
+
 
           /*
           Expanded(

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../services/network.dart';
 
-class VideoCall extends StatefulWidget {
+import 'package:client/widgets/menuBar.dart';
+
+class VoIP extends StatefulWidget {
   final String callerId, calleeId;
   final dynamic offer;
-  const VideoCall({
+  const VoIP({
     super.key,
     this.offer,
     required this.callerId,
@@ -13,10 +15,10 @@ class VideoCall extends StatefulWidget {
   });
 
   @override
-  State<VideoCall> createState() => _VideoScreenState();
+  State<VoIP> createState() => _VoIPState();
 }
 
-class _VideoScreenState extends State<VideoCall> {
+class _VoIPState extends State<VoIP> {
   final socket = NetworkService.instance.socket;
   final _localRTCVideoRenderer = RTCVideoRenderer();
   final _remoteRTCVideoRenderer = RTCVideoRenderer();
@@ -77,7 +79,7 @@ class _VideoScreenState extends State<VideoCall> {
     setState(() {});
 
     if (widget.offer != null) {
-      socket!.on("IceCandidate", (data) {
+      NetworkService.instance.socket!.on("IceCandidate", (data) {
         String candidate = data["iceCandidate"]["candidate"];
         String sdpMid = data["iceCandidate"]["id"];
         int sdpMLineIndex = data["iceCandidate"]["label"];
@@ -97,7 +99,7 @@ class _VideoScreenState extends State<VideoCall> {
 
       _rtcPeerConnection!.setLocalDescription(answer);
 
-      socket!.emit("answerCall", {
+      NetworkService.instance.socket!.emit("answerCall", {
         "callerId": widget.callerId,
         "sdpAnswer": answer.toMap(),
       });
@@ -106,7 +108,7 @@ class _VideoScreenState extends State<VideoCall> {
       _rtcPeerConnection!.onIceCandidate =
           (RTCIceCandidate candidate) => rtcIceCadidates.add(candidate);
 
-      socket!.on("callAnswered", (data) async {
+      NetworkService.instance.socket!.on("callAnswered", (data) async {
         await _rtcPeerConnection!.setRemoteDescription(
           RTCSessionDescription(
             data["sdpAnswer"]["sdp"],
@@ -115,7 +117,7 @@ class _VideoScreenState extends State<VideoCall> {
         );
 
         for (RTCIceCandidate candidate in rtcIceCadidates) {
-          socket!.emit("IceCandidate", {
+          NetworkService.instance.socket!.emit("IceCandidate", {
             "calleeId": widget.calleeId,
             "iceCandidate": {
               "id": candidate.sdpMid,
@@ -130,7 +132,8 @@ class _VideoScreenState extends State<VideoCall> {
 
       await _rtcPeerConnection!.setLocalDescription(offer);
 
-      socket!.emit('makeCall', {
+      //print(offer.toMap());
+      NetworkService.instance.socket!.emit('makeCall', {
         "calleeId": widget.calleeId,
         "sdpOffer": offer.toMap(),
       });
@@ -165,7 +168,12 @@ class _VideoScreenState extends State<VideoCall> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text(""),
+        actions: [
+          menuBar(),
+        ],
+        backgroundColor: Colors.green,
       ),
+
       body: SafeArea(
         child: Column(
           children: [
