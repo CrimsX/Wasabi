@@ -27,9 +27,10 @@ class Group extends StatefulWidget {
 class _GroupState extends State<Group> {
   /// key for the drawer:
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _formKey = GlobalKey<FormState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _controllerAddServer = TextEditingController();
+  final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
   final FocusNode _focusNode = FocusNode();
   String currentChatServer= '';
@@ -85,7 +86,7 @@ class _GroupState extends State<Group> {
     );
 
     _socket.on('addServer', (data) =>
-      _addServerResponse(data)
+      _createGroupResponse(data)
     );
 
   }
@@ -153,34 +154,31 @@ class _GroupState extends State<Group> {
   }
 
   ///sends request to server to add server to db
-  _addServerRequest(serverID){
-    if (serverID == widget.username) {
-      return;
-    }
-    _socket.emit('addserver', {'userID': widget.username,'serverID': serverID});
+  _createGroup(serverName){
+    _socket.emit('addserver', {'owner': widget.username,'serverName': serverName});
   }
 
   ///when server responds, updates serverslist side panel
   ///displays popup message if server is not added
-  _addServerResponse(result) {
+  _createGroupResponse(result) {
     if (result['result']) {
       setState(() {
-        _serverList.add(_buildServerTile(result['serverID']));
+        _serverList.add(_buildServerTile(result['serverName'], result['serverID']));
       });
     }
     else {
-      _showPopupMessage(context, result['serverID']);
+      _showPopupMessage(context, result['serverName']);
     }
   }
 
   // Function to show the popup message
-  void _showPopupMessage(BuildContext context, String serverID) {
+  void _showPopupMessage(BuildContext context, String serverName) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Failed to add server'),
-          content: Text(serverID + ' could not be added'),
+          content: Text(serverName + ' could not be added'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -194,21 +192,26 @@ class _GroupState extends State<Group> {
     );
   }
 
-  _buildServerTile(serverID){
+  _buildServerTile(serverName, serverID){
     return _buildHoverableTile(
-                title: serverID,
+                title: serverName,
                 onTap: () {
+                  if (currentChatServer == serverID) {
+                    return;
+                  }
                   //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatServer !=  serverID) {
-                    _leaveRoom(currentChatServer);
+                  if (currentChatServer != '' && currentChatServer !=  serverID) {
+                    _socket.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
-                  Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                  Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                  currentChatServer = serverID;
-                  _connectToGroupChat(currentChatServer);
-                  FocusScope.of(context).requestFocus(_focusNode);
-                  });
+                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
+                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    currentChatServer = serverID;
+                    print(currentChatServer);
+                    _connectToGroupChat(currentChatServer);
+                    FocusScope.of(context).requestFocus(_focusNode);
+                },
+                );
     }
 
 
@@ -295,7 +298,37 @@ class _GroupState extends State<Group> {
             const SizedBox(width: 1),
             IconButton(
               icon: const Icon(Icons.group_add),
-              onPressed: () {},
+              onPressed:() {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Create Group'),
+                    content: TextField(
+                      controller: _controllerServerName,
+                      autofocus: true,
+                      decoration: const InputDecoration(labelText: 'Group Name'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _createGroup(_controllerServerName.text);
+                          _controllerServerName.clear();
+                        },
+                        child: const Text('Create'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          },
+                          child: const Text('Cancel'),
+                      ),
+                    ],
+                  );
+                },
+              );
+              },
               tooltip: 'Create Group',
             ),
           ]

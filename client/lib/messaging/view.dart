@@ -392,10 +392,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const Text('Add'),
                       ),
                       TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Cancel'),
                       ),
                     ],
                   );

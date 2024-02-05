@@ -11,7 +11,9 @@ import {
   addFriend,
   getServers,
   storeGroupMessage,
-  fetchGroupChat
+  fetchGroupChat,
+  createServer,
+  getServerID
 } from './database.js'
 
 const app = express();
@@ -173,10 +175,13 @@ IO.on('connection', (socket) => {
     })
 
   socket.on('addserver', async (data) => {
-    const result = await addServer(data.serverID, data.userID); //TODO make query
+    const result = await createServer(data.serverName, Date.now(), data.owner);
+    const ID = await getServerID(data.serverName, data.owner);
+    console.log(ID);
     const response = {
       result: result,
-      serverID: data.serverID
+      serverID: ID[0].serverid.toString(),
+      serverName: data.serverName
     };
     IO.to(socket.id).emit('addServer', response);
   })

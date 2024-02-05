@@ -54,7 +54,9 @@ CREATE TABLE sentmessages (
 CREATE TABLE servertable (
     ServerID INTEGER PRIMARY KEY AUTO_INCREMENT,
     ServerName VARCHAR(50) NOT NULL,
-    CreationDate VARCHAR(15)
+    Owner VARCHAR(20),
+    CreationDate VARCHAR(15).
+    FOREIGN KEY (Owner) REFERENCES client(UserID)
     );
 
 CREATE TABLE partof (
