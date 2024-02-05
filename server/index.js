@@ -40,8 +40,8 @@ IO.use((socket, next) => {
 //console.log('Server is listening on *:3000');
 
 IO.on("connection", (socket) => {
-  console.log(socket.user, "Connected");
-  socket.join(socket.user);
+  //console.log(socket.user, "Connected");
+  //socket.join(socket.user);
 
   const username = socket.handshake.query.username
   console.log("User connected:", username)

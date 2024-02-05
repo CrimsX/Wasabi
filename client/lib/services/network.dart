@@ -7,12 +7,24 @@ class NetworkService {
   NetworkService._();
   static final instance = NetworkService._();
 
-  init({required String websocketUrl, required String selfCallerID}) {
+  init({required String serverIP, required String username, required String selfCallerID}) {
     // init Socket
-    socket = io(websocketUrl, {
+    socket = io(serverIP, {
       "transports": ['websocket'],
-      "query": {"callerId": selfCallerID}
+      "query": {
+        "username": username,
+        "callerId": selfCallerID
+      }
     });
+
+    /*
+    socket = IO.io(
+      serverIP,
+    IO.OptionBuilder().setTransports(['websocket']).setQuery(
+    {'username': username,
+    'callerId': selfCallerID}).build(),
+    );
+    */
 
     // listen onConnect event
     socket!.onConnect((data) {
@@ -23,6 +35,8 @@ class NetworkService {
     socket!.onConnectError((data) {
       log("Connect Error $data");
     });
+    
+    //socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
 
     // connect socket
     socket!.connect();

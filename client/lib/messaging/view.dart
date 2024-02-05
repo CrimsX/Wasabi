@@ -3,6 +3,9 @@
 /// I added a + button on top that would add friends, which will open a pop up.
 /// But it does not have the backend yet.
 
+// ! checks if null
+// ? runs even if null
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model.dart';
@@ -10,7 +13,7 @@ import 'view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart';
 //import 'package:client/providers/home.dart';
 //import 'package:client/model/message.dart';
 import 'package:client/login/view_model.dart';
@@ -79,13 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String currentChatFriend= '';
   dynamic friend;
 
-  late IO.Socket _socket;
- late Completer<List<Widget>> _friendsListCompleter;
+  late Completer<List<Widget>> _friendsListCompleter;
 
   ScrollController _scrollController = ScrollController();
 
   final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
-
+ 
+  Socket? _socket;
 
   @override
   void initState() {
@@ -98,52 +101,58 @@ class _HomeScreenState extends State<HomeScreen> {
         }
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
-    _socket = IO.io(
-      widget.serverIP,
-    IO.OptionBuilder().setTransports(['websocket']).setQuery(
-    {'username': widget.username}).build(),
+
+    NetworkService.instance.init(
+      serverIP: widget.serverIP,
+      username: widget.username,
+      selfCallerID: selfCallerID,
     );
+
+    _socket = NetworkService.instance.socket;
+    
     _connectSocket();
-    _socket.emit('friends', widget.username);
+
+    _socket!.emit('friends', widget.username);
   }
 
   ///Socet Connection
-
   _connectSocket() {
-    _socket.onConnect((data) => print('Connection established'));
-    _socket.onConnectError((data) => print('Connect Error: $data'));
-    _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
-    _socket.on(
+    //_socket?.onConnect((data) => print('Connection established'));
+    //_socket?.onConnectError((data) => print('Connect Error: $data'));
+    //_socket?.onDisconnect((data) => print('Socket.IO server disconnected'));
+
+    _socket!.on(
       'message',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
     );
 
-    _socket.on(
+    _socket!.on(
       'friends',
       (data) => _buildFriendList(data)
     );
 
-    _socket.on(
+    _socket!.on(
       'chat',
       (data) => _connectToChat(data)
     );
 
-    _socket.on(
+    _socket!.on(
       'chatCreated',
       (data) => _connectToChat(data)
     );
 
-    _socket.on(
+    _socket!.on(
       'fetchchat',
-      (data) =>
-      _loadChatHistory(data)
+      (data) => _loadChatHistory(data)
     );
 
-    _socket.on('addfriends', (data) =>
-      _addFriendResponse(data)
+    _socket!.on(
+      'addfriends',
+      (data) => _addFriendResponse(data)
     );
+    
   }
 
   ///Helper functions
@@ -153,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_controller.text == '') {
       return;
     }
-     _socket.emit('message', {
+     _socket!.emit('message', {
           'message': _controller.text,
           'sender': widget.username,
           'receiver': currentChatFriend,
@@ -175,12 +184,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ///sends chat room number to server to join socket.io room
   _joinRoom(room) {
-    _socket.emit('join', room);
+    _socket!.emit('join', room);
   }
 
   ///sends chat room number to server to leave socket.io room
   _leaveRoom(room) {
-    _socket.emit('leave', room);
+    _socket!.emit('leave', room);
   }
 
   ///checks if chat room exists between two users
@@ -199,12 +208,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ///creates a chatID in db serving as unique chatroom between two users
   _createChatRoom(data) {
-    _socket.emit('createChat', {'User1': widget.username, 'User2': currentChatFriend});
+    _socket!.emit('createChat', {'User1': widget.username, 'User2': currentChatFriend});
   }
 
   ///Gets chat history between user and the chat that is currently focused
   _fetchChat(chatID) {
-    _socket.emit('fetchchat', {'chatID': chatID});
+    _socket!.emit('fetchchat', {'chatID': chatID});
   }
 
   ///Gets chat history between user and chat partner from the db
@@ -224,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (friendID == widget.username) {
       return;
     }
-    _socket.emit('addfriend', {'userID': widget.username,'friendID': friendID});
+    _socket!.emit('addfriend', {'userID': widget.username,'friendID': friendID});
   }
 
   ///when server responds, updates friendslist side panel
@@ -273,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
                     currentChatFriend = friendID;
-                    _socket.emit('chat', {'User1': widget.username,
+                    _socket!.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
                     FocusScope.of(context).requestFocus(_focusNode);
                   }
@@ -300,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
                     currentChatFriend = friend['FriendID'];
-                    _socket.emit('chat', {'User1': widget.username,
+                    _socket!.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
                     FocusScope.of(context).requestFocus(_focusNode);
                   }
@@ -333,10 +342,13 @@ class _HomeScreenState extends State<HomeScreen> {
  /// the drawer and header
   @override
   Widget build(BuildContext context) {
+    /*
     NetworkService.instance.init(
-      websocketUrl: widget.serverIP,
-      selfCallerID:selfCallerID,
+      serverIP: widget.serverIP,
+      username: widget.username,
+      selfCallerID: selfCallerID,
     );
+    */
 
     return Scaffold(
       /// key:
@@ -439,7 +451,7 @@ tooltip: 'Add Friend',
           IconButton(
             icon: Icon(Icons.exit_to_app_rounded),
             onPressed: () {
-              _socket.disconnect();
+              _socket!.disconnect();
               // Handle logout tap
               Navigator.push(
                 context,
