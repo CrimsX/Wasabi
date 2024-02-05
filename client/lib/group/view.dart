@@ -269,51 +269,37 @@ class _GroupState extends State<Group> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          'Wasabi',
+        title: const Text(
+          'Groups',
           style: TextStyle(
-            color: Colors.green,
+            color: Color.fromARGB(255, 255, 255, 255),
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Roboto',
           ),
         ),
+        centerTitle: true,
+        titleSpacing: 0,
         backgroundColor: Colors.green,
-        iconTheme: IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Add Server'),
-                content: TextField(
-                  controller: _controllerAddServer,
-                  decoration: InputDecoration(labelText: 'Server ID'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _addServerRequest(_controllerAddServer.text);
-                      _controllerAddServer.clear();
-                      Navigator.of(context).pop();
-                    },
-        child: Text('Add'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: Text('Cancel'),
-      ),
-      ],
-    );
-  },
-  );
-},
-tooltip: 'Add Server',
-),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leadingWidth: 200,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(width: 1),
+            IconButton(
+              icon: const Icon(Icons.group_add),
+              onPressed: () {},
+              tooltip: 'Create Group',
+            ),
+          ]
+        ),
         actions:[
           IconButton(
             icon: Icon(Icons.call),

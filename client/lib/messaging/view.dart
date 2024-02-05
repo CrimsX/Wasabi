@@ -344,52 +344,68 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          'Wasabi',
+        title: const Text(
+          'Direct Messages',
           style: TextStyle(
-            color: Colors.green,
+            color: Color.fromARGB(255, 255, 255, 255),
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Roboto',
           ),
         ),
+        centerTitle: true,
+        titleSpacing: 0,
         backgroundColor: Colors.green,
-        iconTheme: IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Add Friend'),
-                content: TextField(
-                  controller: _controllerAddFriend,
-                  autofocus: true,
-                  decoration: InputDecoration(labelText: 'Friend ID'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _addFriendRequest(_controllerAddFriend.text);
-                      _controllerAddFriend.clear();
-                      Navigator.of(context).pop();
-                    },
-        child: Text('Add'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: Text('Cancel'),
-      ),
-      ],
-    );
-  },
-  );
-},
-tooltip: 'Add Friend',
-),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leadingWidth: 200,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              tooltip: 'Back',
+            ),
+            const SizedBox(width: 1),
+            IconButton(
+              icon: const Icon(Icons.person_add),
+              onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Add Friend'),
+                    content: TextField(
+                      controller: _controllerAddFriend,
+                      autofocus: true,
+                      decoration: const InputDecoration(labelText: 'Friend ID'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          _addFriendRequest(_controllerAddFriend.text);
+                          _controllerAddFriend.clear();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Add'),
+                      ),
+                      TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    child: const Text('Cancel'),
+                      ),
+                    ],
+                  );
+                },
+              );
+              },
+              tooltip: 'Add Friend',
+            ),
+          ]
+        ),
         actions:[
           IconButton(
             icon: Icon(Icons.call),
