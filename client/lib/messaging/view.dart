@@ -122,7 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _socket!.emit('friends', widget.username);
     
     _socket!.on("newCall", (data) {
-      print(data);
         if (mounted) {
             //print("received");
             setState(() => incomingSDPOffer = data);
@@ -406,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
       selfCallerID: selfCallerID,
     );
     */
-    print(incomingSDPOffer);
+    //print(incomingSDPOffer);
 
     return Scaffold(
       /// key:
@@ -596,16 +595,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ], 
             ),
           ),
-          /*
-          if (incomingSDPOffer != null)
+          
+          if (incomingSDPOffer != null) 
+            /*
             Positioned(
-              child: ListTile(
+              child: Row(
                 title: Text(
                   "Incoming Call from ${incomingSDPOffer["callerId"]}",
                  ),
                 trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                  //mainAxisSize: MainAxisSize.min,
+                  children: [ 
+                  */
+        Column(
+        children: [
                     IconButton(
                       icon: const Icon(Icons.call_end),
                       color: Colors.redAccent,
@@ -623,7 +626,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           offer: incomingSDPOffer["sdpOffer"],
                         );
                       },
-                    )
+                    ),
+                    ],
+                    ),
+          
+          /*
                   ],
                 ),
               ),

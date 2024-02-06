@@ -133,7 +133,7 @@ class _VoIPState extends State<VoIP> {
       await _rtcPeerConnection!.setLocalDescription(offer);
 
       //print(offer.toMap());
-      NetworkService.instance.socket!.emit('makeCall', {
+      NetworkService.instance.socket!.emit("makeCall", {
         "calleeId": widget.calleeId,
         "sdpOffer": offer.toMap(),
       });

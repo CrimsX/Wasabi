@@ -43,8 +43,8 @@ IO.use((socket, next) => {
 //console.log('Server is listening on *:3000');
 
 IO.on("connection", (socket) => {
-  //console.log(socket.user, "Connected");
-  //socket.join(socket.user);
+  console.log(socket.user, "Connected");
+  socket.join(socket.user);
 
   const username = socket.handshake.query.username
   console.log("User connected:", username)
@@ -55,7 +55,7 @@ IO.on("connection", (socket) => {
   const active = new Set();
   active.add(username);
 
-  IO.emit("Active connections:", Array.from(active));
+  //IO.emit("Active connections:", Array.from(active));
 
   socket.on("makeCall", (data) => {
     let calleeId = data.calleeId;
@@ -66,7 +66,7 @@ IO.on("connection", (socket) => {
       sdpOffer: sdpOffer,
     });
     //console.log(sdpOffer);
-    console.log("Call sent");
+    //console.log("Call sent");
   });
 
   socket.on("answerCall", (data) => {
@@ -233,7 +233,7 @@ IO.on("connection", (socket) => {
   })
 
   socket.on("requestVoIPID", (data) => {
-    console.log("THIS WORKING");
+    //console.log("THIS WORKING");
     /*
     for (var i = 0, keys = Object.keys(onlineUsers), ii = keys.length; i < ii; i++) {
       console.log(keys[i] + '|' + onlineUsers[keys[i]].list);
