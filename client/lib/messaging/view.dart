@@ -33,7 +33,6 @@ import 'dart:math';
 
 import 'package:client/voice/view.dart';
 import 'package:client/services/network.dart';
-import 'package:client/voice/join.dart';
 
 import 'package:client/widgets/menuBar.dart';
 
