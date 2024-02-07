@@ -1,5 +1,5 @@
 import express from 'express'
-import http from 'http'
+//import http from 'http'
 import {Server} from 'socket.io'
 
 import {
@@ -17,34 +17,85 @@ import {
   getServerMembers
 } from './database.js'
 
+let port = process.env.PORT || 3000;
+
 const app = express();
-const httpServer = http.createServer(app);
-const IO = new Server(httpServer);
+//const httpServer = http.createServer(app);
+//const IO = new Server(httpServer);
+//
 const messages = []
-//const peer = new Peer()
 
-//app.get('/', (req, res) => {
-//  res.sendFile(__dirname + 'index.html');
-//});
-//
-//const peerServer = Peer(server, {
-//  debug: true,
-//});
-//
-//app.use('/peerjs', peerServer);
-//
+let callerId;
+let onlineUsers = {};
 
-IO.on('connection', (socket) => {
-	const username = socket.handshake.query.username
+let IO = new (Server) (port, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+IO.use((socket, next) => {
+  if (socket.handshake.query) {
+    callerId = socket.handshake.query.callerId;
+    socket.user = callerId;
+    next();
+  }
+});
+
+//console.log('Server is listening on *:3000');
+
+IO.on("connection", (socket) => {
+  console.log(socket.user, "Connected");
+  socket.join(socket.user);
+
+  const username = socket.handshake.query.username
   console.log("User connected:", username)
+
+  onlineUsers[username] = callerId;
+  //console.log(Object.keys(onlineUsers));
 
   const active = new Set();
   active.add(username);
 
-  IO.emit("Active connections:", Array.from(active));
+  //IO.emit("Active connections:", Array.from(active));
+
+  socket.on("makeCall", (data) => {
+    let calleeId = data.calleeId;
+    let sdpOffer = data.sdpOffer;
+
+    socket.to(calleeId).emit("newCall", {
+      callerId: socket.user,
+      sdpOffer: sdpOffer,
+    });
+    //console.log(sdpOffer);
+    //console.log("Call sent");
+  });
+
+  socket.on("answerCall", (data) => {
+    let callerId = data.callerId;
+    let sdpAnswer = data.sdpAnswer;
+
+    socket.to(callerId).emit("callAnswered", {
+      callee: socket.user,
+      sdpAnswer: sdpAnswer,
+    });
+  });
+
+  socket.on("IceCandidate", (data) => {
+    let calleeId = data.calleeId;
+    let iceCandidate = data.iceCandidate;
+
+    socket.to(calleeId).emit("IceCandidate", {
+      sender: socket.user,
+      iceCandidate: iceCandidate,
+    });
+  });
 
   socket.on('disconnect', () => {
     console.log("User disconnected:", username);
+    delete onlineUsers[username];
+
     active.delete(username);
     IO.emit("Active connections:", Array.from(active));
   });
@@ -190,27 +241,24 @@ IO.on('connection', (socket) => {
     const result = await getServerMembers((parseInt(serverID, 10)));
     console.log(result);
     IO.to(socket.id).emit('getservermembers', result);
-  }
-  )
-});
+  })
 
-//app.set('view engine', 'pug')
-//app.use(express.static('public'))
-//
-//app.get('/', (req, res) => {
-//  res.redirect('/${uuidV4()}')
-//})
-//
-//app.get('/:room', (req,res) => {
-//  res.render('room', { roomId: req.params.room })
-//})
+  socket.on("requestVoIPID", (data) => {
+    //console.log("THIS WORKING");
+    /*
+    for (var i = 0, keys = Object.keys(onlineUsers), ii = keys.length; i < ii; i++) {
+      console.log(keys[i] + '|' + onlineUsers[keys[i]].list);
+    }
+    */
+    var keys = Object.keys(onlineUsers);
+    keys.forEach(key=>{
+      if (key == data) {
+        IO.to(socket.id).emit('r_VoIPID', onlineUsers[key]);
+      //console.log(key + '|' + onlineUsers[key]);
+      }
+    })
 
-httpServer.listen(3000, () => {
-	console.log('Server is listening on *:3000');
+    //IO.to(socket.id).emit('r_VoIPID', "TEST");
+    //console.log('FriendID: ' + data.friendID);
+  });
 });
-
-/*
-httpServer.listen(3000, '0.0.0.0', () => {
-  console.log('Listening to port: ' + 3000);
-});
-*/
