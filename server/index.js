@@ -13,7 +13,8 @@ import {
   storeGroupMessage,
   fetchGroupChat,
   createServer,
-  getServerID
+  getServerID,
+  getServerMembers
 } from './database.js'
 
 const app = express();
@@ -177,7 +178,6 @@ IO.on('connection', (socket) => {
   socket.on('addserver', async (data) => {
     const result = await createServer(data.serverName, Date.now(), data.owner);
     const ID = await getServerID(data.serverName, data.owner);
-    console.log(ID);
     const response = {
       result: result,
       serverID: ID[0].serverid.toString(),
@@ -185,6 +185,13 @@ IO.on('connection', (socket) => {
     };
     IO.to(socket.id).emit('addServer', response);
   })
+
+  socket.on('getservermembers', async (serverID) => {
+    const result = await getServerMembers((parseInt(serverID, 10)));
+    console.log(result);
+    IO.to(socket.id).emit('getservermembers', result);
+  }
+  )
 });
 
 //app.set('view engine', 'pug')

@@ -1,3 +1,4 @@
+import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -27,11 +28,11 @@ class Group extends StatefulWidget {
 class _GroupState extends State<Group> {
   /// key for the drawer:
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _formKey = GlobalKey<FormState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
+  final List<Widget> _serverMemberList = [];
   final FocusNode _focusNode = FocusNode();
   String currentChatServer= '';
   dynamic server;
@@ -50,6 +51,7 @@ class _GroupState extends State<Group> {
       }
     super.initState();
     _serverListCompleter = Completer<List<Widget>>();
+    print(_serverListCompleter.isCompleted);
     _socket = IO.io(
       widget.serverIP,
       //'http://localhost:3000',
@@ -87,6 +89,10 @@ class _GroupState extends State<Group> {
 
     _socket.on('addServer', (data) =>
       _createGroupResponse(data)
+    );
+
+    _socket.on('getservermembers', (data) =>
+      _buildServerMemberList(data)
     );
 
   }
@@ -214,36 +220,47 @@ class _GroupState extends State<Group> {
                 );
     }
 
-
   ///build list of servers based on userID
   ///builds tiles on the end drawer for each server in the db
-
   _buildServerList(data) {
     for (var server in data) {
       _serverList.add(
         _buildHoverableTile(
-                title: server['ServerName'],
-                onTap: () {
-                  if (currentChatServer == server['ServerID'].toString()) {
-                    return;
-                  }
-                  //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
-                    _socket.emit('leavegroupchat', currentChatServer);
-                  }
-                    // Clears chat screen when clicking onto new chat
-                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatServer = server['ServerID'].toString();
-                    print(currentChatServer);
-                    _connectToGroupChat(currentChatServer);
-                    FocusScope.of(context).requestFocus(_focusNode);
-                },
-              ));
+          title: server['ServerName'],
+          onTap: () {
+            if (currentChatServer == server['ServerID'].toString()) {
+              return;
+            }
+            //check if previously connected to another chat and leaves chat room if it is
+            if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
+              _socket.emit('leavegroupchat', currentChatServer);
+            }
+              // Clears chat screen when clicking onto new chat
+              Provider.of<HomeProvider>(context, listen: false).messages.clear();
+              Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+              currentChatServer = server['ServerID'].toString();
+              print(currentChatServer);
+              _connectToGroupChat(currentChatServer);
+              _socket.emit('getservermembers', currentChatServer);
+              FocusScope.of(context).requestFocus(_focusNode);
+          },
+          )
+        );
     }
     _serverListCompleter.complete(_serverList);
-    setState(() {});
-    }
+  }
+
+  _buildServerMemberList(members) {
+      _serverMemberList.clear();
+      for (var member in members) {
+        _serverMemberList.add(
+          _buildHoverableTile(
+                  title: member['UserID'],
+                  onTap: (){},
+          )
+        );
+      }
+  }
 
 
   Widget _buildHoverableTile({
@@ -286,14 +303,17 @@ class _GroupState extends State<Group> {
         backgroundColor: Colors.green,
         iconTheme: const IconThemeData(color: Colors.white),
         leadingWidth: 200,
+
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () {
+                print(_serverListCompleter.isCompleted);
                 Navigator.pop(context);
               },
+              tooltip: 'Back',
             ),
             const SizedBox(width: 1),
             IconButton(
@@ -333,6 +353,7 @@ class _GroupState extends State<Group> {
             ),
           ]
         ),
+
         actions:[
           IconButton(
             icon: Icon(Icons.call),
@@ -354,7 +375,7 @@ class _GroupState extends State<Group> {
           IconButton(
             icon: Icon(Icons.groups_2_rounded),
             onPressed: () {
-              // Handle Group Message tap
+               _scaffoldKey.currentState!.openEndDrawer();
             },
             color: Colors.white,
           ),
@@ -389,6 +410,13 @@ class _GroupState extends State<Group> {
         ],
       ),
 
+      endDrawer: Drawer( // Define the end drawer
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: _serverMemberList
+      ),
+    ),
+
 
       body: Row(
         children: [
@@ -409,12 +437,11 @@ class _GroupState extends State<Group> {
                     padding: EdgeInsets.zero,
                     children: snapshot.data ?? [],
                   );
-            }
-          },
-        ),
-      ),
+                }
+              },
+              ),
             ),
-
+          ),
 
           Expanded(
             child: Column(

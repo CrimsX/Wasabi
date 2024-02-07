@@ -158,3 +158,8 @@ export async function getServerID(serverName, owner) {
     const [id] = await pool.query('SELECT serverid FROM servertable WHERE ServerName = ? AND Owner = ?;', [serverName, owner]);
     return id
 }
+
+export async function getServerMembers(serverID) {
+    const [members] = await pool.query('SELECT UserID FROM partof WHERE ServerID = ?', [serverID]);
+    return members;
+}
