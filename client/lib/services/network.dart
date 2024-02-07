@@ -8,6 +8,7 @@ class NetworkService {
   String username = '';
   String selfCallerID = '';
   String remoteCallerID = 'Offline';
+  String friend = '';
 
   NetworkService._();
   static final instance = NetworkService._();
@@ -66,9 +67,21 @@ class NetworkService {
     String get getusername => username;
     String get getselfCallerID => selfCallerID;
     String get getRemoteCallerID => remoteCallerID;
+    String get getFriend => friend;
 
     // Setters
     set setRemoteCallerID(String remoteCallerID) {
       this.remoteCallerID = remoteCallerID;
     }
+    
+    setFriend (String friend) {
+      this.friend = friend;
+    }
+
+    //String set setFriend(String friend) = friend;
+    /*
+    set setFriend(String friend) {
+        this.friend = friend;
+    }
+    */
 }

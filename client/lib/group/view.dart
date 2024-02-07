@@ -355,6 +355,7 @@ class _GroupState extends State<Group> {
         ),
 
         actions:[
+          /*
           IconButton(
             icon: Icon(Icons.call),
             onPressed: () {},
@@ -365,6 +366,7 @@ class _GroupState extends State<Group> {
               onPressed: () {},
               color: Colors.white
           ),
+          */
           IconButton(
             icon: Icon(Icons.message),
             onPressed: () {

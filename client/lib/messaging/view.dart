@@ -342,6 +342,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
                     currentChatFriend = friend['FriendID'];
+                    //print(currentChatFriend);
+                    NetworkService.instance.setFriend(currentChatFriend);
                     _socket!.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
                     FocusScope.of(context).requestFocus(_focusNode);
@@ -381,6 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String callerId,
     required String calleeId,
     dynamic offer,
+    required bool showVid,
   }) {
     Navigator.push(
       context,
@@ -389,6 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
           callerId: callerId,
           calleeId: calleeId,
           offer: offer,
+          showVid: showVid,
         ),
       ),
     );
@@ -640,6 +644,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           callerId: incomingSDPOffer["callerId"]!,
                           calleeId: NetworkService.instance.getselfCallerID,
                           offer: incomingSDPOffer["sdpOffer"],
+                          showVid: incomingSDPOffer["showVid"],
                         );
                       },
                     ),

@@ -63,22 +63,27 @@ IO.on("connection", (socket) => {
   socket.on("makeCall", (data) => {
     let calleeId = data.calleeId;
     let sdpOffer = data.sdpOffer;
+    let showVid = data.showVid;
 
     socket.to(calleeId).emit("newCall", {
       callerId: socket.user,
       sdpOffer: sdpOffer,
+      showVid: showVid,
     });
     //console.log(sdpOffer);
     //console.log("Call sent");
+    //console.log(showVid);
   });
 
   socket.on("answerCall", (data) => {
     let callerId = data.callerId;
     let sdpAnswer = data.sdpAnswer;
+    let showVid = data.showVid;
 
     socket.to(callerId).emit("callAnswered", {
       callee: socket.user,
       sdpAnswer: sdpAnswer,
+      showVid: showVid,
     });
   });
 
