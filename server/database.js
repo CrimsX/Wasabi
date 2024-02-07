@@ -136,3 +136,30 @@ export async function fetchGroupChat(serverID) {
         ORDER BY groupmsgs.GroupMsgID;", [serverID]);
     return result;
 }
+
+export async function createServer(serverName, creationDate, owner) {
+    const [result] = await pool.query("SELECT * from servertable WHERE owner = ? AND serverName = ?", [owner, serverName]);
+    if (result.length > 0) {
+        return false;
+    }
+    await pool.query("INSERT INTO servertable (ServerName, CreationDate, Owner) VALUES (?, ?, ?);", [serverName, creationDate, owner]);
+    const ID = await getCreatedServerID(creationDate, owner);
+    const serverID = ID[0].serverid;
+    await pool.query("INSERT INTO partof VALUES (?, ?);", [owner, serverID]);
+    return true;
+}
+
+async function getCreatedServerID(creationDate, owner) {
+    const [id] = await pool.query('SELECT serverid FROM servertable WHERE CreationDate = ? AND Owner = ?;', [creationDate, owner]);
+    return id
+}
+
+export async function getServerID(serverName, owner) {
+    const [id] = await pool.query('SELECT serverid FROM servertable WHERE ServerName = ? AND Owner = ?;', [serverName, owner]);
+    return id
+}
+
+export async function getServerMembers(serverID) {
+    const [members] = await pool.query('SELECT UserID FROM partof WHERE ServerID = ?', [serverID]);
+    return members;
+}

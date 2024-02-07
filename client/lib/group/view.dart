@@ -1,3 +1,4 @@
+import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,9 @@ class _GroupState extends State<Group> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _controllerAddServer = TextEditingController();
+  final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
+  final List<Widget> _serverMemberList = [];
   final FocusNode _focusNode = FocusNode();
   String currentChatServer= '';
   dynamic server;
@@ -49,6 +51,7 @@ class _GroupState extends State<Group> {
       }
     super.initState();
     _serverListCompleter = Completer<List<Widget>>();
+    print(_serverListCompleter.isCompleted);
     _socket = IO.io(
       widget.serverIP,
       //'http://localhost:3000',
@@ -85,7 +88,11 @@ class _GroupState extends State<Group> {
     );
 
     _socket.on('addServer', (data) =>
-      _addServerResponse(data)
+      _createGroupResponse(data)
+    );
+
+    _socket.on('getservermembers', (data) =>
+      _buildServerMemberList(data)
     );
 
   }
@@ -153,34 +160,31 @@ class _GroupState extends State<Group> {
   }
 
   ///sends request to server to add server to db
-  _addServerRequest(serverID){
-    if (serverID == widget.username) {
-      return;
-    }
-    _socket.emit('addserver', {'userID': widget.username,'serverID': serverID});
+  _createGroup(serverName){
+    _socket.emit('addserver', {'owner': widget.username,'serverName': serverName});
   }
 
   ///when server responds, updates serverslist side panel
   ///displays popup message if server is not added
-  _addServerResponse(result) {
+  _createGroupResponse(result) {
     if (result['result']) {
       setState(() {
-        _serverList.add(_buildServerTile(result['serverID']));
+        _serverList.add(_buildServerTile(result['serverName'], result['serverID']));
       });
     }
     else {
-      _showPopupMessage(context, result['serverID']);
+      _showPopupMessage(context, result['serverName']);
     }
   }
 
   // Function to show the popup message
-  void _showPopupMessage(BuildContext context, String serverID) {
+  void _showPopupMessage(BuildContext context, String serverName) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Failed to add server'),
-          content: Text(serverID + ' could not be added'),
+          content: Text(serverName + ' could not be added'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -194,53 +198,69 @@ class _GroupState extends State<Group> {
     );
   }
 
-  _buildServerTile(serverID){
+  _buildServerTile(serverName, serverID){
     return _buildHoverableTile(
-                title: serverID,
+                title: serverName,
                 onTap: () {
-                  //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatServer !=  serverID) {
-                    _leaveRoom(currentChatServer);
-                  }
-                    // Clears chat screen when clicking onto new chat
-                  Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                  Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                  currentChatServer = serverID;
-                  _connectToGroupChat(currentChatServer);
-                  FocusScope.of(context).requestFocus(_focusNode);
-                  });
-    }
-
-
-  ///build list of servers based on userID
-  ///builds tiles on the end drawer for each server in the db
-
-  _buildServerList(data) {
-    for (var server in data) {
-      _serverList.add(
-        _buildHoverableTile(
-                title: server['ServerName'],
-                onTap: () {
-                  if (currentChatServer == server['ServerID'].toString()) {
+                  if (currentChatServer == serverID) {
                     return;
                   }
                   //check if previously connected to another chat and leaves chat room if it is
-                  if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
+                  if (currentChatServer != '' && currentChatServer !=  serverID) {
                     _socket.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
                     Provider.of<HomeProvider>(context, listen: false).notifyListeners();
-                    currentChatServer = server['ServerID'].toString();
+                    currentChatServer = serverID;
                     print(currentChatServer);
                     _connectToGroupChat(currentChatServer);
                     FocusScope.of(context).requestFocus(_focusNode);
                 },
-              ));
+                );
+    }
+
+  ///build list of servers based on userID
+  ///builds tiles on the end drawer for each server in the db
+  _buildServerList(data) {
+    for (var server in data) {
+      _serverList.add(
+        _buildHoverableTile(
+          title: server['ServerName'],
+          onTap: () {
+            if (currentChatServer == server['ServerID'].toString()) {
+              return;
+            }
+            //check if previously connected to another chat and leaves chat room if it is
+            if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
+              _socket.emit('leavegroupchat', currentChatServer);
+            }
+              // Clears chat screen when clicking onto new chat
+              Provider.of<HomeProvider>(context, listen: false).messages.clear();
+              Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+              currentChatServer = server['ServerID'].toString();
+              print(currentChatServer);
+              _connectToGroupChat(currentChatServer);
+              _socket.emit('getservermembers', currentChatServer);
+              FocusScope.of(context).requestFocus(_focusNode);
+          },
+          )
+        );
     }
     _serverListCompleter.complete(_serverList);
-    setState(() {});
-    }
+  }
+
+  _buildServerMemberList(members) {
+      _serverMemberList.clear();
+      for (var member in members) {
+        _serverMemberList.add(
+          _buildHoverableTile(
+                  title: member['UserID'],
+                  onTap: (){},
+          )
+        );
+      }
+  }
 
 
   Widget _buildHoverableTile({
@@ -269,51 +289,71 @@ class _GroupState extends State<Group> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          'Wasabi',
+        title: const Text(
+          'Groups',
           style: TextStyle(
-            color: Colors.green,
+            color: Color.fromARGB(255, 255, 255, 255),
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Roboto',
           ),
         ),
+        centerTitle: true,
+        titleSpacing: 0,
         backgroundColor: Colors.green,
-        iconTheme: IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Add Server'),
-                content: TextField(
-                  controller: _controllerAddServer,
-                  decoration: InputDecoration(labelText: 'Server ID'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _addServerRequest(_controllerAddServer.text);
-                      _controllerAddServer.clear();
-                      Navigator.of(context).pop();
-                    },
-        child: Text('Add'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: Text('Cancel'),
-      ),
-      ],
-    );
-  },
-  );
-},
-tooltip: 'Add Server',
-),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leadingWidth: 200,
+
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () {
+                print(_serverListCompleter.isCompleted);
+                Navigator.pop(context);
+              },
+              tooltip: 'Back',
+            ),
+            const SizedBox(width: 1),
+            IconButton(
+              icon: const Icon(Icons.group_add),
+              onPressed:() {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Create Group'),
+                    content: TextField(
+                      controller: _controllerServerName,
+                      autofocus: true,
+                      decoration: const InputDecoration(labelText: 'Group Name'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _createGroup(_controllerServerName.text);
+                          _controllerServerName.clear();
+                        },
+                        child: const Text('Create'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          },
+                          child: const Text('Cancel'),
+                      ),
+                    ],
+                  );
+                },
+              );
+              },
+              tooltip: 'Create Group',
+            ),
+          ]
+        ),
+
         actions:[
           IconButton(
             icon: Icon(Icons.call),
@@ -335,7 +375,7 @@ tooltip: 'Add Server',
           IconButton(
             icon: Icon(Icons.groups_2_rounded),
             onPressed: () {
-              // Handle Group Message tap
+               _scaffoldKey.currentState!.openEndDrawer();
             },
             color: Colors.white,
           ),
@@ -370,6 +410,13 @@ tooltip: 'Add Server',
         ],
       ),
 
+      endDrawer: Drawer( // Define the end drawer
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: _serverMemberList
+      ),
+    ),
+
 
       body: Row(
         children: [
@@ -390,12 +437,11 @@ tooltip: 'Add Server',
                     padding: EdgeInsets.zero,
                     children: snapshot.data ?? [],
                   );
-            }
-          },
-        ),
-      ),
+                }
+              },
+              ),
             ),
-
+          ),
 
           Expanded(
             child: Column(
