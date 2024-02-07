@@ -55,7 +55,7 @@ CREATE TABLE servertable (
     ServerID INTEGER PRIMARY KEY AUTO_INCREMENT,
     ServerName VARCHAR(50) NOT NULL,
     Owner VARCHAR(20),
-    CreationDate VARCHAR(15).
+    CreationDate VARCHAR(15),
     FOREIGN KEY (Owner) REFERENCES client(UserID)
     );
 
