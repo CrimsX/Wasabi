@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // maybe hash name salted with current time
   final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
   final String remoteCallerID = 'Offline';
- 
+
   Socket? _socket;
 
   // VoIP
@@ -115,11 +115,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     _socket = NetworkService.instance.socket;
-    
+
     _connectSocket();
 
     _socket!.emit('friends', widget.username);
-    
+
     _socket!.on("newCall", (data) {
         if (mounted) {
             //print("received");
@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
       (data) => _requestFriendVoIPID(data)
     );
     */
-      
+
   }
 
   ///Helper functions
@@ -432,6 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () {
+                _socket!.disconnect();
                 Navigator.pop(context);
               },
               tooltip: 'Back',
@@ -461,6 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       TextButton(
                         onPressed: () {
+                          _socket!.disconnect();
                           Navigator.of(context).pop();
                         },
                         child: const Text('Cancel'),
@@ -608,11 +610,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-              ], 
+              ],
             ),
           ),
-          
-          if (incomingSDPOffer != null) 
+
+          if (incomingSDPOffer != null)
             /*
             Positioned(
               child: Row(
@@ -621,7 +623,7 @@ class _HomeScreenState extends State<HomeScreen> {
                  ),
                 trailing: Row(
                   //mainAxisSize: MainAxisSize.min,
-                  children: [ 
+                  children: [
                   */
         Column(
         children: [
@@ -645,7 +647,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     ],
                     ),
-          
+
           /*
                   ],
                 ),

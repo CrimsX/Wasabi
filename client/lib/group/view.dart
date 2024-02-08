@@ -1,18 +1,26 @@
 import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+
+import 'package:socket_io_client/socket_io_client.dart';
 //import 'package:client/providers/home.dart';
 //import 'package:client/model/message.dart';
 import 'package:client/login/view_model.dart';
 import 'package:client/login/model.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
-import 'package:flutter/services.dart';
+
+
 import 'dart:async';
 import 'package:client/login/view.dart';
+import 'dart:math';
+
+import 'package:client/services/network.dart';
+import 'package:client/widgets/menuBar.dart';
 
 
 
@@ -37,61 +45,73 @@ class _GroupState extends State<Group> {
   String currentChatServer= '';
   dynamic server;
 
-  late IO.Socket _socket;
+
   late Completer<List<Widget>> _serverListCompleter;
 
   ScrollController _scrollController = ScrollController();
+
+  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
+  final String remoteCallerID = 'Offline';
+
+  Socket? _socket;
+
+   dynamic incomingSDPOffer;
 
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000";
-      }
+        widget.serverIP = "http://localhost:3000/";
+      } else {
+          widget.serverIP = "http://" + widget.serverIP + ":3000/";
+        }
     super.initState();
     _serverListCompleter = Completer<List<Widget>>();
-    print(_serverListCompleter.isCompleted);
-    _socket = IO.io(
-      widget.serverIP,
-      //'http://localhost:3000',
-      //Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000',
-    IO.OptionBuilder().setTransports(['websocket']).setQuery(
-    {'username': widget.username}).build(),
+
+
+    NetworkService.instance.init(
+      serverIP: widget.serverIP,
+      username: widget.username,
+      selfCallerID: selfCallerID,
     );
+
+    _socket = NetworkService.instance.socket;
+
     _connectSocket();
-    _socket.emit('servers', widget.username);
+    _socket!.emit('servers', widget.username);
+    print(_serverListCompleter.hashCode);
   }
 
   ///Socet Connection
 
   _connectSocket() {
-    _socket.onConnect((data) => print('Connection established'));
-    _socket.onConnectError((data) => print('Connect Error: $data'));
-    _socket.onDisconnect((data) => print('Socket.IO server disconnected'));
-    _socket.on(
+    _socket!.onConnect((data) => print('Connection established'));
+    _socket!.onConnectError((data) => print('Connect Error: $data'));
+    _socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
+    _socket!.on(
       'groupmsg',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
     );
 
-    _socket.on(
+    _socket!.on(
       'servers',
       (data) => _buildServerList(data)
     );
 
-    _socket.on(
+    _socket!.on(
       'fetchgroupchat',
       (data) =>
       _loadChatHistory(data)
     );
 
-    _socket.on('addServer', (data) =>
+    _socket!.on('addServer', (data) =>
       _createGroupResponse(data)
     );
 
-    _socket.on('getservermembers', (data) =>
+    _socket!.on('getservermembers', (data) =>
       _buildServerMemberList(data)
     );
 
@@ -104,7 +124,7 @@ class _GroupState extends State<Group> {
     if (_controller.text == '') {
       return;
     }
-     _socket.emit('groupmsg', {
+     _socket!.emit('groupmsg', {
           'message': _controller.text,
           'sender': widget.username,
           'serverID': currentChatServer
@@ -125,7 +145,7 @@ class _GroupState extends State<Group> {
 
   ///sends serverID to server to join socket.io room
   _joinRoom(room) {
-    _socket.emit('joingroupchat', room);
+    _socket!.emit('joingroupchat', room);
     WidgetsBinding.instance!.addPostFrameCallback((_) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     });
@@ -133,7 +153,7 @@ class _GroupState extends State<Group> {
 
   ///sends serverID to server to leave socket.io room
   _leaveRoom(room) {
-    _socket.emit('leave', room);
+    _socket!.emit('leave', room);
   }
 
   ///checks if chat room exists between two users
@@ -147,7 +167,7 @@ class _GroupState extends State<Group> {
 
   ///Gets chat history between user and the chat that is currently focused
   _fetchGroupChat(serverID) {
-    _socket.emit('fetchgroupchat', {'serverID': serverID});
+    _socket!.emit('fetchgroupchat', {'serverID': serverID});
   }
 
   ///Gets chat history between user and chat partner from the db
@@ -161,7 +181,7 @@ class _GroupState extends State<Group> {
 
   ///sends request to server to add server to db
   _createGroup(serverName){
-    _socket.emit('addserver', {'owner': widget.username,'serverName': serverName});
+    _socket!.emit('addserver', {'owner': widget.username,'serverName': serverName});
   }
 
   ///when server responds, updates serverslist side panel
@@ -207,7 +227,7 @@ class _GroupState extends State<Group> {
                   }
                   //check if previously connected to another chat and leaves chat room if it is
                   if (currentChatServer != '' && currentChatServer !=  serverID) {
-                    _socket.emit('leavegroupchat', currentChatServer);
+                    _socket!.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
                     Provider.of<HomeProvider>(context, listen: false).messages.clear();
@@ -233,7 +253,7 @@ class _GroupState extends State<Group> {
             }
             //check if previously connected to another chat and leaves chat room if it is
             if (currentChatServer != '' && currentChatServer !=  server['ServerID'].toString()) {
-              _socket.emit('leavegroupchat', currentChatServer);
+              _socket!.emit('leavegroupchat', currentChatServer);
             }
               // Clears chat screen when clicking onto new chat
               Provider.of<HomeProvider>(context, listen: false).messages.clear();
@@ -241,7 +261,7 @@ class _GroupState extends State<Group> {
               currentChatServer = server['ServerID'].toString();
               print(currentChatServer);
               _connectToGroupChat(currentChatServer);
-              _socket.emit('getservermembers', currentChatServer);
+              _socket!.emit('getservermembers', currentChatServer);
               FocusScope.of(context).requestFocus(_focusNode);
           },
           )
@@ -310,7 +330,7 @@ class _GroupState extends State<Group> {
             IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () {
-                print(_serverListCompleter.isCompleted);
+                _socket!.disconnect();
                 Navigator.pop(context);
               },
               tooltip: 'Back',
@@ -355,58 +375,7 @@ class _GroupState extends State<Group> {
         ),
 
         actions:[
-          IconButton(
-            icon: Icon(Icons.call),
-            onPressed: () {},
-            color: Colors.white
-          ),
-          IconButton(
-              icon: Icon(Icons.video_call),
-              onPressed: () {},
-              color: Colors.white
-          ),
-          IconButton(
-            icon: Icon(Icons.message),
-            onPressed: () {
-              // Handle Direct Message tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.groups_2_rounded),
-            onPressed: () {
-               _scaffoldKey.currentState!.openEndDrawer();
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.folder_copy_rounded),
-            onPressed: () {
-              // Handle Collaborate tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              // Handle Settings tap
-            },
-            color: Colors.white,
-          ),
-          IconButton(
-            icon: Icon(Icons.exit_to_app_rounded),
-            onPressed: () {
-              _socket.disconnect();
-              // Handle logout tap
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Homepage(), // Replace with your logout screen
-                ),
-              );
-            },
-            color: Colors.white,
-          ),
+          menuBar(),
         ],
       ),
 
