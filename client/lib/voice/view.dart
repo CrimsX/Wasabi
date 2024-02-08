@@ -7,13 +7,15 @@ import 'package:client/widgets/menuBar.dart';
 class VoIP extends StatefulWidget {
   final String callerId, calleeId;
   final dynamic offer;
+  final bool showVid;
   const VoIP({
     super.key,
     this.offer,
     required this.callerId,
     required this.calleeId,
+    required this.showVid,
   });
-
+  
   @override
   State<VoIP> createState() => _VoIPState();
 }
@@ -38,6 +40,8 @@ class _VoIPState extends State<VoIP> {
 
     _setupPeerConnection();
     super.initState();
+
+    isVideoOn = widget.showVid;
   }
 
   @override
@@ -102,6 +106,7 @@ class _VoIPState extends State<VoIP> {
       NetworkService.instance.socket!.emit("answerCall", {
         "callerId": widget.callerId,
         "sdpAnswer": answer.toMap(),
+        "showVid": widget.showVid,
       });
     }
     else {
@@ -136,6 +141,7 @@ class _VoIPState extends State<VoIP> {
       NetworkService.instance.socket!.emit("makeCall", {
         "calleeId": widget.calleeId,
         "sdpOffer": offer.toMap(),
+        "showVid": widget.showVid,
       });
     }
   }
@@ -213,6 +219,7 @@ class _VoIPState extends State<VoIP> {
                     iconSize: 30,
                     onPressed: _leaveCall,
                   ),
+                  if (isVideoOn == true)
                   IconButton(
                     icon: Icon(isVideoOn ? Icons.videocam : Icons.videocam_off),
                     onPressed: _toggleCamera,

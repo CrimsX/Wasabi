@@ -9,6 +9,8 @@ import 'package:client/voice/view.dart';
 import 'package:client/login/view.dart';
 
 class menuBar extends StatelessWidget {
+  String friend = NetworkService.instance.getFriend;
+  
   //String test3 = "sd";
 
   //_receiveFriendVoIPID(BuildContext context) {
@@ -33,6 +35,7 @@ class menuBar extends StatelessWidget {
     required String callerId,
     required String calleeId,
     dynamic offer,
+    required bool showVid,
   }) {
     Navigator.push(
       context,
@@ -41,6 +44,7 @@ class menuBar extends StatelessWidget {
           callerId: callerId,
           calleeId: calleeId,
           offer: offer,
+          showVid: showVid,
         ),
       ),
     );
@@ -57,7 +61,21 @@ class menuBar extends StatelessWidget {
       children: [
         IconButton(
             icon: Icon(Icons.call),
-            onPressed: () {},
+            onPressed: () {
+              _socket!.emit("requestVoIPID", friend);
+                remoteCallerID = NetworkService.instance.getRemoteCallerID;
+                print(remoteCallerID);
+                print(friend);
+
+                if (remoteCallerID != 'Offline') {
+                  _joinCall(
+                    context,
+                   callerId: selfCallerID,
+                   calleeId: remoteCallerID,
+                   showVid: false,
+                  );
+                }
+              },
             color: Colors.white
           ),
 
@@ -66,15 +84,17 @@ class menuBar extends StatelessWidget {
               onPressed: () {
                 //_receiveFriendVoIPID(context);
                 //NetworkService.instance.socket!.emit!("requestVoIPID");
-                _socket!.emit("requestVoIPID", "user2");
+                _socket!.emit("requestVoIPID", friend);
                 remoteCallerID = NetworkService.instance.getRemoteCallerID;
                 print(remoteCallerID);
+                print(friend);
 
                 if (remoteCallerID != 'Offline') {
                   _joinCall(
                     context,
                    callerId: selfCallerID,
                    calleeId: remoteCallerID,
+                   showVid: true,
                   );
                 }
 
