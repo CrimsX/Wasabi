@@ -28,6 +28,7 @@ git clone https://github.com/CrimsX/Wasabi
 - Start the server
 
 ```shell
+npm i
 npm start
 or
 npx nodemon
@@ -37,7 +38,7 @@ npx nodemon
 
 ```shell
 mysql
-source schema.sql
+source schema.sql;
 ```
 
 - Start the app

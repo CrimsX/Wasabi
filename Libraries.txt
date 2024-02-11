@@ -13,3 +13,6 @@ provider
 intl
 iconsax_flutter
 flutter_webrtc
+
+fly.io
+planetscale

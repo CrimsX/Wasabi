@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000/";
+        widget.serverIP = "https://wasabi-server.fly.dev/";
       } else {
           widget.serverIP = "http://" + widget.serverIP + ":3000/";
         }
