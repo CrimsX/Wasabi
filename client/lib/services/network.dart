@@ -9,6 +9,9 @@ class NetworkService {
   String selfCallerID = '';
   String remoteCallerID = 'Offline';
   String friend = '';
+  String type = '';
+  List<String> groupNames = [];
+  List<String> groupCallerID = [];
 
   NetworkService._();
   static final instance = NetworkService._();
@@ -54,11 +57,12 @@ class NetworkService {
     ); 
 
     // connect socket
-    socket!.connect();
+    //socket!.connect();
   }
 
    _responseFriendVoIPID(data) {
     remoteCallerID = data;
+    groupCallerID.add(remoteCallerID);
     //print("test2");
     //NetworkService.instance.socket!.emit('s_VoIPID', "test");
   }
@@ -68,6 +72,9 @@ class NetworkService {
     String get getselfCallerID => selfCallerID;
     String get getRemoteCallerID => remoteCallerID;
     String get getFriend => friend;
+    String get getType => type;
+    List<String> get getGroupNames => groupNames;
+    List<String> get getGroupCallerID => groupCallerID;
 
     // Setters
     set setRemoteCallerID(String remoteCallerID) {
@@ -84,4 +91,16 @@ class NetworkService {
         this.friend = friend;
     }
     */
+
+    setType (String type) {
+      this.type = type;
+    }
+
+    addGroupNames(String Name) {
+      this.groupNames.add(Name);
+    }
+
+    addGroupCallerID(String groupCallerID) {
+      this.groupCallerID.add(groupCallerID);
+    }
 }
