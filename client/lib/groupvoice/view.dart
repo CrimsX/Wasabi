@@ -26,7 +26,7 @@ class _groupVoIPState extends State<groupVoIP> {
   final _localRTCVideoRenderer = RTCVideoRenderer();
   final _remoteRTCVideoRenderer = RTCVideoRenderer();
 
-  //final _remoteRTCVideoRenderer2 = RTCVideoRenderer();
+  final _remoteRTCVideoRenderer2 = RTCVideoRenderer();
 
   //final List<RTCVideoRenderer> _remoteRTCVideoRenderers = [];
 
@@ -34,9 +34,10 @@ class _groupVoIPState extends State<groupVoIP> {
 
   RTCPeerConnection? _rtcPeerConnection;
 
-  //RTCPeerConnection? _rtcPeerConnection2;
+  RTCPeerConnection? _rtcPeerConnection2;
 
   List<RTCIceCandidate> rtcIceCadidates = [];
+  List<RTCIceCandidate> rtcIceCadidates2 = [];
 
   bool isAudioOn = true, isVideoOn = true, isFrontCameraSelected = true;
 
@@ -45,7 +46,7 @@ class _groupVoIPState extends State<groupVoIP> {
     _localRTCVideoRenderer.initialize();
     _remoteRTCVideoRenderer.initialize();
 
-    //_remoteRTCVideoRenderer2.initialize();
+    _remoteRTCVideoRenderer2.initialize();
 
     //_remoteRTCVideoRenders = List.generate(widget.groupcalleeId.length, (index) => RTCVideoRenderer());
 
@@ -80,18 +81,18 @@ class _groupVoIPState extends State<groupVoIP> {
       ]
     });
 
-    /*
+    
     _rtcPeerConnection2 = await createPeerConnection({
       'iceServers': [
         {
           'urls': [
-            'stun:stun1.l.google.com:19302',
-            'stun:stun2.l.google.com:19302'
+            'stun:stun3.l.google.com:19302',
+            'stun:stun4.l.google.com:19302'
           ]
         }
       ]
     });
-    */
+    
 
     _rtcPeerConnection!.onTrack = (event) {
       //int index = widget.groupcalleeId.indexOf(event.track.id);
@@ -117,12 +118,12 @@ class _groupVoIPState extends State<groupVoIP> {
       
     };
 
-    /*
+    
     _rtcPeerConnection2!.onTrack = (event) {
         _remoteRTCVideoRenderer2.srcObject = event.streams[0];
         setState(() {});
       };
-    */
+    
 
     /*
     for (int i = 0; i < widget.groupcalleeId.length; i++) {
@@ -159,7 +160,7 @@ class _groupVoIPState extends State<groupVoIP> {
       });
 
 
-      /*
+      
       NetworkService.instance.socket!.on("IceCandidate", (data) {
         String candidate2 = data["iceCandidate"]["candidate"];
         String sdpMid2 = data["iceCandidate"]["id"];
@@ -171,23 +172,23 @@ class _groupVoIPState extends State<groupVoIP> {
           sdpMLineIndex2,
         ));
       });
-      */
+      
 
       await _rtcPeerConnection!.setRemoteDescription(
         RTCSessionDescription(widget.offer["sdp"], widget.offer["type"]),
       );
 
-      //await _rtcPeerConnection2!.setRemoteDescription(
-      //  RTCSessionDescription(widget.offer["sdp"], widget.offer["type"]),
-      //);
+      await _rtcPeerConnection2!.setRemoteDescription(
+        RTCSessionDescription(widget.offer["sdp"], widget.offer["type"]),
+      );
 
       RTCSessionDescription answer = await _rtcPeerConnection!.createAnswer();
 
-      //RTCSessionDescription answer2 = await _rtcPeerConnection2!.createAnswer();
+      RTCSessionDescription answer2 = await _rtcPeerConnection2!.createAnswer();
 
       _rtcPeerConnection!.setLocalDescription(answer);
 
-      //_rtcPeerConnection2!.setLocalDescription(answer2);
+      _rtcPeerConnection2!.setLocalDescription(answer2);
 
       NetworkService.instance.socket!.emit("answerCall", {
         "callerId": widget.callerId,
@@ -223,9 +224,9 @@ class _groupVoIPState extends State<groupVoIP> {
       });
 
 
-    /*
+    
       _rtcPeerConnection2!.onIceCandidate =
-          (RTCIceCandidate candidate) => rtcIceCadidates.add(candidate);
+          (RTCIceCandidate candidate) => rtcIceCadidates2.add(candidate);
 
       NetworkService.instance.socket!.on("callAnswered", (data) async {
         await _rtcPeerConnection2!.setRemoteDescription(
@@ -235,7 +236,7 @@ class _groupVoIPState extends State<groupVoIP> {
           ),
         );
 
-        for (RTCIceCandidate candidate in rtcIceCadidates) {
+        for (RTCIceCandidate candidate in rtcIceCadidates2) {
           //for (int i = 0; i < widget.groupcalleeId.length; i++) {
           NetworkService.instance.socket!.emit("IceCandidate", {
             "calleeId": widget.groupcalleeId[1],
@@ -250,16 +251,16 @@ class _groupVoIPState extends State<groupVoIP> {
         //)};
       });
 
-      */
+      
 
 
       RTCSessionDescription offer = await _rtcPeerConnection!.createOffer();
 
-      //RTCSessionDescription offer2 = await _rtcPeerConnection2!.createOffer();
+      RTCSessionDescription offer2 = await _rtcPeerConnection2!.createOffer();
 
       await _rtcPeerConnection!.setLocalDescription(offer);
 
-      //await _rtcPeerConnection2!.setLocalDescription(offer2);
+      await _rtcPeerConnection2!.setLocalDescription(offer2);
 
       //print(offer.toMap());
       for (int i = 0; i < widget.groupcalleeId.length; i++) 
@@ -322,7 +323,7 @@ class _groupVoIPState extends State<groupVoIP> {
                 ),
                 ),
                 ),
-                /*
+                
                 Positioned(
                 right:50,
                 top: 80,
@@ -335,7 +336,7 @@ class _groupVoIPState extends State<groupVoIP> {
                 ),
                 ),
                 ),
-                */
+                
                 Positioned(
                   right: 20,
                   bottom: 20,
@@ -384,8 +385,10 @@ class _groupVoIPState extends State<groupVoIP> {
   void dispose() {
     _localRTCVideoRenderer.dispose();
     _remoteRTCVideoRenderer.dispose();
+    _remoteRTCVideoRenderer2.dispose();
     _localStream?.dispose();
     _rtcPeerConnection?.dispose();
+    _rtcPeerConnection2?.dispose();
     super.dispose();
   }
 }
