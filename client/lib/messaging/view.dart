@@ -134,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
     */
+    NetworkService.instance.setType('DM');
   }
 
   ///Socet Connection

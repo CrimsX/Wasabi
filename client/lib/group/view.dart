@@ -22,6 +22,8 @@ import 'dart:math';
 import 'package:client/services/network.dart';
 import 'package:client/widgets/menuBar.dart';
 
+import 'package:client/groupvoice/view.dart';
+
 
 
 class Group extends StatefulWidget {
@@ -62,7 +64,7 @@ class _GroupState extends State<Group> {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-        widget.serverIP = "http://localhost:3000/";
+      widget.serverIP = "https://wasabi-server.fly.dev/";
       } else {
           widget.serverIP = "http://" + widget.serverIP + ":3000/";
         }
@@ -81,6 +83,18 @@ class _GroupState extends State<Group> {
     _connectSocket();
     _socket!.emit('servers', widget.username);
     print(_serverListCompleter.hashCode);
+
+     _socket!.on("newCall", (data) {
+        if (mounted) {
+            //print("received");
+            setState(() => incomingSDPOffer = data);
+            //print(incomingSDPOffer);
+        }
+        //print(incomingSDPOffer);
+    });
+
+
+    NetworkService.instance.setType("group");
   }
 
   ///Socet Connection
@@ -273,6 +287,9 @@ class _GroupState extends State<Group> {
   _buildServerMemberList(members) {
       _serverMemberList.clear();
       for (var member in members) {
+        if (member['UserID'] != widget.username) {
+          NetworkService.instance.groupNames.add(member['UserID']);
+        }
         _serverMemberList.add(
           _buildHoverableTile(
                   title: member['UserID'],
@@ -300,6 +317,27 @@ class _GroupState extends State<Group> {
       onTap: onTap,
     );
   }
+
+  // Join VoIP
+  _joingroupCall({
+    required String callerId,
+    required List<String> groupcalleeId,
+    dynamic offer,
+    required bool showVid,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => groupVoIP(
+          callerId: callerId,
+          groupcalleeId: groupcalleeId,
+          offer: offer,
+          showVid: showVid,
+        ),
+      ),
+    );
+  }
+
 
  /// the drawer and header
   @override
@@ -518,6 +556,51 @@ class _GroupState extends State<Group> {
               ],
             ),
           ),
+          if (incomingSDPOffer != null)
+            /*
+            Positioned(
+              child: Row(
+                title: Text(
+                  "Incoming Call from ${incomingSDPOffer["callerId"]}",
+                 ),
+                trailing: Row(
+                  //mainAxisSize: MainAxisSize.min,
+                  children: [
+                  */
+        Column(
+        children: [
+                    IconButton(
+                      icon: const Icon(Icons.call_end),
+                      color: Colors.redAccent,
+                      onPressed: () {
+                        setState(() => incomingSDPOffer = null);
+                        },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.call),
+                      color: Colors.greenAccent,
+                      onPressed: () {
+                         List<String> groupNames = NetworkService.instance.getGroupNames;
+                         List<String> groupCallerID = [];
+                          for (int i = 0; i < groupNames.length; i++) {
+                          _socket!.emit("requestVoIPID", groupNames[i]);
+                          //NetworkService.instance.addGroupCallerID(NetworkService.instance.getRemoteCallerID);
+                          }
+                          groupCallerID = NetworkService.instance.getGroupCallerID;
+
+                        _joingroupCall(
+                          callerId: incomingSDPOffer["callerId"]!,
+                          groupcalleeId: groupCallerID,
+                          //calleeId: NetworkService.instance.getselfCallerID,
+                          offer: incomingSDPOffer["sdpOffer"],
+                          showVid: incomingSDPOffer["showVid"],
+                        );
+                      },
+                    ),
+                    ],
+                    ),
+
+          
         ],
       ),
     );
