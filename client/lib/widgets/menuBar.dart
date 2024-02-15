@@ -222,7 +222,7 @@ class menuBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Homepage(), // Replace with your logout screen
+                  builder: (context) => Login(), // Replace with your logout screen
                 ),
               );
             },

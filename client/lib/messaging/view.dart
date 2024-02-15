@@ -1,23 +1,11 @@
-/// Redesigned Home.dart. Instead of drawers i used rows for the friend list
-/// The navigation is not a drawer as well, it's in the header now
-/// I added a + button on top that would add friends, which will open a pop up.
-/// But it does not have the backend yet.
-
-// ! checks if null
-// ? runs even if null
-
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'view_model.dart';
-
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'model.dart';
 
 import 'package:socket_io_client/socket_io_client.dart';
-//import 'package:client/providers/home.dart';
-//import 'package:client/model/message.dart';
-import 'package:client/login/view_model.dart';
-import 'package:client/login/model.dart';
+
 
 import 'package:intl/intl.dart';
 
@@ -28,38 +16,10 @@ import 'dart:async';
 
 import 'package:client/login/view.dart';
 
-// Random
-import 'dart:math';
-
 import 'package:client/voice/view.dart';
 import 'package:client/services/network.dart';
 
 import 'package:client/widgets/menuBar.dart';
-
-
-
-/* don't delete yet
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create:(context) => _ViewModel(),
-      child: MaterialApp(
-        title: "",
-          home: _(),
-      ),
-    );
-  }
-}
-
-class _ extends StatelessWidget {
-
-}
-*/
 
 class HomeScreen extends StatefulWidget {
   String username = '';
@@ -87,10 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ScrollController _scrollController = ScrollController();
 
-  // maybe hash name salted with current time
-  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
-  final String remoteCallerID = 'Offline';
-
   Socket? _socket;
 
   // VoIP
@@ -111,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
     NetworkService.instance.init(
       serverIP: widget.serverIP,
       username: widget.username,
-      selfCallerID: selfCallerID,
     );
 
     _socket = NetworkService.instance.socket;
@@ -122,10 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _socket!.on("newCall", (data) {
         if (mounted) {
-            //print("received");
             setState(() => incomingSDPOffer = data);
         }
-        //print(incomingSDPOffer);
     });
     /*
     NetworkService.instance.socket!.on("newCall", (data) {
@@ -141,10 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
   //
   // should be able to move this to network.dart
   _connectSocket() {
-    //_socket?.onConnect((data) => print('Connection established'));
-    //_socket?.onConnectError((data) => print('Connect Error: $data'));
-    //_socket?.onDisconnect((data) => print('Socket.IO server disconnected'));
-
     _socket!.on(
       'message',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
@@ -152,15 +101,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    _socket!.on(
-      'friends',
-      (data) => _buildFriendList(data)
+    _socket!.on('friends', (data) => _buildFriendList(data)
     );
 
     _socket!.on(
       'chat',
-      (data) => _connectToChat(data)
-    );
+      (data) =>
+        _connectToChat(data)
+      );
 
     _socket!.on(
       'chatCreated',
@@ -401,16 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
  /// the drawer and header
   @override
-  Widget build(BuildContext context) {
-    /*
-    NetworkService.instance.init(
-      serverIP: widget.serverIP,
-      username: widget.username,
-      selfCallerID: selfCallerID,
-    );
-    */
-    //print(incomingSDPOffer);
-
+  Widget build(BuildContext context) { 
     return Scaffold(
       /// key:
       key: _scaffoldKey,

@@ -6,36 +6,10 @@ import 'package:client/login/view.dart';
 import 'package:client/messaging/view.dart';
 import 'package:client/group/view.dart';
 
-import 'package:client/login/view_model.dart';
-import 'package:client/login/model.dart';
-import 'package:client/login/view.dart';
+import 'package:client/messaging/view_model.dart';
+import 'package:client/messaging/model.dart';
+import 'package:client/messaging/view.dart';
 
-/*
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create:(context) => _ViewModel(),
-      child: MaterialApp(
-        title: "",
-          home: _(),
-      ),
-    );
-  }
-}
-
-class _ extends StatelessWidget {
-
-}
-*/
-
-//void main() {
-//  runApp(MyApp());
-//}
 class WelcomePage extends StatelessWidget {
   final String loggedInUsername;
   final String serverIP;
@@ -61,7 +35,7 @@ class WelcomePage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Homepage(), // Replace with your logout screen
+                  builder: (context) => Login(), // Replace with your logout screen
                 ),
               );
             },

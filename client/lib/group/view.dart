@@ -1,23 +1,17 @@
 import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 
 import 'package:socket_io_client/socket_io_client.dart';
-//import 'package:client/providers/home.dart';
-//import 'package:client/model/message.dart';
-import 'package:client/login/view_model.dart';
-import 'package:client/login/model.dart';
+
+import 'package:provider/provider.dart';
+import 'package:client/messaging/view_model.dart';
+import 'package:client/messaging/model.dart';
+
 import 'package:intl/intl.dart';
 import 'dart:io';
 
-
 import 'dart:async';
 import 'package:client/login/view.dart';
-import 'dart:math';
 
 import 'package:client/services/network.dart';
 import 'package:client/widgets/menuBar.dart';
@@ -52,9 +46,6 @@ class _GroupState extends State<Group> {
 
   ScrollController _scrollController = ScrollController();
 
-  final String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
-  final String remoteCallerID = 'Offline';
-
   Socket? _socket;
 
    dynamic incomingSDPOffer;
@@ -75,7 +66,6 @@ class _GroupState extends State<Group> {
     NetworkService.instance.init(
       serverIP: widget.serverIP,
       username: widget.username,
-      selfCallerID: selfCallerID,
     );
 
     _socket = NetworkService.instance.socket;
@@ -86,11 +76,8 @@ class _GroupState extends State<Group> {
 
      _socket!.on("newCall", (data) {
         if (mounted) {
-            //print("received");
             setState(() => incomingSDPOffer = data);
-            //print(incomingSDPOffer);
         }
-        //print(incomingSDPOffer);
     });
 
 
@@ -100,10 +87,7 @@ class _GroupState extends State<Group> {
   ///Socet Connection
 
   _connectSocket() {
-    _socket!.onConnect((data) => print('Connection established'));
-    _socket!.onConnectError((data) => print('Connect Error: $data'));
-    _socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
-    _socket!.on(
+     _socket!.on(
       'groupmsg',
       (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),

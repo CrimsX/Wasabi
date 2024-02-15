@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'view_model.dart';
-import '../createAccount/view.dart';
-import 'package:client/home/view.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class Homepage extends StatefulWidget {
+import 'package:provider/provider.dart';
+import 'view_model.dart';
+
+import 'package:client/messaging/view_model.dart';
+
+import '../createAccount/view.dart';
+import 'package:client/home/view.dart';
+
+class Login extends StatefulWidget {
   @override
-  _HomepageState createState() => _HomepageState();
+  _LoginState createState() => _LoginState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
@@ -209,9 +213,9 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
-
     );
   }
+
   @override
   void dispose() {
     _socket?.disconnect();
