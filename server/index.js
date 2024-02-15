@@ -14,7 +14,9 @@ import {
   fetchGroupChat,
   createServer,
   getServerID,
-  getServerMembers
+  getServerMembers,
+  createAccount,
+  logIn
 } from './database.js'
 
 let port = process.env.PORT || 3000;
@@ -59,6 +61,28 @@ IO.on("connection", (socket) => {
   active.add(username);
 
   //IO.emit("Active connections:", Array.from(active));
+
+
+  // Kipp
+    socket.on('createaccount', async (data) => {
+       const result = await createAccount(data);
+          if (result.success) {
+              // Inform the client of the successful account creation
+              socket.emit('accountCreated', result);
+          } else {
+              // Inform the client that account creation failed
+              socket.emit('accountCreationFailed', result);
+          }
+    });
+
+    socket.on('login', async (data) => {
+      console.log('Attempting login for:', data.userID);
+      const result = await logIn(data);
+      IO.to(socket.id).emit('loginResponse', result);
+    });
+
+
+// Kipp
 
   socket.on("makeCall", (data) => {
     let calleeId = data.calleeId;

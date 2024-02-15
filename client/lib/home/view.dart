@@ -36,18 +36,6 @@ class _ extends StatelessWidget {
 //void main() {
 //  runApp(MyApp());
 //}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: WelcomePage(loggedInUsername: 'Username',
-      serverIP: 'IP'),
-      debugShowCheckedModeBanner: false, // Remove debug banner
-    );
-  }
-}
-
 class WelcomePage extends StatelessWidget {
   final String loggedInUsername;
   final String serverIP;
@@ -64,12 +52,6 @@ class WelcomePage extends StatelessWidget {
             icon: Icon(Icons.notifications),
             onPressed: () {
               // Handle notification button click
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => NotificationsScreen(),
-              //   ),
-              // );
             },
           ),
           IconButton(
@@ -152,8 +134,8 @@ class WelcomePage extends StatelessWidget {
                     builder: (_) => ChangeNotifierProvider(
                       create: (context) => HomeProvider(),
                       child: Group(
-                        username: loggedInUsername,
-                        serverIP: serverIP
+                          username: loggedInUsername,
+                          serverIP: serverIP
                       ),
                     ),
                     //builder: (context) => HomeScreen(username: loggedInUsername),
@@ -165,7 +147,7 @@ class WelcomePage extends StatelessWidget {
             /// This is the button goes to home.dart and passed on the username.
             ListTile(
               title: Text('Messages'),
-              leading: Icon(Icons.notifications),
+              leading: Icon(Icons.messenger),
               onTap: () {
                 Navigator.push(
                   context,
@@ -173,8 +155,8 @@ class WelcomePage extends StatelessWidget {
                     builder: (_) => ChangeNotifierProvider(
                       create: (context) => HomeProvider(),
                       child: HomeScreen(
-                        username: loggedInUsername,
-                        serverIP: serverIP
+                          username: loggedInUsername,
+                          serverIP: serverIP
                       ),
                     ),
                     //builder: (context) => HomeScreen(username: loggedInUsername),
@@ -198,47 +180,50 @@ class WelcomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: Image.asset(
-                'assets/Welcome.png', // replace with your logo image path
-                width: 300,
-                height: 300,
-              ),
-            ),
-            SizedBox(height: 5),
-            Center(
-              child: Text(
-                "What's up, $loggedInUsername?",
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
+      body: SingleChildScrollView( // Makes the body scrollable
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/Welcome.png', // replace with your logo image path
+                  width: 300,
+                  height: 300,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: Text(
-                "You don't have any listed tasks.",
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w500,
+              SizedBox(height: 5),
+              Center(
+                child: Text(
+                  "What's up, $loggedInUsername?",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-            SizedBox(height: 50),
-          ],
+              SizedBox(height: 20),
+              Center(
+                child: Text(
+                  "You don't have any listed tasks.",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(height: 50),
+
+            ],
+          ),
         ),
       ),
     );
