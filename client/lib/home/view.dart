@@ -1,3 +1,4 @@
+import 'package:client/collaborate/view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model.dart';
@@ -89,12 +90,19 @@ class WelcomePage extends StatelessWidget {
               title: Text('Collaborate'),
               leading: Icon(Icons.file_copy),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => CollaborateScreen(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (context) => HomeProvider(),
+                      child: Collaborate(
+                          username: loggedInUsername,
+                          serverIP: serverIP
+                      ),
+                    ),
+                    //builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+                );
               },
             ),
 

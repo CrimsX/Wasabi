@@ -8,6 +8,7 @@ import 'package:client/services/network.dart';
 import 'package:client/voice/view.dart';
 import 'package:client/login/view.dart';
 import 'package:client/groupvoice/view.dart';
+import 'package:client/collaborate/view.dart';
 
 class menuBar extends StatelessWidget {
   String friend = NetworkService.instance.getFriend;
@@ -204,6 +205,8 @@ class menuBar extends StatelessWidget {
             onPressed: () {
               // Handle Collaborate tap
             },
+
+
             color: Colors.white,
           ),
           IconButton(
