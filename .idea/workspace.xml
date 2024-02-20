@@ -5,19 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="247069f1-08a6-4919-9cac-573eb7b4a408" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/Calendar.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/model.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/view.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/view_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/home/view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/home/view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/widgets/menuBar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/widgets/menuBar.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/client/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/collaborate/Calendar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/collaborate/Calendar.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
