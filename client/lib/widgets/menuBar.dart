@@ -194,7 +194,7 @@ class menuBar extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.groups_2_rounded),
             onPressed: () {
-              // Handle Group Message tap
+              //_scaffoldKey.currentState!.openEndDrawer();
             },
             color: Colors.white,
           ),

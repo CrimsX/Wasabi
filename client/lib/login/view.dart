@@ -29,16 +29,18 @@ class _LoginState extends State<Login> {
 
   void initializeSocket() {
     // Assuming serverIPController contains the full server IP including protocol and port
-    String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    //String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    String serverIP = "http://localhost:3000";
 
     // Initialize socket connection
     _socket = IO.io(serverIP, <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': true, // Changed to true to ensure connection starts immediately
+      'autoConnect': false, // Changed to true to ensure connection starts immediately
     });
   }
 
   void _login(BuildContext context) {
+    _socket!.connect(); 
     // Check if _socket is initialized
     if (_socket != null) {
       _socket!.emit('login', {
@@ -47,12 +49,13 @@ class _LoginState extends State<Login> {
       });
 
       _socket!.on('loginResponse', (data) {
+        _socket!.disconnect();
         if (data['success']) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
-                create: (context) => HomeProvider(),
+                create: (context) => MessageProvider(),
                 child: WelcomePage(
                   loggedInUsername: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
@@ -61,6 +64,7 @@ class _LoginState extends State<Login> {
             ),
           );
         } else {
+          _socket!.disconnect();
           // Handle login failure
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -75,7 +79,6 @@ class _LoginState extends State<Login> {
       // Consider showing an error message or retrying the initialization
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -223,4 +226,3 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 }
-

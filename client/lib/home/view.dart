@@ -106,7 +106,7 @@ class WelcomePage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => ChangeNotifierProvider(
-                      create: (context) => HomeProvider(),
+                      create: (context) => MessageProvider(),
                       child: Group(
                           username: loggedInUsername,
                           serverIP: serverIP
@@ -127,7 +127,7 @@ class WelcomePage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => ChangeNotifierProvider(
-                      create: (context) => HomeProvider(),
+                      create: (context) => MessageProvider(),
                       child: HomeScreen(
                           username: loggedInUsername,
                           serverIP: serverIP

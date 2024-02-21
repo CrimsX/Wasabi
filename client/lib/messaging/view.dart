@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 import 'model.dart';
 
-import 'package:socket_io_client/socket_io_client.dart';
+import 'package:flutter/services.dart';
 
+import 'package:client/services/network.dart';
+
+import 'package:client/widgets/menuBar.dart';
+
+import 'package:client/login/view.dart';
+import 'package:client/voice/view.dart';
 
 import 'package:intl/intl.dart';
 
 import 'dart:io';
-
-import 'package:flutter/services.dart';
 import 'dart:async';
 
-import 'package:client/login/view.dart';
-
-import 'package:client/voice/view.dart';
-import 'package:client/services/network.dart';
-
-import 'package:client/widgets/menuBar.dart';
 
 class HomeScreen extends StatefulWidget {
   String username = '';
@@ -80,13 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() => incomingSDPOffer = data);
         }
     });
-    /*
-    NetworkService.instance.socket!.on("newCall", (data) {
-      if (mounted) {
-        setState(() => incomingSDPOffer = data);
-      }
-    });
-    */
     NetworkService.instance.setType('DM');
   }
 
@@ -96,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
   _connectSocket() {
     _socket!.on(
       'message',
-      (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+      (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
     );
@@ -124,17 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
       'addfriends',
       (data) => _addFriendResponse(data)
     );
-
-
-    //_socket!.emit("requestFriendVoIPID", widget.username);
-
-    /*
-    _socket!.on(
-      'receivefriendVoIPID',
-      (data) => _requestFriendVoIPID(data)
-    );
-    */
-
   }
 
   ///Helper functions
@@ -202,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ///adds message to the screen after fetching
   _loadChatHistory(data) {
     for (var message in data) {
-      Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+      Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
     }
     WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -261,8 +242,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     _leaveRoom(currentChatRoom);
                   }
                     // Clears chat screen when clicking onto new chat
-                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    Provider.of<MessageProvider>(context, listen: false).messages.clear();
+                    Provider.of<MessageProvider>(context, listen: false).notifyListeners();
                     currentChatFriend = friendID;
                     _socket!.emit('chat', {'User1': widget.username,
                       'User2': currentChatFriend});
@@ -288,8 +269,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     _leaveRoom(currentChatRoom);
                   }
                     // Clears chat screen when clicking onto new chat
-                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    Provider.of<MessageProvider>(context, listen: false).messages.clear();
+                    Provider.of<MessageProvider>(context, listen: false).notifyListeners();
                     currentChatFriend = friend['FriendID'];
                     //print(currentChatFriend);
                     NetworkService.instance.setFriend(currentChatFriend);
@@ -302,12 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     _friendsListCompleter.complete(_friendsList);
     setState(() {});
-    }
-
-    _requestFriendVoIPID(data) {
-      _socket!.emit('receivefriendVoIPID', widget.username);
-      //NetworkService.instance.setRemoteCallerID = data;
-    }
+    } 
 
   Widget _buildHoverableTile({
     required String title,
@@ -455,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 Expanded(
-                  child: Consumer<HomeProvider>(
+                  child: Consumer<MessageProvider>(
                     builder: (_, provider, __) => ListView.separated(
                       controller: _scrollController,
                       padding: const EdgeInsets.all(16),
@@ -592,13 +568,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     ],
                     ),
-
-          /*
-                  ],
-                ),
-              ),
-            ),
-            */
         ],
       ),
     );

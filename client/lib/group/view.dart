@@ -89,7 +89,7 @@ class _GroupState extends State<Group> {
   _connectSocket() {
      _socket!.on(
       'groupmsg',
-      (data) => Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+      (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
       ),
     );
@@ -172,7 +172,7 @@ class _GroupState extends State<Group> {
   ///adds message to the screen after fetching
   _loadChatHistory(data) {
     for (var message in data) {
-      Provider.of<HomeProvider>(context, listen: false).addNewMessage(
+      Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
     }
   }
@@ -228,8 +228,8 @@ class _GroupState extends State<Group> {
                     _socket!.emit('leavegroupchat', currentChatServer);
                   }
                     // Clears chat screen when clicking onto new chat
-                    Provider.of<HomeProvider>(context, listen: false).messages.clear();
-                    Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+                    Provider.of<MessageProvider>(context, listen: false).messages.clear();
+                    Provider.of<MessageProvider>(context, listen: false).notifyListeners();
                     currentChatServer = serverID;
                     print(currentChatServer);
                     _connectToGroupChat(currentChatServer);
@@ -254,8 +254,8 @@ class _GroupState extends State<Group> {
               _socket!.emit('leavegroupchat', currentChatServer);
             }
               // Clears chat screen when clicking onto new chat
-              Provider.of<HomeProvider>(context, listen: false).messages.clear();
-              Provider.of<HomeProvider>(context, listen: false).notifyListeners();
+              Provider.of<MessageProvider>(context, listen: false).messages.clear();
+              Provider.of<MessageProvider>(context, listen: false).notifyListeners();
               currentChatServer = server['ServerID'].toString();
               print(currentChatServer);
               _connectToGroupChat(currentChatServer);
@@ -398,6 +398,13 @@ class _GroupState extends State<Group> {
 
         actions:[
           menuBar(),
+          IconButton(
+            icon: Icon(Icons.groups_2_rounded),
+            onPressed: () {
+               _scaffoldKey.currentState!.openEndDrawer();
+            },
+            color: Colors.white,
+          ),
         ],
       ),
 
@@ -438,7 +445,7 @@ class _GroupState extends State<Group> {
             child: Column(
               children: [
                 Expanded(
-                  child: Consumer<HomeProvider>(
+                  child: Consumer<MessageProvider>(
                     builder: (_, provider, __) => ListView.separated(
                       controller: _scrollController,
                       padding: const EdgeInsets.all(16),
