@@ -23,6 +23,10 @@ import 'dart:async';
 class HomeScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
+ 
+//String username = NetworkService.instance.getusername;
+//String serverIP = NetworkService.instance.getserverIP;
+  
 
 
   //HomeScreen({Key? key, required this.username}) : super(key: key);

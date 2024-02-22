@@ -1,36 +1,23 @@
 import 'package:flutter/material.dart';
 
-// Connection
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
-// Screens
 import 'package:client/voice/view.dart';
-import 'package:client/login/view.dart';
 import 'package:client/groupvoice/view.dart';
+
+import 'package:client/messaging/view.dart';
+import 'package:provider/provider.dart';
+import 'package:client/messaging/view_model.dart';
+
+import 'package:client/group/view.dart';
 
 class menuBar extends StatelessWidget {
   String friend = NetworkService.instance.getFriend;
   String type = NetworkService.instance.getType;
-  
-  //String test3 = "sd";
 
-  //_receiveFriendVoIPID(BuildContext context) {
-    //print("test");
-  /*
-   NetworkService.instance.socket!.on(
-      'r_VoIPID',
-      (data) => _responseFriendVoIPID(data)
-    );
-   */
-   //print(data);
-  //}
-
-  //_responseFriendVoIPID(data) {
-  //  print(data);
-    //print("test2");
-    //NetworkService.instance.socket!.emit('s_VoIPID', "test");
-  //}
+  String loggedInUsername = NetworkService.instance.getusername;
+  String serverIP = NetworkService.instance.getserverIP;
 
   // Join VoIP
   _joinCall(BuildContext context, {
@@ -182,21 +169,8 @@ class menuBar extends StatelessWidget {
               },
               color: Colors.white,
           ),
-
-          IconButton(
-            icon: Icon(Icons.message),
-            onPressed: () {
-              // Handle Direct Message tap
-            },
-            color: Colors.white,
-          ),
-
-          IconButton(
-            icon: Icon(Icons.groups_2_rounded),
-            onPressed: () {
-              //_scaffoldKey.currentState!.openEndDrawer();
-            },
-            color: Colors.white,
+          Padding(
+            padding: EdgeInsets.only(right: 25),
           ),
 
           IconButton(
@@ -205,29 +179,54 @@ class menuBar extends StatelessWidget {
               // Handle Collaborate tap
             },
             color: Colors.white,
+          ), 
+
+          Padding(
+            padding: EdgeInsets.only(right: 25),
           ),
+
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.message),
             onPressed: () {
-              // Handle Settings tap
+              // Handle Direct Message tap
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (context) => MessageProvider(),
+                      child: HomeScreen(
+                          username: loggedInUsername,
+                          serverIP: serverIP
+                      ),
+                    ),
+                    //builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+              );
             },
             color: Colors.white,
           ),
 
           IconButton(
-            icon: Icon(Icons.exit_to_app_rounded),
+            icon: Icon(Icons.groups_2_rounded),
             onPressed: () {
-              _socket!.disconnect();
-              // Handle logout tap
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Login(), // Replace with your logout screen
-                ),
-              );
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (context) => MessageProvider(),
+                      child: Group(
+                          username: loggedInUsername,
+                          serverIP: serverIP
+                      ),
+                    ),
+                    //builder: (context) => HomeScreen(username: loggedInUsername),
+                  ),
+                );
+
+              //_scaffoldKey.currentState!.openEndDrawer();
             },
             color: Colors.white,
-          )
+          ),
       ]
     );
   }

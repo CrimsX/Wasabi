@@ -23,6 +23,8 @@ import 'package:client/groupvoice/view.dart';
 class Group extends StatefulWidget {
   String username = '';
   String serverIP = '';
+  //String username = NetworkService.instance.getusername;
+  //String serverIP = NetworkService.instance.getserverIP;
 
   //Group({Key? key, required this.username}) : super(key: key);
   Group({required this.username, required this.serverIP});

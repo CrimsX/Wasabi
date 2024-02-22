@@ -49,14 +49,13 @@ class _LoginState extends State<Login> {
       });
 
       _socket!.on('loginResponse', (data) {
-        _socket!.disconnect();
         if (data['success']) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
                 create: (context) => MessageProvider(),
-                child: WelcomePage(
+                child: Home(
                   loggedInUsername: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
                 ),
@@ -64,7 +63,6 @@ class _LoginState extends State<Login> {
             ),
           );
         } else {
-          _socket!.disconnect();
           // Handle login failure
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
