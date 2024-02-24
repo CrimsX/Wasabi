@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="247069f1-08a6-4919-9cac-573eb7b4a408" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/Draw.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/FileEditing.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/Powerpoint.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/lib/collaborate/Todo.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/lib/collaborate/Calendar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/collaborate/Calendar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/collaborate/view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/collaborate/view.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

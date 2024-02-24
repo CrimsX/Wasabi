@@ -16,6 +16,7 @@ import 'package:client/login/view.dart';
 import 'package:client/services/network.dart';
 import 'package:client/widgets/menuBar.dart';
 import 'package:client/collaborate/Calendar.dart';
+import 'package:client/collaborate/Todo.dart';
 import 'package:flutter/material.dart';
 // Ensure all necessary imports are here.
 class Collaborate extends StatefulWidget {
@@ -37,7 +38,7 @@ class _CollaborateState extends State<Collaborate> {
       case 0:
         return CalendarScreen(); // Your Calendar screen widget
       case 1:
-        //return TodoListScreen(); // Your Todo List screen widget
+        return TodoScreen(); // Your Todo List screen widget
       case 2:
         //return DrawScreen(); // Your Draw screen widget
       case 3:
