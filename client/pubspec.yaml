@@ -100,3 +100,6 @@ flutter:
     - assets/WasabiIcon.png
     - assets/Hi.png
     - assets/Welcome.png
+    - assets/FileEdit.webp
+    - assets/DrawingImage.webp
+    - assets/PowerpointImage.webp

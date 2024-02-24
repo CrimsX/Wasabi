@@ -17,6 +17,10 @@ import 'package:client/services/network.dart';
 import 'package:client/widgets/menuBar.dart';
 import 'package:client/collaborate/Calendar.dart';
 import 'package:client/collaborate/Todo.dart';
+import 'package:client/collaborate/Draw.dart';
+import 'package:client/collaborate/Powerpoint.dart';
+import 'package:client/collaborate/FileEditing.dart';
+
 import 'package:flutter/material.dart';
 // Ensure all necessary imports are here.
 class Collaborate extends StatefulWidget {
@@ -36,15 +40,15 @@ class _CollaborateState extends State<Collaborate> {
   Widget _getContentForSelectedTile(int index) {
     switch (index) {
       case 0:
-        return CalendarScreen(); // Your Calendar screen widget
+        return CalendarScreen();
       case 1:
-        return TodoScreen(); // Your Todo List screen widget
+        return TodoScreen();
       case 2:
-        //return DrawScreen(); // Your Draw screen widget
+        return DrawScreen();
       case 3:
-        //return PowerPointScreen(); // Your PowerPoint screen widget
+        return PowerPointScreen();
       case 4:
-        //return FileEditingScreen(); // Your File Editing screen widget
+        return FileEditingScreen();
       default:
         return CalendarScreen(); // Default placeholder
     }
