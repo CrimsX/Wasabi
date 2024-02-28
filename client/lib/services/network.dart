@@ -1,6 +1,10 @@
 //import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart';
 
+import 'package:provider/provider.dart';
+import 'package:client/messaging/view_model.dart';
+import 'package:client/messaging/model.dart';
+
 import 'dart:math';
 
 class NetworkService {
@@ -75,6 +79,7 @@ class NetworkService {
     //print("test2");
     //NetworkService.instance.socket!.emit('s_VoIPID', "test");
   }
+
     // Getters
     String get getserverIP => serverIP;
     String get getusername => username;
