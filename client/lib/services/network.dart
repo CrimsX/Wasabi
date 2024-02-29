@@ -2,8 +2,8 @@
 import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:provider/provider.dart';
-import 'package:client/messaging/view_model.dart';
-import 'package:client/messaging/model.dart';
+import 'package:client/home/view_model.dart';
+import 'package:client/home/model.dart';
 
 import 'dart:math';
 

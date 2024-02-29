@@ -4,7 +4,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 
-import 'package:client/messaging/view_model.dart';
+import 'package:client/home/view_model.dart';
 
 import '../createAccount/view.dart';
 import 'package:client/home/view.dart';
@@ -55,8 +55,8 @@ class _LoginState extends State<Login> {
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
                 create: (context) => MessageProvider(),
-                child: Home(
-                  loggedInUsername: usernameController.text.trim(),
+                child: HomeScreen(
+                  username: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
                 ),
               ),

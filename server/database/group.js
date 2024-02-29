@@ -5,6 +5,16 @@ dotenv.config()
 
 const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
 
+async function getCurrentGroupMsgID(data) {
+    const [id] = await pool.query('SELECT GroupMsgID FROM groupmsgs WHERE DateReceived = ?;', [data.sentAt.toString()])
+    return id
+}
+
+async function getCreatedServerID(creationDate, owner) {
+    const [id] = await pool.query('SELECT serverid FROM servertable WHERE CreationDate = ? AND Owner = ?;', [creationDate, owner]);
+    return id
+}
+
 export async function getServers(userID) {
     const [rows] = await pool.query("SELECT servertable.ServerID, servertable.ServerName \
     FROM partof \

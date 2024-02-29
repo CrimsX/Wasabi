@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../services/network.dart';
 
-import 'package:client/widgets/menuBar.dart';
+import 'package:client/widgets/rAppBar.dart';
 
 class groupVoIP extends StatefulWidget {
   final String callerId; 
@@ -301,7 +301,7 @@ class _groupVoIPState extends State<groupVoIP> {
       appBar: AppBar(
         title: const Text(""),
         actions: [
-          menuBar(),
+          rAppBar(),
         ],
         backgroundColor: Colors.green,
       ),

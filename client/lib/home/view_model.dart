@@ -3,17 +3,13 @@ import 'model.dart';
 
 //import 'package:flutter/foundation.dart';
 
-class LoginViewModel {
-  //final String _loggedInUsername = '';
-  //final String _serverIP = '';
-  final List<Login> _login = [];
+class MessageProvider extends ChangeNotifier {
+  final List<Message> _messages = [];
 
-  List <Login> get login => _login;
-  //String get loggedinUsername => _loggedInUsername;
-  //String get serverIP => _serverIP;
+  List <Message> get messages => _messages;
 
- // addNewLogin(Login login) {
- //   _login.add(login);
- //   notifyListeners();
- // }
+  addNewMessage(Message message) {
+    _messages.add(message);
+    notifyListeners();
+  }
 }

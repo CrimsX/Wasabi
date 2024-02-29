@@ -6,6 +6,17 @@ dotenv.config()
 const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
 
 /**
+ * Retrieves the message id of the most recent sent message
+ * Helper funciton of store message
+ * @param {*} data
+ * @returns msgID
+ */
+async function getCurrentID(data) {
+    const [id] = await pool.query('SELECT MessageID FROM messages WHERE DateReceived = ?;', [data.sentAt.toString()])
+    return id
+}
+
+/**
  * Stores message into tables messages, sentmessages, and receivedmessages
  */
 export async function storeMessage(data) {
