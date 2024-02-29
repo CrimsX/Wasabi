@@ -1,12 +1,19 @@
-import 'dart:developer';
+//import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart';
+
+import 'package:provider/provider.dart';
+import 'package:client/home/view_model.dart';
+import 'package:client/home/model.dart';
+
+import 'dart:math';
 
 class NetworkService {
   Socket? socket;
 
   String serverIP = '';
   String username = '';
-  String selfCallerID = '';
+  // maybe hash name salted with current time
+  String selfCallerID = Random().nextInt(999999).toString().padLeft(6, '0');
   String remoteCallerID = 'Offline';
   String friend = '';
   String type = '';
@@ -16,13 +23,12 @@ class NetworkService {
   NetworkService._();
   static final instance = NetworkService._();
 
-  init({required String serverIP, required String username, required String selfCallerID}) {
+  init({required String serverIP, required String username}) {
     // init Socket
     socket = io(serverIP, {
       "transports": ['websocket'],
       "query": {
-        "username": username,
-        "callerId": selfCallerID
+        "username": username
       }   
     });
 
@@ -39,11 +45,16 @@ class NetworkService {
     );
     */
 
+    socket!.onConnect((data) => print('Connection established'));
+    socket!.onConnectError((data) => print('Connect Error: $data'));
+    socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
+
+/*
     // listen onConnect event
     socket!.onConnect((data) {
       log("Socket connected !!");
     });
-
+  
     // listen onConnectError event
     socket!.onConnectError((data) {
       log("Connect Error $data");
@@ -51,6 +62,8 @@ class NetworkService {
     
     //socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
     
+    */
+
    socket!.on(
       'r_VoIPID',
       (data) => _responseFriendVoIPID(data)
@@ -66,6 +79,7 @@ class NetworkService {
     //print("test2");
     //NetworkService.instance.socket!.emit('s_VoIPID', "test");
   }
+
     // Getters
     String get getserverIP => serverIP;
     String get getusername => username;

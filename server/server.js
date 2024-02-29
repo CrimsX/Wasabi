@@ -1,23 +1,32 @@
-import express from 'express'
+//import express from 'express'
 //import http from 'http'
 import {Server} from 'socket.io'
 
 import {
-  storeMessage,
+  logIn,
+  createAccount,
+} from './database/login.js' 
+
+import {
   getFriends,
-  getChatRoom,
   createChat,
-  fetchChat,
+  getChatRoom,
   addFriend,
+} from './database/individual.js'
+
+import {
   getServers,
   storeGroupMessage,
   fetchGroupChat,
   createServer,
   getServerID,
   getServerMembers,
-  createAccount,
-  logIn
-} from './database.js'
+} from './database/group.js'
+
+import {
+  storeMessage,
+  fetchChat,
+} from './database/messaging.js'
 
 let port = process.env.PORT || 3000;
 
@@ -273,21 +282,11 @@ IO.on("connection", (socket) => {
   })
 
   socket.on("requestVoIPID", (data) => {
-    //console.log("THIS WORKING");
-    /*
-    for (var i = 0, keys = Object.keys(onlineUsers), ii = keys.length; i < ii; i++) {
-      console.log(keys[i] + '|' + onlineUsers[keys[i]].list);
-    }
-    */
     var keys = Object.keys(onlineUsers);
-    keys.forEach(key=>{
+    keys.forEach(key => {
       if (key == data) {
         IO.to(socket.id).emit('r_VoIPID', onlineUsers[key]);
-      //console.log(key + '|' + onlineUsers[key]);
       }
     })
-
-    //IO.to(socket.id).emit('r_VoIPID', "TEST");
-    //console.log('FriendID: ' + data.friendID);
   });
 });

@@ -13,6 +13,7 @@ provider
 intl
 iconsax_flutter
 flutter_webrtc
+libsignal_protocol_dart
 
 fly.io
 planetscale

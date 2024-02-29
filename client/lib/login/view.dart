@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'view_model.dart';
-import '../createAccount/view.dart';
-import 'package:client/home/view.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class Homepage extends StatefulWidget {
+import 'package:provider/provider.dart';
+import 'view_model.dart';
+
+import 'package:client/home/view_model.dart';
+
+import '../createAccount/view.dart';
+import 'package:client/home/view.dart';
+
+class Login extends StatefulWidget {
   @override
-  _HomepageState createState() => _HomepageState();
+  _LoginState createState() => _LoginState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
@@ -25,16 +29,18 @@ class _HomepageState extends State<Homepage> {
 
   void initializeSocket() {
     // Assuming serverIPController contains the full server IP including protocol and port
-    String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    //String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    String serverIP = "http://localhost:3000";
 
     // Initialize socket connection
     _socket = IO.io(serverIP, <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': true, // Changed to true to ensure connection starts immediately
+      'autoConnect': false, // Changed to true to ensure connection starts immediately
     });
   }
 
   void _login(BuildContext context) {
+    _socket!.connect(); 
     // Check if _socket is initialized
     if (_socket != null) {
       _socket!.emit('login', {
@@ -48,9 +54,9 @@ class _HomepageState extends State<Homepage> {
             context,
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
-                create: (context) => HomeProvider(),
-                child: WelcomePage(
-                  loggedInUsername: usernameController.text.trim(),
+                create: (context) => MessageProvider(),
+                child: HomeScreen(
+                  username: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
                 ),
               ),
@@ -71,7 +77,6 @@ class _HomepageState extends State<Homepage> {
       // Consider showing an error message or retrying the initialization
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -209,9 +214,9 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
-
     );
   }
+
   @override
   void dispose() {
     _socket?.disconnect();
@@ -219,4 +224,3 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
   }
 }
-
