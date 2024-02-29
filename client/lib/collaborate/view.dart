@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:provider/provider.dart';
-import 'package:client/messaging/view_model.dart';
-import 'package:client/messaging/model.dart';
+import 'package:client/home/view_model.dart';
+import 'package:client/home/model.dart';
 
 import 'package:intl/intl.dart';
 import 'dart:io';
@@ -14,7 +14,6 @@ import 'dart:async';
 import 'package:client/login/view.dart';
 
 import 'package:client/services/network.dart';
-import 'package:client/widgets/menuBar.dart';
 import 'package:client/collaborate/Calendar.dart';
 import 'package:client/collaborate/Todo.dart';
 import 'package:client/collaborate/Draw.dart';
@@ -63,7 +62,6 @@ class _CollaborateState extends State<Collaborate> {
         centerTitle: true,
         backgroundColor: Colors.green,
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [menuBar()],
       ),
       body: Row(
         children: [

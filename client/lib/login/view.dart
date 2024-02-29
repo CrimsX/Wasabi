@@ -4,7 +4,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 
-import 'package:client/messaging/view_model.dart';
+import 'package:client/home/view_model.dart';
 
 import '../createAccount/view.dart';
 import 'package:client/home/view.dart';
@@ -29,16 +29,18 @@ class _LoginState extends State<Login> {
 
   void initializeSocket() {
     // Assuming serverIPController contains the full server IP including protocol and port
-    String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    //String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
+    String serverIP = "http://localhost:3000";
 
     // Initialize socket connection
     _socket = IO.io(serverIP, <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': true, // Changed to true to ensure connection starts immediately
+      'autoConnect': false, // Changed to true to ensure connection starts immediately
     });
   }
 
   void _login(BuildContext context) {
+    _socket!.connect(); 
     // Check if _socket is initialized
     if (_socket != null) {
       _socket!.emit('login', {
@@ -52,9 +54,9 @@ class _LoginState extends State<Login> {
             context,
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
-                create: (context) => HomeProvider(),
-                child: WelcomePage(
-                  loggedInUsername: usernameController.text.trim(),
+                create: (context) => MessageProvider(),
+                child: HomeScreen(
+                  username: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
                 ),
               ),
@@ -75,7 +77,6 @@ class _LoginState extends State<Login> {
       // Consider showing an error message or retrying the initialization
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -223,4 +224,3 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 }
-
