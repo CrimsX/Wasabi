@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+import 'package:client/home/view_model.dart';
+import 'package:client/home/model.dart';
+
 import 'package:client/services/network.dart';
 
+import 'package:client/collaborate/view.dart';
 import 'package:client/login/view.dart';
 
 class sideBar extends StatelessWidget {
   String loggedInUsername = NetworkService.instance.getusername;
+  String serverIP = NetworkService.instance.getserverIP;
 
   @override
   Widget build(BuildContext context) {
@@ -69,12 +75,19 @@ class sideBar extends StatelessWidget {
             title: Text('Collaborate'),
             leading: Icon(Icons.file_copy),
             onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => CollaborateScreen(),
-                //   ),
-                // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChangeNotifierProvider(
+                    create: (context) => MessageProvider(),
+                    child: Collaborate(
+                      username: loggedInUsername,
+                      serverIP: serverIP
+                    ),
+                  ),
+                    //builder: (context) => HomeScreen(username: loggedInUsername),
+                ),
+              );
             },
           ),
 
