@@ -1,4 +1,3 @@
-import 'package:client/collaborate/view.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -69,7 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isServer = false;
   bool start = true;
- 
+
+  @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
