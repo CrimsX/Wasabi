@@ -495,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(width: 1),
 
-            if (!isServer) 
+            if (!start && !isServer) 
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -540,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
 
-            if (isServer)
+            if (!start && isServer)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [ 
@@ -583,18 +583,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ), 
           ]
         ),   
-        
+
         actions:[
-          rAppBar(),
-          IconButton(
-            icon: Icon(Icons.group_rounded),
-            onPressed: () {
-               _scaffoldKey.currentState!.openEndDrawer();
-            },
-            color: Colors.white,
-          ),
+          // Hide EndDrawer
+          Container(),
+
+          if (!start) ... {
+            rAppBar(),
+
+            IconButton(
+              icon: Icon(Icons.group_rounded),
+              onPressed: () {
+                _scaffoldKey.currentState!.openEndDrawer();
+              },
+              color: Colors.white,
+            ),
+          }
         ], 
-      ),  
+      ),
 
       drawer:
         sideBar(),
