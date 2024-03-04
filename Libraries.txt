@@ -15,6 +15,9 @@ iconsax_flutter
 flutter_webrtc
 libsignal_protocol_dart
 table_calendar
+hive
+flutter_pptx
+share_plus
 
 fly.io
 planetscale

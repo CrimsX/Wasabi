@@ -6,7 +6,7 @@ class PowerPointScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         // Replace 'path_to_your_image' with your actual image path
-        child: Image.asset('assets/PowerpointImage.webp'),
+        //child: Image.asset('assets/PowerpointImage.webp'),
       ),
     );
   }
