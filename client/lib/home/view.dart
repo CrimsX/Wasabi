@@ -26,10 +26,10 @@ import 'dart:async';
 class HomeScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
- 
+
   //String username = NetworkService.instance.getusername;
   //String serverIP = NetworkService.instance.getserverIP;
-  
+
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({required this.username, required this.serverIP});
   State<HomeScreen> createState() => _HomeScreenState();
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String currentChatRoom = '';
   String currentChatFriend= '';
   dynamic friend;
- 
+
   // server
   final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
@@ -74,7 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-      widget.serverIP = "https://wasabi-server.fly.dev/";
+      //widget.serverIP = "https://wasabi-server.fly.dev/";
+      widget.serverIP = "http://localhost:3000";
     } else {
       widget.serverIP = "http://" + widget.serverIP + ":3000/";
     }
@@ -140,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
       _friendsListCompleter.complete(_friendsList);
-      setState(() {});    
+      setState(() {});
     });
 
     _socket!.on('chat', (data) => _connectToChat(data));
@@ -240,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         );
       }
-    }); 
+    });
   }
 
   ///Helper functions
@@ -274,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     }
-  } 
+  }
 
   ///checks if chat room exists between two users
   ///if not, it will create a new chatid in data base
@@ -288,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
     currentChatRoom = data[0]['ChatID'].toString();
     _socket!.emit('join', currentChatRoom);
     _socket!.emit('fetchchat', {'chatID': currentChatRoom});
-  } 
+  }
 
   ///checks if chat room exists between two users
   ///if not, it will create a new chatid in data base
@@ -299,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     });
     _socket!.emit('fetchgroupchat', {'serverID': serverID});
-  } 
+  }
 
   // Function to show the popup message
   void _showPopupMessage(BuildContext context, String friendID) {
@@ -332,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           );
-        } 
+        }
       },
     );
   }
@@ -429,12 +430,12 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       titleName = !isServer ? "Direct Messages" : 'Groups';
     }
-    Completer<List<Widget>> _listCompleter = !isServer ? _friendsListCompleter : _serverListCompleter;  
+    Completer<List<Widget>> _listCompleter = !isServer ? _friendsListCompleter : _serverListCompleter;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      
+
       appBar: AppBar(
         title: Text("${titleName}",
           style: TextStyle(
@@ -448,7 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
         titleSpacing: 0,
         backgroundColor: Colors.green,
         iconTheme: const IconThemeData(color: Colors.white),
-        leadingWidth: 250, 
+        leadingWidth: 250,
 
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -467,14 +468,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {});
               },
             ),
-            
+
             IconButton(
               icon: const Icon(Icons.message),
               onPressed: () {
                 start = false;
                 isServer = false;
                 NetworkService.instance.setType('DM');
-                
+
                 setState(() {});
               },
               tooltip: 'DM',
@@ -488,14 +489,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 NetworkService.instance.setType('group');
                 currentChatServer = '';
 
-                setState(() {}); 
+                setState(() {});
               },
               tooltip: 'Server',
             ),
 
             const SizedBox(width: 1),
 
-            if (!start && !isServer) 
+            if (!start && !isServer)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -543,7 +544,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (!start && isServer)
               Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [ 
+                children: [
                   IconButton(
                     icon: const Icon(Icons.group_add),
                     onPressed:() {
@@ -580,9 +581,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     tooltip: 'Create Group',
                   ),
                 ],
-              ), 
+              ),
           ]
-        ),   
+        ),
 
         actions:[
           // Hide EndDrawer
@@ -599,12 +600,12 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
             ),
           }
-        ], 
+        ],
       ),
 
       drawer:
         sideBar(),
-      
+
       endDrawer: Drawer( // Define the end drawer
         child: ListView(
           padding: EdgeInsets.zero,

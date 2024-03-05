@@ -41,8 +41,8 @@ dependencies:
   flutter_webrtc: ^0.9.47
   libsignal_protocol_dart: ^0.7.1
   hive: ^2.2.3
-  flutter_pptx: ^0.1.3
   share_plus: ^7.2.2
+  url_launcher: ^6.1.6
 
 dev_dependencies:
   flutter_test:
