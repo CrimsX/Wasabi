@@ -30,7 +30,10 @@ import {
 
 import {
   getPowerPoints,
-  createPowerPoint
+  createPowerPoint,
+  deletePowerPoint,
+  sharePPT,
+  sharePPTGroup
 } from './database/collaborate.js'
 
 let port = process.env.PORT || 3000;
@@ -319,6 +322,29 @@ IO.on("connection", (socket) => {
     })
 
     socket.on('createppt', async (data) => {
-      await createPowerPoint(data);
+      const result = await createPowerPoint(data);
+      IO.to(socket.id).emit('createppt', result)
+    })
+
+    socket.on('deleteppt', async (data) => {
+      await deletePowerPoint(data);
+    })
+
+    socket.on('buildfriendsppt', async (user) => {
+      const result = await getFriends(user);
+      IO.to(socket.id).emit('buildfriendsppt', result);
+    })
+
+    socket.on('buildgroupsppt', async (user) => {
+      const result = await getServers(user); //TODO: make query
+      IO.to(socket.id).emit('buildgroupsppt', result);
+    })
+
+    socket.on('sharepptfriend', async (data) => {
+      await sharePPT(data);
+    })
+
+    socket.on('sharepptgroup', async (data) => {
+      await sharePPTGroup(data);
     })
 });
