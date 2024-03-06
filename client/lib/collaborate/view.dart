@@ -21,6 +21,9 @@ import 'package:client/collaborate/Powerpoint.dart';
 import 'package:client/collaborate/FileEditing.dart';
 
 import 'package:flutter/material.dart';
+
+import 'package:client/collaborate/pp.dart';
+
 // Ensure all necessary imports are here.
 class Collaborate extends StatefulWidget {
   final String username;
@@ -48,6 +51,8 @@ class _CollaborateState extends State<Collaborate> {
         return PowerPointScreen();
       case 4:
         return FileEditingScreen();
+      case 5:
+      return PowerPointScreen2();
       default:
         return CalendarScreen(); // Default placeholder
     }
@@ -75,6 +80,7 @@ class _CollaborateState extends State<Collaborate> {
                 _buildTile(icon: Icons.brush, title: 'Draw', index: 2),
                 _buildTile(icon: Icons.slideshow, title: 'Powerpoint', index: 3),
                 _buildTile(icon: Icons.edit, title: 'File Editing', index: 4),
+                _buildTile(icon: Icons.slideshow, title: 'Powerpoint2', index: 5),
               ],
             ),
           ),

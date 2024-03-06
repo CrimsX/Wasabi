@@ -18,6 +18,9 @@ table_calendar
 hive
 flutter_pptx
 share_plus
+file_saver
+isar_flutter_libs
+path_provider
 
 fly.io
 planetscale

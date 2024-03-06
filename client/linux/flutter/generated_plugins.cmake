@@ -3,7 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  file_saver
   flutter_webrtc
+  isar_flutter_libs
   url_launcher_linux
 )
 

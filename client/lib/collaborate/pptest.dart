@@ -5,8 +5,25 @@ import 'package:flutter_pptx/flutter_pptx.dart';
 import 'dart:typed_data';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:file_saver/file_saver.dart';
+import 'dart:io';
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 
 Future<void> downloadFile(String name, Uint8List bytes) async {
+  await FileSaver.instance.saveFile(
+      name: name,
+      bytes: bytes,
+      //file: file,
+      //String? filePath,
+      ext: ".pptx",
+      //MimeType mimeType = MimeType.other,
+      //mimeType: application/vnd.openxmlformats-officedocument.presentationml.presentation,
+      //custommimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      //mimeType: MimeType.microsoftPresentation,
+      );
+  /*
   Share.shareXFiles(
     [
       XFile.fromData(
@@ -20,6 +37,7 @@ Future<void> downloadFile(String name, Uint8List bytes) async {
     ],
     text: 'Presentation',
   );
+  */
 }
 
 void main() {
@@ -55,11 +73,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future<FlutterPowerPoint> createPresentation() async {
     final pres = FlutterPowerPoint();
+    pres.addBlankSlide();
 
+/*
     pres.addTitleSlide(
       title: 'Slide one'.toTextValue(),
     );
-
+*/
     /*
     pres.addTitleAndPhotoSlide(
       title: 'Slide two'.toTextValue(),
@@ -76,9 +96,10 @@ class _MyHomePageState extends State<MyHomePage> {
         name: 'Sample Jpg',
       ),
     );
+    */
 
-    pres
-        .addTitleAndBulletsSlide(
+/*
+    pres.addTitleAndBulletsSlide(
           title: 'Slide three'.toTextValue(),
           bullets: [
             'Bullet 1',
@@ -88,6 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ].map((e) => e.toTextValue()).toList(),
         )
         .speakerNotes = TextValue.uniform('This is a note!');
+        */
+    /*
 
     pres
         .addBulletsSlide(
@@ -208,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     */
 
-    pres.showSlideNumbers = true;
+    //pres.showSlideNumbers = true;
 
     return pres;
   }
@@ -216,7 +239,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> downloadPresentation(FlutterPowerPoint pres) async {
     final bytes = await pres.save();
     if (bytes == null) return;
-    downloadFile('presentation.pptx', bytes);
+    //final file = File("presentation2.pptx");
+    //await file.writeAsBytes(bytes);
+    downloadFile('presentation.pptx', bytes);      
   }
 
   @override
