@@ -20,8 +20,8 @@ class _PowerPointScreen2State extends State<PowerPointScreen2> {
   box.put('numbers', ['1','2','3']);
   print(box.get('numbers'));
   */
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController headingController = TextEditingController();
+  final TextEditingController bulletController = TextEditingController();
 
   int slideLength = 0;
 
@@ -58,20 +58,21 @@ class _PowerPointScreen2State extends State<PowerPointScreen2> {
                             children: [
                             SizedBox(height: 60),
                             TextFormField(
-                              controller: usernameController,
+                              controller: headingController,
                               decoration: const InputDecoration(
-                                labelText: 'Username',
+                                labelText: 'Heading',
                                 border: OutlineInputBorder(),
                               ),
                             ),
 
                             SizedBox(height: 60),
                             TextFormField(
-                              controller: passwordController,
+                              controller: bulletController,
                               decoration: const InputDecoration(
-                                labelText: 'Password',
+                                labelText: 'Bullet point',
                                 border: OutlineInputBorder(),
                               ),
+                              maxLines: 15,
                             ),
                           ],
                         ),
