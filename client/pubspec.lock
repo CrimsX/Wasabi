@@ -221,20 +221,16 @@ packages:
     description:
       name: matcher
       sha256: "1803e76e6653768d64ed8ff2e1e67bea3ad4b923eb5c56a295c3e634bad5960e"
-      sha256: "1803e76e6653768d64ed8ff2e1e67bea3ad4b923eb5c56a295c3e634bad5960e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.16"
     version: "0.12.16"
   material_color_utilities:
     dependency: transitive
     description:
       name: material_color_utilities
       sha256: "9528f2f296073ff54cb9fee677df673ace1218163c3bc7628093e7eed5203d41"
-      sha256: "9528f2f296073ff54cb9fee677df673ace1218163c3bc7628093e7eed5203d41"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
     version: "0.5.0"
   meta:
     dependency: transitive
@@ -249,11 +245,9 @@ packages:
     description:
       name: mime
       sha256: "2e123074287cc9fd6c09de8336dae606d1ddb88d9ac47358826db698c176a1f2"
-      sha256: a6e590c838b18133bb482a2745ad77c5bb7715fb0451209e1a7567d416678b8e
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
-    version: "1.10.0"
   nested:
     dependency: transitive
     description:
@@ -275,10 +269,8 @@ packages:
     description:
       name: path
       sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
-      sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.3"
     version: "1.8.3"
   path_provider:
     dependency: transitive
@@ -598,16 +590,12 @@ packages:
     source: hosted
     version: "5.1.0"
   web:
-  web:
     dependency: transitive
     description:
       name: web
       sha256: afe077240a270dcfd2aafe77602b4113645af95d0ad31128cc02bce5ac5d5152
-      name: web
-      sha256: afe077240a270dcfd2aafe77602b4113645af95d0ad31128cc02bce5ac5d5152
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
     version: "0.3.0"
   webrtc_interface:
     dependency: transitive
