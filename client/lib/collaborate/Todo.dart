@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart';
 
 class Task {
   final int id;
-  final String name;
-  final bool isFinished;
+  String name;
+  bool isFinished;
 
   Task({required this.id, required this.name, required this.isFinished});
 }
 
 class TodoScreen extends StatefulWidget {
-  final String username;
-  final String serverIP;
+  String username = '';
+  String serverIP = '';
+  Socket? socket;
 
-  TodoScreen({Key? key, required this.username, required this.serverIP}) : super(key: key);
+  TodoScreen({Key? key, required this.username, required this.serverIP, required this.socket}) : super(key: key);
 
   @override
   _TodoScreenState createState() => _TodoScreenState();
@@ -22,27 +23,63 @@ class TodoScreen extends StatefulWidget {
 class _TodoScreenState extends State<TodoScreen> {
   List<Task> _tasks = [];
   List<Task> _finishedTasks = [];
-  IO.Socket? _socket;
 
   @override
   void initState() {
     super.initState();
-    initializeSocket();
+    _connectSocket();
+    widget.socket!.emit('getTasks', widget.username);
   }
 
-  void initializeSocket() {
-    _socket = IO.io('http://${widget.serverIP}', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': true,
+  void _connectSocket() {
+    widget.socket!.on('tasks', (data) {
+      retrieveTasks(data);
+    });
+
+    widget.socket!.on('taskStatusUpdated', (data) {
+      markAsComplete(data);
+    });
+
+    widget.socket!.on('taskStatusUndone', (data) {
+      undoCompletedTask(data);
     });
 
   }
 
-  @override
-  void dispose() {
-    _socket?.disconnect();
-    _socket?.close();
-    super.dispose();
+  retrieveTasks(data) {
+    if (mounted) {
+      setState(() {
+        for (var task in data) {
+          _tasks.add(Task(id: task['TaskID'], name: task['TaskName'], isFinished: (task['TaskStatus'] != 0)));
+        }
+      });
+    }
+  }
+
+  markAsComplete(data) {
+    if (mounted) {
+      setState(() {
+        for (Task task in _tasks) {
+          if (task.id == data['ID']) {
+            task.isFinished = true;
+            return;
+          }
+        }
+      });
+    }
+  }
+
+  undoCompletedTask(data) {
+    if (mounted) {
+      setState(() {
+        for (Task task in _tasks) {
+          if (task.id == data['ID']) {
+            task.isFinished = false;
+            return;
+          }
+        }
+      });
+    }
   }
 
   void _showAddTaskDialog() {
@@ -86,7 +123,7 @@ class _TodoScreenState extends State<TodoScreen> {
               onPressed: () {
                 if (taskController.text.isNotEmpty) {
                   // createTask
-                  _socket!.emit('createTask', {
+                  widget.socket!.emit('createTask', {
                     'taskName': taskController.text,
                     'userID': widget.username,
                   });
@@ -116,7 +153,7 @@ class _TodoScreenState extends State<TodoScreen> {
               child: Text('Yes'),
               onPressed: () {
                 // Emit a socket event to delete the task
-                _socket!.emit('deleteTask', _tasks[index].id);
+                widget.socket!.emit('deleteTask', _tasks[index].id);
                 // Update the UI to reflect the deletion
                 setState(() {
                   if (isFinished) {
@@ -197,7 +234,7 @@ class _TodoScreenState extends State<TodoScreen> {
                           icon: Icon(Icons.check, color: Colors.green),
                           onPressed: () {
                             int taskID = tasks[index].id;
-                            _socket!.emit('updateTaskStatus', taskID);
+                            widget.socket!.emit('updateTaskStatus', taskID);
                           },
                         ),
                         IconButton(
@@ -233,7 +270,7 @@ class _TodoScreenState extends State<TodoScreen> {
                           icon: Icon(Icons.undo, color: Colors.white),
                           onPressed: () {
                             int taskID = tasks[index].id;
-                            _socket!.emit('undoTaskStatus', taskID);
+                            widget.socket!.emit('undoTaskStatus', taskID);
                           },
                         ),
                         IconButton(
@@ -251,5 +288,3 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 }
-
-

@@ -86,8 +86,8 @@ export async function insertTaskIntoDatabase(taskName, userID) {
 // Function to update task status by ID from 0 to 1
 export async function updateTaskStatus(taskID) {
     try {
-        await pool.query('UPDATE tasks SET taskStatus = 1 WHERE tasksID = ?;', [taskID]);
-        return { success: true, message: "Task status updated successfully" };
+        await pool.query('UPDATE tasks SET taskStatus = 1 WHERE taskID = ?;', [taskID]);
+        return { success: true, ID:taskID };
     } catch (error) {
         console.error("Error updating task status:", error);
         return { success: false, message: "Failed to update task status", error: error.message };
@@ -96,8 +96,8 @@ export async function updateTaskStatus(taskID) {
 
 export async function undoTaskStatus(taskID) {
   try {
-    await pool.query('UPDATE tasks SET taskStatus = 0 WHERE tasksID = ?;', [taskID]);
-    return { success: true, message: "Task status undone successfully" };
+    await pool.query('UPDATE tasks SET taskStatus = 0 WHERE taskID = ?;', [taskID]);
+    return { success: true, ID: taskID };
   } catch (error) {
     console.error("Error undoing task status:", error);
     return { success: false, message: "Failed to undo task status", error: error.message };
@@ -109,7 +109,7 @@ export async function undoTaskStatus(taskID) {
 export async function deleteTask(taskID) {
   try {
     //database deletion logic
-    await pool.query('DELETE FROM tasks WHERE id = ?', [taskID]);
+    await pool.query('DELETE FROM tasks WHERE taskID = ?', [taskID]);
 
     return { success: true, message: "Task deleted successfully" };
   } catch (error) {

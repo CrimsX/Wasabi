@@ -3,13 +3,18 @@
 import {Server} from 'socket.io'
 
 import {
- createEvent,
- getEvents,
- insertTaskIntoDatabase,
- updateTaskStatus,
- undoTaskStatus,
- deleteTask,
- getAllTasks,
+  createEvent,
+  getEvents,
+  insertTaskIntoDatabase,
+  updateTaskStatus,
+  undoTaskStatus,
+  deleteTask,
+  getAllTasks,
+  getPowerPoints,
+  createPowerPoint,
+  deletePowerPoint,
+  sharePPT,
+  sharePPTGroup
 } from './database/collaborate.js'
 
 import {
@@ -38,13 +43,6 @@ import {
   fetchChat,
 } from './database/messaging.js'
 
-import {
-  getPowerPoints,
-  createPowerPoint,
-  deletePowerPoint,
-  sharePPT,
-  sharePPTGroup
-} from './database/collaborate.js'
 
 let port = process.env.PORT || 3000;
 
@@ -103,6 +101,7 @@ IO.on("connection", (socket) => {
 
     socket.on('getEvents', async (userID) => {
         const result = await getEvents(userID);
+        console.log("here")
         IO.to(socket.id).emit('eventsResponse', result.events);
     });
 

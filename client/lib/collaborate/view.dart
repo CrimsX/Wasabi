@@ -34,22 +34,34 @@ class Collaborate extends StatefulWidget {
 
 class _CollaborateState extends State<Collaborate> {
   int _selectedTile = 0; // Assuming Calendar is the first tile with index 0
+  Socket? _socket;
+
+  @override
+  void initState() {
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    super.initState();
+    NetworkService.instance.init(
+      serverIP: widget.serverIP,
+      username: widget.username,
+    );
+    _socket = NetworkService.instance.socket;
+  }
 
   // Function to determine the content based on the selected tile
   Widget _getContentForSelectedTile(int index, String username, String serverIP) {
     switch (index) {
       case 0:
-        return CalendarScreen(username: widget.username, serverIP: widget.serverIP);;
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
       case 1:
-        return TodoScreen(username: widget.username, serverIP: widget.serverIP);
+        return TodoScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
       case 2:
         return DrawScreen();
       case 3:
-        return PowerPointScreen(username: username, serverIP: serverIP);
+        return PowerPointScreen(username: username, serverIP: serverIP, socket: _socket);
       case 4:
         return FileEditingScreen();
       default:
-        return CalendarScreen(username: widget.username, serverIP: widget.serverIP);
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
     }
   }
 

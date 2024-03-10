@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:client/services/network.dart';
@@ -14,8 +14,9 @@ class Event {
 class CalendarScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
+  Socket? socket;
 
-  CalendarScreen({Key? key, required this.username, required this.serverIP}) : super(key: key);
+  CalendarScreen({Key? key, required this.username, required this.serverIP, required this.socket}) : super(key: key);
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
@@ -28,7 +29,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _showFloatingButton = false;
-  IO.Socket? _socket;
 
   final Map<DateTime, List<CalendarEvent>> _events = {
     DateTime.utc(2024, 2, 20): [
@@ -55,30 +55,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
-    if (widget.serverIP == '') {
-     // widget.serverIP = "https://wasabi-server.fly.dev/";
-      widget.serverIP = "'http://192.168.56.1:3000";
-    } //else {
-     // widget.serverIP = "http://" + widget.serverIP + ":3000/";
-    //}
 
     super.initState();
-
+    /*
     NetworkService.instance.init(
       serverIP: widget.serverIP,
       username: widget.username,
     );
 
     _socket = NetworkService.instance.socket;
+    */
     initializeSocket();
 
-    _socket!.emit('getEvents');
+    widget.socket!.emit('getEvents');
 
-    _socket!.on('eventsResponse', (events) {
-      setState(() {
-        // Update _events map with fetched events
-        _updateEvents(events);
-        });
+    widget.socket!.on('eventsResponse', (events) {
+      if (mounted) {
+        setState(() {
+          // Update _events map with fetched events
+          _updateEvents(events);
+          });
+      }
     });
   }
 
@@ -101,37 +98,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initializeSocket() {
 
     // Listen for socket connection successful
-    _socket!.on('connect', (_) => print('Connected to the socket server'));
+    widget.socket!.on('connect', (_) => print('Connected to the socket server'));
 
     // Listen for socket connection error
-    _socket!.on('connect_error', (data) => print('Connection error: $data'));
+    widget.socket!.on('connect_error', (data) => print('Connection error: $data'));
 
     // Listen for socket connection timeout
-    _socket!.on('connect_timeout', (data) => print('Connection timeout: $data'));
+    widget.socket!.on('connect_timeout', (data) => print('Connection timeout: $data'));
 
     // Listen for any errors
-    _socket!.on('error', (data) => print('Error: $data'));
+    widget.socket!.on('error', (data) => print('Error: $data'));
 
     // Listen for socket disconnection
-    _socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
+    widget.socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
   }
 
   // Create event
   void emitCreateEvent({required String eventName, required String eventTime, String? shareToUser, String? shareToServer}) {
     print('Emitting createEvent with name: $eventName, time: $eventTime');
 
-      _socket!.emit('createEvent', {
+      widget.socket!.emit('createEvent', {
         'eventName': eventName,
         'eventTime': eventTime,
         'userID': widget.username,
       });
-  }
-
-  @override
-  void dispose() {
-    _socket?.disconnect();
-    _socket?.close();
-    super.dispose();
   }
 
   // M3
