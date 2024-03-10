@@ -15,7 +15,7 @@ import {
 import {
   logIn,
   createAccount,
-} from './database/login.js' 
+} from './database/login.js'
 
 import {
   getFriends,
@@ -37,6 +37,14 @@ import {
   storeMessage,
   fetchChat,
 } from './database/messaging.js'
+
+import {
+  getPowerPoints,
+  createPowerPoint,
+  deletePowerPoint,
+  sharePPT,
+  sharePPTGroup
+} from './database/collaborate.js'
 
 let port = process.env.PORT || 3000;
 
@@ -81,6 +89,9 @@ IO.on("connection", (socket) => {
 
   //IO.emit("Active connections:", Array.from(active));
 
+  /************************************************************************************
+   * Account Creation
+   ************************************************************************************/
 
 
     socket.on('createEvent', async (data) => {
@@ -185,6 +196,9 @@ IO.on("connection", (socket) => {
     });
 
 
+  /************************************************************************************
+   * Voice Calls
+   ************************************************************************************/
 // Kipp
 
   socket.on("makeCall", (data) => {
@@ -231,6 +245,10 @@ IO.on("connection", (socket) => {
     active.delete(username);
     IO.emit("Active connections:", Array.from(active));
   });
+
+  /************************************************************************************
+   * Direct Messaging
+   ************************************************************************************/
 
   /**
    * when 'message' emitted from client, creates JSON object containing message info,
@@ -319,6 +337,10 @@ IO.on("connection", (socket) => {
     IO.to(socket.id).emit('addfriends', response);
   })
 
+  /************************************************************************************
+   * Group Messaging
+   ************************************************************************************/
+
   socket.on('servers', async (user) => {
     console.log('fetching servers of: ' + user);
     const result = await getServers(user); //TODO: make query
@@ -383,4 +405,40 @@ IO.on("connection", (socket) => {
       }
     })
   });
+
+  /************************************************************************************
+   * Powerpoint
+   ************************************************************************************/
+    socket.on('getpowerpoints', async (username) => {
+      const ppts = await getPowerPoints(username);
+      console.log(ppts);
+      IO.to(socket.id).emit('getpowerpoints', ppts);
+    })
+
+    socket.on('createppt', async (data) => {
+      const result = await createPowerPoint(data);
+      IO.to(socket.id).emit('createppt', result)
+    })
+
+    socket.on('deleteppt', async (data) => {
+      await deletePowerPoint(data);
+    })
+
+    socket.on('buildfriendsppt', async (user) => {
+      const result = await getFriends(user);
+      IO.to(socket.id).emit('buildfriendsppt', result);
+    })
+
+    socket.on('buildgroupsppt', async (user) => {
+      const result = await getServers(user); //TODO: make query
+      IO.to(socket.id).emit('buildgroupsppt', result);
+    })
+
+    socket.on('sharepptfriend', async (data) => {
+      await sharePPT(data);
+    })
+
+    socket.on('sharepptgroup', async (data) => {
+      await sharePPTGroup(data);
+    })
 });

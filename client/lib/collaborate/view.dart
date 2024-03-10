@@ -36,7 +36,7 @@ class _CollaborateState extends State<Collaborate> {
   int _selectedTile = 0; // Assuming Calendar is the first tile with index 0
 
   // Function to determine the content based on the selected tile
-  Widget _getContentForSelectedTile(int index) {
+  Widget _getContentForSelectedTile(int index, String username, String serverIP) {
     switch (index) {
       case 0:
         return CalendarScreen(username: widget.username, serverIP: widget.serverIP);;
@@ -45,7 +45,7 @@ class _CollaborateState extends State<Collaborate> {
       case 2:
         return DrawScreen();
       case 3:
-        return PowerPointScreen();
+        return PowerPointScreen(username: username, serverIP: serverIP);
       case 4:
         return FileEditingScreen();
       default:
@@ -79,7 +79,7 @@ class _CollaborateState extends State<Collaborate> {
             ),
           ),
           Expanded(
-            child: _getContentForSelectedTile(_selectedTile), // Dynamically display content based on selected tile
+            child: _getContentForSelectedTile(_selectedTile, widget.username, widget.serverIP), // Dynamically display content based on selected tile
           ),
         ],
       ),
