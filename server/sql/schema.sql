@@ -9,6 +9,15 @@ CREATE TABLE client (
     Pass VARCHAR(30) NOT NULL
     );
 
+CREATE TABLE powerpoints (
+    PptID INTEGER AUTO_INCREMENT,
+    PptName VARCHAR(100) NOT NULL,
+    Ppturl VARCHAR(1000) NOT NULL,
+    UserID VARCHAR(20),
+    PRIMARY KEY (PptID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+);
+
 CREATE TABLE friends (
     UserID VARCHAR(20),
     FriendID VARCHAR(20)
