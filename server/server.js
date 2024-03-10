@@ -101,7 +101,6 @@ IO.on("connection", (socket) => {
 
     socket.on('getEvents', async (userID) => {
         const result = await getEvents(userID);
-        console.log("here")
         IO.to(socket.id).emit('eventsResponse', result.events);
     });
 

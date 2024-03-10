@@ -134,3 +134,30 @@ CREATE TABLE groupmsgsender (
     FOREIGN KEY (UserID) REFERENCES client(UserID),
     FOREIGN KEY (GroupMsgID) REFERENCES groupmsgs(GroupMsgID)
 );
+
+CREATE TABLE powerpoints (
+    PptID INTEGER AUTO_INCREMENT,
+    PptName VARCHAR(100) NOT NULL,
+    Ppturl VARCHAR(1000) NOT NULL,
+    UserID VARCHAR(20),
+    PRIMARY KEY (PptID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+);
+
+CREATE TABLE events (
+    eventsID INT AUTO_INCREMENT,
+    eventNAME VARCHAR(100) NOT NULL,
+    eventTIME DATETIME NOT NULL,
+    UserID VARCHAR(20),
+    PRIMARY KEY (eventsID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+);
+
+CREATE TABLE tasks (
+    taskID INT AUTO_INCREMENT,
+    taskNAME VARCHAR(300) NOT NULL,
+    taskStatus INT NOT NULL CHECK (taskStatus IN (0, 1)),
+    UserID VARCHAR(20),
+    PRIMARY KEY (tasksID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+);
