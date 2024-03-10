@@ -39,9 +39,9 @@ class _CollaborateState extends State<Collaborate> {
   Widget _getContentForSelectedTile(int index) {
     switch (index) {
       case 0:
-        return CalendarScreen();
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP);;
       case 1:
-        return TodoScreen();
+        return TodoScreen(username: widget.username, serverIP: widget.serverIP);
       case 2:
         return DrawScreen();
       case 3:
@@ -49,7 +49,7 @@ class _CollaborateState extends State<Collaborate> {
       case 4:
         return FileEditingScreen();
       default:
-        return CalendarScreen(); // Default placeholder
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP);
     }
   }
 

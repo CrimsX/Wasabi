@@ -74,10 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     print(widget.username);
     if (widget.serverIP == '') {
-      widget.serverIP = "https://wasabi-server.fly.dev/";
-    } else {
-      widget.serverIP = "http://" + widget.serverIP + ":3000/";
-    }
+     // widget.serverIP = "https://wasabi-server.fly.dev/";
+      widget.serverIP = "http://192.168.56.1:3000";
+    } //else {
+     // widget.serverIP = "http://" + widget.serverIP + ":3000/";
+   // }
 
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
@@ -87,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
       serverIP: widget.serverIP,
       username: widget.username,
     );
+
+
     _socket = NetworkService.instance.socket;
     _connectSocket();
 

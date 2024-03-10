@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
+import 'package:client/services/network.dart';
+
+class Event {
+  final String name;
+  final TimeOfDay? time;
+
+  Event({required this.name, this.time});
+}
 
 class CalendarScreen extends StatefulWidget {
+  String username = '';
+  String serverIP = '';
+
+  CalendarScreen({Key? key, required this.username, required this.serverIP}) : super(key: key);
+
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
+
+
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
@@ -11,14 +28,114 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _showFloatingButton = false;
+  IO.Socket? _socket;
 
-  // Update the _events map to use List<Event>
-  final Map<DateTime, List<Event>> _events = {
+  final Map<DateTime, List<CalendarEvent>> _events = {
     DateTime.utc(2024, 2, 20): [
-      Event(name: 'Event 1', time: TimeOfDay(hour: 10, minute: 30)),
-      Event(name: 'Event 2', time: TimeOfDay(hour: 14, minute: 45)),
+      CalendarEvent(name: 'Event 1', time: TimeOfDay(hour: 10, minute: 30)),
+      CalendarEvent(name: 'Event 2', time: TimeOfDay(hour: 14, minute: 45)),
     ],
   };
+
+
+//  @override
+//  void initState() {
+ //   super.initState();
+ //   initializeSocket();
+
+  //  _socket!.on('eventsResponse', (events) {
+   //   setState(() {
+        // Update _events map with fetched events
+  //      _updateEvents(events);
+  //    });
+  //  });
+ // }
+
+  @override
+  void initState() {
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    print(widget.username);
+    if (widget.serverIP == '') {
+     // widget.serverIP = "https://wasabi-server.fly.dev/";
+      widget.serverIP = "'http://192.168.56.1:3000";
+    } //else {
+     // widget.serverIP = "http://" + widget.serverIP + ":3000/";
+    //}
+
+    super.initState();
+
+    NetworkService.instance.init(
+      serverIP: widget.serverIP,
+      username: widget.username,
+    );
+
+    _socket = NetworkService.instance.socket;
+    initializeSocket();
+
+    _socket!.emit('getEvents');
+
+    _socket!.on('eventsResponse', (events) {
+      setState(() {
+        // Update _events map with fetched events
+        _updateEvents(events);
+        });
+    });
+  }
+
+
+
+
+
+
+  void _updateEvents(List<dynamic> events) {
+    _events.clear();
+    for (var event in events) {
+      DateTime eventDate = DateTime.parse(event['eventTIME']);
+      if (_events[eventDate] == null) {
+        _events[eventDate] = [];
+      }
+      _events[eventDate]!.add(CalendarEvent(name: event['eventNAME'], time: TimeOfDay.fromDateTime(eventDate)));
+    }
+  }
+
+  void initializeSocket() {
+
+    // Listen for socket connection successful
+    _socket!.on('connect', (_) => print('Connected to the socket server'));
+
+    // Listen for socket connection error
+    _socket!.on('connect_error', (data) => print('Connection error: $data'));
+
+    // Listen for socket connection timeout
+    _socket!.on('connect_timeout', (data) => print('Connection timeout: $data'));
+
+    // Listen for any errors
+    _socket!.on('error', (data) => print('Error: $data'));
+
+    // Listen for socket disconnection
+    _socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
+  }
+
+  // Create event
+  void emitCreateEvent({required String eventName, required String eventTime, String? shareToUser, String? shareToServer}) {
+    print('Emitting createEvent with name: $eventName, time: $eventTime');
+
+      _socket!.emit('createEvent', {
+        'eventName': eventName,
+        'eventTime': eventTime,
+        'userID': widget.username,
+      });
+  }
+
+  @override
+  void dispose() {
+    _socket?.disconnect();
+    _socket?.close();
+    super.dispose();
+  }
+
+  // M3
+
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +178,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             },
             onFormatChanged: (format) {
               if (_calendarFormat != format) {
-                setState(() { _calendarFormat = format; });
+                setState(() {
+                  _calendarFormat = format;
+                });
               }
             },
             onPageChanged: (focusedDay) {
@@ -82,25 +201,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _selectedDay != null ? _getEventsForDay(_selectedDay!).length : 0,
+              itemCount: _selectedDay != null ? _getEventsForDay(_selectedDay!)
+                  .length : 0,
               itemBuilder: (context, index) {
                 if (_selectedDay != null) {
                   final events = _getEventsForDay(_selectedDay!);
                   final event = events[index];
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    margin: EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 8.0),
                     child: ListTile(
-                      leading: Icon(Icons.event, color: Colors.white), // Icon color changed to white
+                      leading: Icon(Icons.event, color: Colors.white),
+                      // Icon color changed to white
                       title: Text(
                         event.name,
-                        style: TextStyle(color: Colors.white), // Text color changed to white
+                        style: TextStyle(color: Colors
+                            .white), // Text color changed to white
                       ),
                       subtitle: Text(
                         event.time?.format(context) ?? '',
-                        style: TextStyle(color: Colors.white), // Text color changed to white
+                        style: TextStyle(color: Colors
+                            .white), // Text color changed to white
                       ), // Icon color changed to white
                     ),
-                    color: Colors.green, // Add this to change the card's background color to ensure white text is visible
+                    color: Colors
+                        .green, // Add this to change the card's background color to ensure white text is visible
                   );
                 } else {
                   return Container(); // No selected day
@@ -113,16 +238,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
       floatingActionButton: _showFloatingButton
           ? FloatingActionButton(
-        backgroundColor: Colors.green,
-        onPressed: () => _showAddEventDialog(context),
-        child: Icon(Icons.add, color: Colors.white)
+          backgroundColor: Colors.green,
+          onPressed: () => _showAddEventDialog(context),
+          child: Icon(Icons.add, color: Colors.white)
       )
           : null,
     );
   }
 
-  List<Event> _getEventsForDay(DateTime day) {
-    return _events[_normalizeDateTime(day)] ?? [];
+  List<CalendarEvent> _getEventsForDay(DateTime day) {
+    return _events[_normalizeDateTime(day)]?.cast<CalendarEvent>() ?? [];
   }
 
   DateTime _normalizeDateTime(DateTime dateTime) {
@@ -132,7 +257,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildEventsMarker(DateTime date, List<dynamic> events) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(shape: BoxShape.rectangle, color: Colors.green[700]),
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle, color: Colors.green[700]),
       width: 16.0,
       height: 16.0,
       child: Center(
@@ -145,19 +271,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _showAddEventDialog(BuildContext context) {
+    TextEditingController eventNameController = TextEditingController();
+    TimeOfDay? pickedTime;
+
     showDialog(
       context: context,
       builder: (BuildContext context) => AddEventDialog(
-        onSave: (String eventName, TimeOfDay? pickedTime, String shareToUser, String shareToServer) {
-          if (eventName.isNotEmpty && pickedTime != null) {
+        onSaveEvent:(eventName, eventTime, shareToUser, shareToServer) {
+          if (eventName.isNotEmpty && eventTime!= null) {
+            print("1");
             final selectedDayNormalized = _normalizeDateTime(_selectedDay ?? _focusedDay);
+            print("2");
             if (_events[selectedDayNormalized] != null) {
-              _events[selectedDayNormalized]!.add(Event(name: eventName, time: pickedTime));
+              _events[selectedDayNormalized]!.add(CalendarEvent(name: eventName, time: pickedTime));
+              print("3");
             } else {
-              _events[selectedDayNormalized] = [Event(name: eventName, time: pickedTime)];
+              emitCreateEvent(eventName: eventName, eventTime: eventTime, shareToUser: shareToUser, shareToServer: shareToServer);
+              print("4");
             }
             setState(() {}); // Refresh UI to show new event
+            print("5");
           }
+          print('6');
         },
       ),
     );
@@ -165,9 +300,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 }
 
 class AddEventDialog extends StatefulWidget {
-  final Function(String eventName, TimeOfDay? pickedTime, String shareToUser, String shareToServer) onSave;
+  final Function(String eventName, String eventTime, String? shareToUser, String? shareToServer) onSaveEvent;
 
-  const AddEventDialog({Key? key, required this.onSave}) : super(key: key);
+  const AddEventDialog({Key? key, required this.onSaveEvent}) : super(key: key);
 
   @override
   _AddEventDialogState createState() => _AddEventDialogState();
@@ -203,7 +338,8 @@ class _AddEventDialogState extends State<AddEventDialog> {
               decoration: InputDecoration(hintText: "Name of Event"),
             ),
             ListTile(
-              title: Text("Time of Event: ${pickedTime?.format(context) ?? 'Not Set'}"),
+              title: Text(
+                  "Time of Event: ${pickedTime?.format(context) ?? 'Not Set'}"),
               trailing: Icon(Icons.timer),
               onTap: _selectTime,
             ),
@@ -213,7 +349,8 @@ class _AddEventDialogState extends State<AddEventDialog> {
             ),
             TextField(
               controller: shareToServerController,
-              decoration: InputDecoration(hintText: "Share to server (Optional)"),
+              decoration: InputDecoration(
+                  hintText: "Share to server (Optional)"),
             ),
           ],
         ),
@@ -226,13 +363,14 @@ class _AddEventDialogState extends State<AddEventDialog> {
         TextButton(
           child: Text('Save'),
           onPressed: () {
-            widget.onSave(
-              eventNameController.text,
-              pickedTime,
-              shareToUserController.text,
-              shareToServerController.text,
-            );
-            Navigator.of(context).pop();
+            if (eventNameController.text.isNotEmpty && pickedTime != null) {
+              // Format the time and call the onSaveEvent callback
+              final DateTime now = DateTime.now();
+              final DateTime eventDateTime = DateTime(now.year, now.month, now.day, pickedTime!.hour, pickedTime!.minute);
+              final String formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(eventDateTime);
+              widget.onSaveEvent(eventNameController.text, formattedTime, shareToUserController.text, shareToServerController.text);
+              Navigator.of(context).pop();
+            }
           },
         ),
       ],
@@ -240,9 +378,9 @@ class _AddEventDialogState extends State<AddEventDialog> {
   }
 }
 
-class Event {
+class CalendarEvent {
   final String name;
   final TimeOfDay? time;
 
-  Event({required this.name, this.time});
+  CalendarEvent({required this.name, this.time});
 }

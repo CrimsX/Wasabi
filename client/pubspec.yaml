@@ -41,6 +41,7 @@ dependencies:
   flutter_webrtc: ^0.9.47
   libsignal_protocol_dart: ^0.7.1
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
