@@ -76,7 +76,8 @@ export async function getEvents(userID) {
 export async function insertTaskIntoDatabase(taskName, userID) {
     try {
         const [result] = await pool.query("INSERT INTO tasks (taskName, taskStatus, UserID) VALUES (?, ?, ?)", [taskName, 0, userID]);
-        return { success: true, taskID: result.insertId };
+        const [data] =  await pool.query("SELECT taskID, taskName, taskStatus FROM tasks WHERE taskID = ?", [result.insertId]);
+        return data
     } catch (error) {
         console.error("Error creating task:", error.message);
         throw error;

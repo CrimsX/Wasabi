@@ -1,17 +1,9 @@
-import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart';
 
-import 'package:provider/provider.dart';
-import 'package:client/home/view_model.dart';
-import 'package:client/home/model.dart';
 
-import 'package:intl/intl.dart';
-import 'dart:io';
 
-import 'dart:async';
-import 'package:client/login/view.dart';
 
 import 'package:client/services/network.dart';
 import 'package:client/collaborate/Calendar.dart';
@@ -20,13 +12,12 @@ import 'package:client/collaborate/Draw.dart';
 import 'package:client/collaborate/Powerpoint.dart';
 import 'package:client/collaborate/FileEditing.dart';
 
-import 'package:flutter/material.dart';
 // Ensure all necessary imports are here.
 class Collaborate extends StatefulWidget {
   final String username;
   final String serverIP;
 
-  Collaborate({required this.username, required this.serverIP});
+  const Collaborate({super.key, required this.username, required this.serverIP});
 
   @override
   _CollaborateState createState() => _CollaborateState();
@@ -55,11 +46,11 @@ class _CollaborateState extends State<Collaborate> {
       case 1:
         return TodoScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
       case 2:
-        return DrawScreen();
+        return const DrawScreen();
       case 3:
         return PowerPointScreen(username: username, serverIP: serverIP, socket: _socket);
       case 4:
-        return FileEditingScreen();
+        return const FileEditingScreen();
       default:
         return CalendarScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
     }

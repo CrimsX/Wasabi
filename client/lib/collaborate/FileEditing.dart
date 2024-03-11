@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FileEditingScreen extends StatelessWidget {
+  const FileEditingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

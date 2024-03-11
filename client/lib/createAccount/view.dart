@@ -1,11 +1,12 @@
 import 'package:client/login/view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-void main() => runApp(MaterialApp(home: CreateAccount(),));
+void main() => runApp(const MaterialApp(home: CreateAccount(),));
 
 class CreateAccount extends StatefulWidget {
+  const CreateAccount({super.key});
+
   @override
   _CreateAccountState createState() => _CreateAccountState();
 }
@@ -55,12 +56,12 @@ class _CreateAccountState extends State<CreateAccount> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.green,
-          title: Text("Account Created!", style: TextStyle(color: Colors.white)),
-          content: Text("Your account has been successfully created.", style: TextStyle(color: Colors.white)),
+          title: const Text("Account Created!", style: TextStyle(color: Colors.white)),
+          content: const Text("Your account has been successfully created.", style: TextStyle(color: Colors.white)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("OK", style: TextStyle(color: Colors.white)),
+              child: const Text("OK", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -76,7 +77,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Please enter both username and password."),
           duration: Duration(seconds: 2),
         ),
@@ -100,10 +101,10 @@ class _CreateAccountState extends State<CreateAccount> {
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_outlined, color: Colors.green),
+                icon: const Icon(Icons.arrow_back_ios_new_outlined, color: Colors.green),
                 onPressed: () {
                   Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => Login()));
+                      MaterialPageRoute(builder: (context) => const Login()));
                 }
                   ),
                   ),
@@ -111,23 +112,23 @@ class _CreateAccountState extends State<CreateAccount> {
                   child: Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
-                  padding: EdgeInsets.only(top: 50),
+                  padding: const EdgeInsets.only(top: 50),
                   child: Column(
                   children: [
                   Image.asset('assets/Hi.png', width: 200, height: 220),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   ],
                   ),
                   ),
                   ),
                   ),
-                  SizedBox(height: 20),
-                  Text('Create your Account', style: TextStyle(color: Colors
+                  const SizedBox(height: 20),
+                  const Text('Create your Account', style: TextStyle(color: Colors
                 .black, fontFamily: 'Roboto', fontSize: 18, fontWeight: FontWeight.bold)),
-            Text('Create your account to start collaborating', style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.normal)),
-            SizedBox(height: 20),
+            const Text('Create your account to start collaborating', style: TextStyle(color: Colors.black, fontFamily: 'Roboto', fontSize: 12, fontWeight: FontWeight.normal)),
+            const SizedBox(height: 20),
             Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
                   TextFormField(
@@ -135,13 +136,13 @@ class _CreateAccountState extends State<CreateAccount> {
                     decoration: InputDecoration(
                       labelText: 'Username',
                       hintText: 'Create Username',
-                      prefixIcon: Icon(Icons.person, color: Colors.black, size: 18),
+                      prefixIcon: const Icon(Icons.person, color: Colors.black, size: 18),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -151,13 +152,13 @@ class _CreateAccountState extends State<CreateAccount> {
                     decoration: InputDecoration(
                       labelText: 'First Name',
                       hintText: 'Enter First Name',
-                      prefixIcon: Icon(Icons.person, color: Colors.black, size: 18),
+                      prefixIcon: const Icon(Icons.person, color: Colors.black, size: 18),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -167,25 +168,25 @@ class _CreateAccountState extends State<CreateAccount> {
                     decoration: InputDecoration(
                       labelText: 'Last Name',
                       hintText: 'Enter Last Name',
-                      prefixIcon: Icon(Icons.person, color: Colors.black, size: 18),
+                      prefixIcon: const Icon(Icons.person, color: Colors.black, size: 18),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: passwordController,
                     obscureText: !isPasswordVisible,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       hintText: 'Create password',
-                      prefixIcon: Icon(Icons.lock, color: Colors.black, size: 18),
+                      prefixIcon: const Icon(Icons.lock, color: Colors.black, size: 18),
                       suffixIcon: GestureDetector(
                         onTap: () => setState(() => isPasswordVisible = !isPasswordVisible),
                         child: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.black, size: 18),
@@ -195,22 +196,22 @@ class _CreateAccountState extends State<CreateAccount> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
 
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   MaterialButton(
                     onPressed: () => _createAccount(context),
                     height: 45,
                     color: Colors.lightGreen,
-                    child: Text('Create Account', style: TextStyle(color: Colors.white)),
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: const Text('Create Account', style: TextStyle(color: Colors.white)),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

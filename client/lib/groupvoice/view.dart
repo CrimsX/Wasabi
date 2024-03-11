@@ -263,12 +263,13 @@ class _groupVoIPState extends State<groupVoIP> {
       await _rtcPeerConnection2!.setLocalDescription(offer2);
 
       //print(offer.toMap());
-      for (int i = 0; i < widget.groupcalleeId.length; i++) 
+      for (int i = 0; i < widget.groupcalleeId.length; i++) {
         NetworkService.instance.socket!.emit("makeCall", {
           "calleeId": widget.groupcalleeId[i],
           "sdpOffer": offer.toMap(),
           "showVid": widget.showVid,
         });
+      }
     }
   }
 

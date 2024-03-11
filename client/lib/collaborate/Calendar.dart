@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:client/services/network.dart';
 
 class Event {
   final String name;
@@ -32,8 +31,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   final Map<DateTime, List<CalendarEvent>> _events = {
     DateTime.utc(2024, 2, 20): [
-      CalendarEvent(name: 'Event 1', time: TimeOfDay(hour: 10, minute: 30)),
-      CalendarEvent(name: 'Event 2', time: TimeOfDay(hour: 14, minute: 45)),
+      CalendarEvent(name: 'Event 1', time: const TimeOfDay(hour: 10, minute: 30)),
+      CalendarEvent(name: 'Event 2', time: const TimeOfDay(hour: 14, minute: 45)),
     ],
   };
 
@@ -144,12 +143,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(20.0),
               ),
-              formatButtonTextStyle: TextStyle(color: Colors.white),
+              formatButtonTextStyle: const TextStyle(color: Colors.white),
             ),
             calendarStyle: CalendarStyle(
-              defaultDecoration: BoxDecoration(shape: BoxShape.circle),
-              weekendDecoration: BoxDecoration(shape: BoxShape.circle),
-              selectedDecoration: BoxDecoration(
+              defaultDecoration: const BoxDecoration(shape: BoxShape.circle),
+              weekendDecoration: const BoxDecoration(shape: BoxShape.circle),
+              selectedDecoration: const BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
               ),
@@ -186,6 +185,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     child: _buildEventsMarker(date, events),
                   );
                 }
+                return null;
               },
             ),
           ),
@@ -198,24 +198,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   final events = _getEventsForDay(_selectedDay!);
                   final event = events[index];
                   return Card(
-                    margin: EdgeInsets.symmetric(
+                    margin: const EdgeInsets.symmetric(
                         vertical: 4.0, horizontal: 8.0),
+                    color: Colors
+                        .green,
                     child: ListTile(
-                      leading: Icon(Icons.event, color: Colors.white),
+                      leading: const Icon(Icons.event, color: Colors.white),
                       // Icon color changed to white
                       title: Text(
                         event.name,
-                        style: TextStyle(color: Colors
+                        style: const TextStyle(color: Colors
                             .white), // Text color changed to white
                       ),
                       subtitle: Text(
                         event.time?.format(context) ?? '',
-                        style: TextStyle(color: Colors
+                        style: const TextStyle(color: Colors
                             .white), // Text color changed to white
                       ), // Icon color changed to white
-                    ),
-                    color: Colors
-                        .green, // Add this to change the card's background color to ensure white text is visible
+                    ), // Add this to change the card's background color to ensure white text is visible
                   );
                 } else {
                   return Container(); // No selected day
@@ -230,7 +230,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ? FloatingActionButton(
           backgroundColor: Colors.green,
           onPressed: () => _showAddEventDialog(context),
-          child: Icon(Icons.add, color: Colors.white)
+          child: const Icon(Icons.add, color: Colors.white)
       )
           : null,
     );
@@ -254,7 +254,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Center(
         child: Text(
           '${events.length}',
-          style: TextStyle().copyWith(color: Colors.white, fontSize: 12.0),
+          style: const TextStyle().copyWith(color: Colors.white, fontSize: 12.0),
         ),
       ),
     );
@@ -268,7 +268,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (BuildContext context) => AddEventDialog(
         onSaveEvent:(eventName, eventTime, shareToUser, shareToServer) {
-          if (eventName.isNotEmpty && eventTime!= null) {
+          if (eventName.isNotEmpty) {
             print("1");
             final selectedDayNormalized = _normalizeDateTime(_selectedDay ?? _focusedDay);
             print("2");
@@ -319,27 +319,27 @@ class _AddEventDialogState extends State<AddEventDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Create Event"),
+      title: const Text("Create Event"),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             TextField(
               controller: eventNameController,
-              decoration: InputDecoration(hintText: "Name of Event"),
+              decoration: const InputDecoration(hintText: "Name of Event"),
             ),
             ListTile(
               title: Text(
                   "Time of Event: ${pickedTime?.format(context) ?? 'Not Set'}"),
-              trailing: Icon(Icons.timer),
+              trailing: const Icon(Icons.timer),
               onTap: _selectTime,
             ),
             TextField(
               controller: shareToUserController,
-              decoration: InputDecoration(hintText: "Share to user (Optional)"),
+              decoration: const InputDecoration(hintText: "Share to user (Optional)"),
             ),
             TextField(
               controller: shareToServerController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   hintText: "Share to server (Optional)"),
             ),
           ],
@@ -347,11 +347,11 @@ class _AddEventDialogState extends State<AddEventDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text('Save'),
+          child: const Text('Save'),
           onPressed: () {
             if (eventNameController.text.isNotEmpty && pickedTime != null) {
               // Format the time and call the onSaveEvent callback

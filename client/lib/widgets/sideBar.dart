@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:client/home/view_model.dart';
-import 'package:client/home/model.dart';
 
 import 'package:client/services/network.dart';
 
@@ -13,6 +12,8 @@ class sideBar extends StatelessWidget {
   String loggedInUsername = NetworkService.instance.getusername;
   String serverIP = NetworkService.instance.getserverIP;
 
+  sideBar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -20,7 +21,7 @@ class sideBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.green,
             ),
             child: Column(
@@ -36,10 +37,10 @@ class sideBar extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   loggedInUsername,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                   ),
@@ -50,8 +51,8 @@ class sideBar extends StatelessWidget {
 
           // Handle profile button click
           ListTile(
-            title: Text('My Profile'),
-            leading: Icon(Icons.person),
+            title: const Text('My Profile'),
+            leading: const Icon(Icons.person),
             onTap: () {
                 // Navigator.push(
                 //   context,
@@ -64,16 +65,16 @@ class sideBar extends StatelessWidget {
 
           // Handle notifications button click
           ListTile(
-            title: Text('Notifications'),
-            leading: Icon(Icons.notifications),
+            title: const Text('Notifications'),
+            leading: const Icon(Icons.notifications),
             onTap: () {
             },
           ),
 
           // Handle collaborate button click
           ListTile(
-            title: Text('Collaborate'),
-            leading: Icon(Icons.file_copy),
+            title: const Text('Collaborate'),
+            leading: const Icon(Icons.file_copy),
             onTap: () {
               Navigator.push(
                 context,
@@ -93,8 +94,8 @@ class sideBar extends StatelessWidget {
 
           // Handle settings button click
           ListTile(
-            title: Text('Settings'),
-            leading: Icon(Icons.settings),
+            title: const Text('Settings'),
+            leading: const Icon(Icons.settings),
             onTap: () {
                 // Navigator.push(
                 //   context,
@@ -107,13 +108,13 @@ class sideBar extends StatelessWidget {
 
           // Handle logout button click
           ListTile(
-            title: Text('Log Out'),
-            leading: Icon(Icons.exit_to_app),
+            title: const Text('Log Out'),
+            leading: const Icon(Icons.exit_to_app),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Login(),
+                  builder: (context) => const Login(),
                 ),
               );
             },

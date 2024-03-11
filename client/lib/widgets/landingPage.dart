@@ -5,6 +5,8 @@ import 'package:client/services/network.dart';
 class landingPage extends StatelessWidget {
   String loggedInUsername = NetworkService.instance.getusername;
 
+  landingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView( // Makes the body scrollable
@@ -21,11 +23,11 @@ class landingPage extends StatelessWidget {
                 height: 300,
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Center(
               child: Text(
-                "What's up, ${loggedInUsername}?",
-                style: TextStyle(
+                "What's up, $loggedInUsername?",
+                style: const TextStyle(
                   fontSize: 24,
                   color: Colors.black,
                   fontFamily: 'Roboto',
@@ -34,8 +36,8 @@ class landingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(height: 20),
-            Center(
+            const SizedBox(height: 20),
+            const Center(
               child: Text(
                 "You don't have any listed tasks.",
                 style: TextStyle(
@@ -47,7 +49,7 @@ class landingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
           ],
         ),
       ),

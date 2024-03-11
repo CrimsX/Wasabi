@@ -114,7 +114,7 @@ IO.on("connection", (socket) => {
            const result = await insertTaskIntoDatabase(taskName, userID);
            console.log('Task created successfully:', result);
            // Emit a confirmation event back to the client
-           socket.emit('taskCreated', { success: true, taskID: result.taskID });
+           socket.emit('taskCreated', { success: true, result });
          } catch (error) {
            console.error('Error creating task:', error);
            // Emit an error event back to the client if task creation fails

@@ -20,7 +20,6 @@ import 'package:client/groupvoice/view.dart';
 
 import 'package:intl/intl.dart';
 
-import 'dart:io';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +30,8 @@ class HomeScreen extends StatefulWidget {
   //String serverIP = NetworkService.instance.getserverIP;
 
   //HomeScreen({Key? key, required this.username}) : super(key: key);
-  HomeScreen({required this.username, required this.serverIP});
+  HomeScreen({super.key, required this.username, required this.serverIP});
+  @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Completer<List<Widget>> _friendsListCompleter;
   late Completer<List<Widget>> _serverListCompleter;
 
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   Socket? _socket;
 
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //widget.serverIP = "https://wasabi-server.fly.dev/";
       widget.serverIP = "http://localhost:3000";
     } else {
-      widget.serverIP = "http://" + widget.serverIP + ":3000/";
+      widget.serverIP = "http://${widget.serverIP}:3000/";
     }
 
     super.initState();
@@ -157,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(message));
       }
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     });
@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _controller.clear();
       });
 
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     }
@@ -298,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ///connects client to socket io room
   _connectToGroupChat(serverID) {
     _socket!.emit('joingroupchat', serverID);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     });
     _socket!.emit('fetchgroupchat', {'serverID': serverID});
@@ -311,27 +311,27 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (BuildContext context) {
         if (!isServer) {
           return AlertDialog(
-            title: Text('Failed to add friend'),
-            content: Text(friendID + ' could not be added'),
+            title: const Text('Failed to add friend'),
+            content: Text('$friendID could not be added'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           );
         } else {
           return AlertDialog(
-            title: Text('Failed to add server'),
-            content: Text(friendID + ' could not be added'),
+            title: const Text('Failed to add server'),
+            content: Text('$friendID could not be added'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           );
@@ -432,15 +432,15 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       titleName = !isServer ? "Direct Messages" : 'Groups';
     }
-    Completer<List<Widget>> _listCompleter = !isServer ? _friendsListCompleter : _serverListCompleter;
+    Completer<List<Widget>> listCompleter = !isServer ? _friendsListCompleter : _serverListCompleter;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
 
       appBar: AppBar(
-        title: Text("${titleName}",
-          style: TextStyle(
+        title: Text(titleName,
+          style: const TextStyle(
             color: Color.fromARGB(255, 255, 255, 255),
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
@@ -595,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
             rAppBar(),
 
             IconButton(
-              icon: Icon(Icons.group_rounded),
+              icon: const Icon(Icons.group_rounded),
               onPressed: () {
                 _scaffoldKey.currentState!.openEndDrawer();
               },
@@ -620,14 +620,14 @@ class _HomeScreenState extends State<HomeScreen> {
         : Row(
             children: [
               // Left side for friend list
-              Container(
+              SizedBox(
                 width: 200, // Adjust the width as needed
                 child: Drawer(
                   child: FutureBuilder<List<Widget>>(
-                    future: _listCompleter.future,
+                    future: listCompleter.future,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(); // Loading indicator
+                        return const CircularProgressIndicator(); // Loading indicator
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
@@ -695,12 +695,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 /// container design for the textfield bottom:
 
                 Container(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   color: Colors.white,
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.image,
                           color: Colors.green,
                         ),
@@ -718,15 +718,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 2,
                                 blurRadius: 4,
-                                offset: Offset(0, 2),
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
                           child: TextField(
                             controller: _controller,
                             focusNode: _focusNode,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
+                            style: const TextStyle(color: Colors.black),
+                            decoration: const InputDecoration(
                               hintText: 'Message',
                               hintStyle: TextStyle(color: Colors.grey),
                               contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -736,7 +736,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.send,
                           color: Colors.green,
                         ),

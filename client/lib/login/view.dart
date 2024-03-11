@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:provider/provider.dart';
-import 'view_model.dart';
 
 import 'package:client/home/view_model.dart';
 
@@ -10,6 +9,8 @@ import '../createAccount/view.dart';
 import 'package:client/home/view.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -67,7 +68,7 @@ class _LoginState extends State<Login> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(data['message'] ?? "Login failed"),
-              duration: Duration(seconds: 2),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -91,7 +92,7 @@ class _LoginState extends State<Login> {
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: EdgeInsets.only(top: 50),
+                  padding: const EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
                       Image.asset(
@@ -99,14 +100,14 @@ class _LoginState extends State<Login> {
                         width: 200,
                         height: 220,
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
                   TextFormField(
@@ -114,25 +115,25 @@ class _LoginState extends State<Login> {
                     decoration: InputDecoration(
                       labelText: 'Username',
                       hintText: 'Enter your Username',
-                      prefixIcon: Icon(Icons.person, color: Colors.black),
+                      prefixIcon: const Icon(Icons.person, color: Colors.black),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: passwordController,
                     obscureText: !isPasswordVisible,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       hintText: 'Enter your password',
-                      prefixIcon: Icon(Icons.lock, color: Colors.black),
+                      prefixIcon: const Icon(Icons.lock, color: Colors.black),
                       suffixIcon: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -149,29 +150,29 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: serverIPController,
                     decoration: InputDecoration(
                       labelText: 'Server IP (optional)',
                       hintText: 'Enter server IP',
-                      prefixIcon: Icon(Icons.data_usage, color: Colors.black),
+                      prefixIcon: const Icon(Icons.data_usage, color: Colors.black),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -180,11 +181,11 @@ class _LoginState extends State<Login> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CreateAccount(),
+                              builder: (context) => const CreateAccount(),
                             ),
                           );
                         },
-                        child: Text(
+                        child: const Text(
                           'Create Account',
                           style: TextStyle(
                             color: Colors.lightGreen,
@@ -194,20 +195,20 @@ class _LoginState extends State<Login> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   MaterialButton(
                     onPressed: () => _login(context),
                     height: 45,
                     color: Colors.lightGreen,
-                    child: Text(
-                      'Login',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

@@ -21,8 +21,7 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  List<Task> _tasks = [];
-  List<Task> _finishedTasks = [];
+  final List<Task> _tasks = [];
 
   @override
   void initState() {
@@ -42,6 +41,15 @@ class _TodoScreenState extends State<TodoScreen> {
 
     widget.socket!.on('taskStatusUndone', (data) {
       undoCompletedTask(data);
+    });
+
+    widget.socket!.on('taskCreated', (data) {
+      if (mounted) {
+        setState(() {
+          Task task = Task(id: data['result'][0]['taskID'], name: data['result'][0]['taskName'], isFinished: data['result'][0]['taskStatus'] != 0);
+          _tasks.add(task);
+        });
+      }
     });
 
   }
@@ -82,6 +90,20 @@ class _TodoScreenState extends State<TodoScreen> {
     }
   }
 
+  deleteTask(data) {
+    if (mounted) {
+      setState(() {
+        for (Task task in _tasks) {
+          if (task.id == data.id) {
+            _tasks.remove(task);
+            return;
+          }
+        }
+        print(data);
+      });
+    }
+  }
+
   void _showAddTaskDialog() {
     TextEditingController taskController = TextEditingController();
     TextEditingController userController = TextEditingController();
@@ -91,23 +113,23 @@ class _TodoScreenState extends State<TodoScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Add New Task"),
+          title: const Text("Add New Task"),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
                   controller: taskController,
-                  decoration: InputDecoration(hintText: "Task Name"),
+                  decoration: const InputDecoration(hintText: "Task Name"),
                 ),
                 TextField(
                   controller: userController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       hintText: "Share with user (Optional)"),
                 ),
                 TextField(
                   controller: serverController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       hintText: "Share with server (Optional)"),
                 ),
               ],
@@ -115,11 +137,11 @@ class _TodoScreenState extends State<TodoScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('Create'),
+              child: const Text('Create'),
               onPressed: () {
                 if (taskController.text.isNotEmpty) {
                   // createTask
@@ -137,31 +159,28 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
-  void _confirmDeleteTask(int index, bool isFinished) {
+  void _confirmDeleteTask(Task task, bool isFinished) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Delete Task"),
-          content: Text("Are you sure you want to delete this task?"),
+          title: const Text("Delete Task"),
+          content: const Text("Are you sure you want to delete this task?"),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('Yes'),
+              child: const Text('Yes'),
               onPressed: () {
                 // Emit a socket event to delete the task
-                widget.socket!.emit('deleteTask', _tasks[index].id);
+                widget.socket!.emit('deleteTask', task.id);
                 // Update the UI to reflect the deletion
                 setState(() {
-                  if (isFinished) {
-                    _finishedTasks.removeAt(index);
-                  } else {
-                    _tasks.removeAt(index);
+                    deleteTask(task);
                   }
-                });
+                );
                 Navigator.of(context).pop();
               },
             ),
@@ -183,7 +202,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 false),
           ),
           Divider(height: 2, color: Colors.green[200]),
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(8.0),
             child: Align(
               alignment: Alignment.center,
@@ -204,7 +223,7 @@ class _TodoScreenState extends State<TodoScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
         onPressed: _showAddTaskDialog,
-        child: Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -219,27 +238,27 @@ class _TodoScreenState extends State<TodoScreen> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 return Card(
-                  margin: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(8.0),
                   color: Colors.white, // Unfinished tasks color
                   child: ListTile(
                     title: Text(
                       tasks[index].name,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.black), // Unfinished tasks text color
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.check, color: Colors.green),
+                          icon: const Icon(Icons.check, color: Colors.green),
                           onPressed: () {
                             int taskID = tasks[index].id;
                             widget.socket!.emit('updateTaskStatus', taskID);
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDeleteTask(index, false),
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDeleteTask(tasks[index], false),
                         ),
                       ],
                     ),
@@ -255,27 +274,27 @@ class _TodoScreenState extends State<TodoScreen> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 return Card(
-                  margin: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(8.0),
                   color: Colors.green, // Finished tasks color
                   child: ListTile(
                     title: Text(
                       tasks[index].name,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white), // Finished tasks text color
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.undo, color: Colors.white),
+                          icon: const Icon(Icons.undo, color: Colors.white),
                           onPressed: () {
                             int taskID = tasks[index].id;
                             widget.socket!.emit('undoTaskStatus', taskID);
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete, color: Colors.white),
-                          onPressed: () => _confirmDeleteTask(index, true),
+                          icon: const Icon(Icons.delete, color: Colors.white),
+                          onPressed: () => _confirmDeleteTask(tasks[index], true),
                         ),
                       ],
                     ),
