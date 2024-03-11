@@ -22,15 +22,27 @@ class TodoScreen extends StatefulWidget {
 
 class _TodoScreenState extends State<TodoScreen> {
   final List<Task> _tasks = [];
+  final List<dynamic> _friends = [];
+  final List<dynamic>_groups = [];
 
   @override
   void initState() {
     super.initState();
     _connectSocket();
     widget.socket!.emit('getTasks', widget.username);
+    widget.socket!.emit('buildfriendscollab', widget.username);
+    widget.socket!.emit('buildgroupscollab', widget.username);
   }
 
   void _connectSocket() {
+    widget.socket!.on('buildfriendscollab', (data) {
+      _friends.addAll(data);
+    });
+
+    widget.socket!.on('buildgroupscollab', (data) {
+      _groups.addAll(data);
+    });
+
     widget.socket!.on('tasks', (data) {
       retrieveTasks(data);
     });
@@ -51,7 +63,6 @@ class _TodoScreenState extends State<TodoScreen> {
         });
       }
     });
-
   }
 
   retrieveTasks(data) {
@@ -122,16 +133,6 @@ class _TodoScreenState extends State<TodoScreen> {
                   controller: taskController,
                   decoration: const InputDecoration(hintText: "Task Name"),
                 ),
-                TextField(
-                  controller: userController,
-                  decoration: const InputDecoration(
-                      hintText: "Share with user (Optional)"),
-                ),
-                TextField(
-                  controller: serverController,
-                  decoration: const InputDecoration(
-                      hintText: "Share with server (Optional)"),
-                ),
               ],
             ),
           ),
@@ -154,6 +155,141 @@ class _TodoScreenState extends State<TodoScreen> {
               },
             )
           ],
+        );
+      },
+    );
+  }
+
+  void _shareForm(task) {
+    int selectedOption = 0; // Track the selected radio button option
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text("Would you like to share this task?"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RadioListTile(
+                      title: Text('Share with friends'),
+                      value: 0,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                    RadioListTile(
+                      title: Text('Share with group'),
+                      value: 1,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Don\'t share'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  child: Text('Next'),
+                  onPressed: () {
+
+                    Navigator.of(context).pop();
+                    _shareSelect(selectedOption, task);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _shareSelect(option, task) {
+    List<dynamic> items = [];
+    String key = "";
+    if (option == 0){
+      items = _friends;
+      key = 'FriendID';
+    } else if (option == 1) {
+      items = _groups;
+      key = 'ServerName';
+    }
+    List<bool> checkedItems = List<bool>.filled(items.length, false); // Initialize with false values
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select Items'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    items.length,
+                    (index) {
+                      return CheckboxListTile(
+                        title: Text(items[index][key]),
+                        value: checkedItems[index],
+                        onChanged: (newValue) {
+                          print('Checkbox $index tapped');
+                          setState(() {
+                            checkedItems[index] = newValue!;
+                          });
+                          print('Checkbox $index is now ${checkedItems[index]}');
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Perform actions based on the checked items
+                    for (int i = 0; i < items.length; i++) {
+                      if (checkedItems[i] && option == 0) {
+                        widget.socket!.emit('sharetodofriend', {
+                          'user': _friends[i][key],
+                          'taskid': task.id,
+                          'taskname': task.name
+                          });
+                      } else if (checkedItems[i] && option == 1) {
+                        widget.socket!.emit('sharetodogroup', {
+                          'group': _groups[i][key],
+                          'user': widget.username,
+                          'taskid': task.id,
+                          'taskname': task.name
+                          });
+                      }
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text('Share'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -256,6 +392,9 @@ class _TodoScreenState extends State<TodoScreen> {
                             widget.socket!.emit('updateTaskStatus', taskID);
                           },
                         ),
+                        IconButton(
+                          icon: const Icon(Icons.group_add_outlined, color: Colors.black),
+                          onPressed: () => _shareForm(tasks[index])),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _confirmDeleteTask(tasks[index], false),

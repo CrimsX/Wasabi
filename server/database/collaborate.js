@@ -136,3 +136,25 @@ export async function getAllTasks(userID) {
     throw new Error('Failed to fetch tasks');
   }
 }
+
+export async function shareToDo(data) {
+    const [check] = await pool.query('SELECT * FROM tasks \
+    WHERE taskID = ? AND UserID = ?', [data.taskid, data.userid]);
+    console.log(check.length===0);
+    if (check.length === 0) {
+        await pool.query('INSERT INTO tasks (taskID, taskName, taskStatus, UserID) \
+    VALUES (?, ?, ?, ?)', [data.taskid, data.taskname, 0, data.user]);
+    }
+}
+
+export async function shareToDoGroup(data) {
+    const [members] = await pool.query('SELECT UserID from partof WHERE \
+    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
+    for (const username of members) {
+        shareToDo({
+            user: username.UserID,
+            'taskid': data.taskid,
+            'taskname': data.taskname
+        })
+    }
+}

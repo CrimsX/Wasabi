@@ -10,6 +10,8 @@ import {
   undoTaskStatus,
   deleteTask,
   getAllTasks,
+  shareToDo,
+  shareToDoGroup,
   getPowerPoints,
   createPowerPoint,
   deletePowerPoint,
@@ -173,6 +175,14 @@ IO.on("connection", (socket) => {
          socket.emit('error', { message: 'Failed to fetch tasks' });
        }
      });
+
+     socket.on('sharetodofriend', async (data) => {
+      await shareToDo(data);
+    })
+
+    socket.on('sharetodogroup', async (data) => {
+      await shareToDoGroup(data);
+    })
 
 
   // Kipp
@@ -422,14 +432,14 @@ IO.on("connection", (socket) => {
       await deletePowerPoint(data);
     })
 
-    socket.on('buildfriendsppt', async (user) => {
+    socket.on('buildfriendscollab', async (user) => {
       const result = await getFriends(user);
-      IO.to(socket.id).emit('buildfriendsppt', result);
+      IO.to(socket.id).emit('buildfriendscollab', result);
     })
 
-    socket.on('buildgroupsppt', async (user) => {
+    socket.on('buildgroupscollab', async (user) => {
       const result = await getServers(user); //TODO: make query
-      IO.to(socket.id).emit('buildgroupsppt', result);
+      IO.to(socket.id).emit('buildgroupscollab', result);
     })
 
     socket.on('sharepptfriend', async (data) => {

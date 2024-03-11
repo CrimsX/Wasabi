@@ -34,8 +34,8 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
     _connectSocket();
 
     widget.socket!.emit('getpowerpoints', widget.username);
-    widget.socket!.emit('buildfriendsppt', widget.username);
-    widget.socket!.emit('buildgroupsppt', widget.username);
+    widget.socket!.emit('buildfriendscollab', widget.username);
+    widget.socket!.emit('buildgroupscollab', widget.username);
   }
 
   void _connectSocket() {
@@ -54,11 +54,11 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
       _createTile(data);
     });
 
-    widget.socket!.on('buildfriendsppt', (data) {
+    widget.socket!.on('buildfriendscollab', (data) {
       _friends.addAll(data);
     });
 
-    widget.socket!.on('buildgroupsppt', (data) {
+    widget.socket!.on('buildgroupscollab', (data) {
       _groups.addAll(data);
     });
   }
