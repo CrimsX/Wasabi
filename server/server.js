@@ -16,7 +16,9 @@ import {
   createPowerPoint,
   deletePowerPoint,
   sharePPT,
-  sharePPTGroup
+  sharePPTGroup,
+  shareEventGroup,
+  shareEvent,
 } from './database/collaborate.js'
 
 import {
@@ -94,17 +96,46 @@ IO.on("connection", (socket) => {
    ************************************************************************************/
 
 
-    socket.on('createEvent', async (data) => {
-        const result = await createEvent(data);
-        console.log('test');
-    });
+     /************************************************************************************
+       * Calendar :
+       ************************************************************************************/
+
+
+   socket.on('createEvent', async (data) => {
+               const result = await createEvent(data);
+               if (result.success) {
+                   console.log('Emitting back newly created event data:', result.event);
+                   // Emit the new event details back to the client
+                   socket.emit('eventCreated', result.event);
+               } else {
+                   console.error('Failed to create event:', result.message);
+               }
+           });
+
+
+            socket.on('getEvents', async (userID)=>{
+               try {
+                   const task = await getEvents(userID);
+                   socket.emit('eventResponse', task.events);
+               } catch (error) {
+               console.error('Error:', error.message);
+               socket.emit('error', {message: 'failed to retrieve events'})
+               }
+            });
+
+
+            socket.on('shareEvent', async (data) => {
+             await shareEvent(data);
+           });
+
+           socket.on('shareEventGroup', async (data) => {
+             await shareEventGroup(data);
+           });
 
 
 
-    socket.on('getEvents', async (userID) => {
-        const result = await getEvents(userID);
-        IO.to(socket.id).emit('eventsResponse', result.events);
-    });
+      /************************************************************************************
+       ************************************************************************************/
 
 
 

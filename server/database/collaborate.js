@@ -50,9 +50,14 @@ export async function createEvent(data) {
     try {
         console.log('Attempting to create event with data:', data);
         const { eventName, eventTime, userID } = data;
-        const [result] = await pool.query("INSERT INTO events (eventNAME, eventTIME, UserID) VALUES (?, ?, ?)", [eventName, eventTime, userID]);
-        console.log('Event created successfully:', result);
-        return { success: true, message: "Event created successfully.", eventID: result.insertId };
+        await pool.query("INSERT INTO events (eventNAME, eventTIME, UserID) VALUES (?, ?, ?)", [eventName, eventTime, userID]);
+        const [rows] = await pool.query("SELECT eventNAME, eventTIME FROM events WHERE eventsID = LAST_INSERT_ID()");
+
+        const newEvent = rows[0];
+        console.log('Event created successfully:', newEvent);
+
+
+        return { success: true, event: newEvent }; // Return the new event details
     } catch (error) {
         console.error("Error creating event:", error.message);
         return { success: false, message: "Failed to create event.", error: error.message };
@@ -61,16 +66,76 @@ export async function createEvent(data) {
 
 
 
-
 export async function getEvents(userID) {
     try {
-        const [rows] = await pool.query("SELECT * FROM events WHERE UserID = ?", [userID]);
+        const [rows] = await pool.query("SELECT eventName, eventTime FROM events WHERE UserID = ?", [userID]);
+        console.log("Retrieved events:", rows);
+        console.log(userID);
+
         return { success: true, events: rows };
     } catch (error) {
-        console.error("Error fetching events:", error.message);
-        return { success: false, message: "Failed to fetch events.", error: error.message };
+        console.error("Error fetching events:", error);
+        throw new Error('Failed to fetch events');
     }
 }
+
+
+
+
+
+export async function shareEvent(data) {
+    // Check for necessary data
+    console.log("Received data:", data);
+    if (!data.eventname || !data.userID || !data.eventTIME || !data.user) {
+        console.error("Missing data for shareEvent");
+        throw new Error("Missing data for shareEvent"); // Throwing an error for missing data
+    }
+
+    try {
+        // Step 1: Check if the event already exists for the target user (data.user)
+        const [check] = await pool.query('SELECT * FROM events WHERE eventNAME = ? AND UserID = ?', [data.eventname, data.user]);
+        if (check.length === 0) {
+            // Step 2: Since the event doesn't exist for the target user, fetch it for the source user (data.userID)
+            const rows = await pool.query('SELECT * FROM events WHERE eventName = ? AND UserID = ?', [data.eventname, data.userID]);
+            console.log("this is rows:");
+            console.log(rows);
+
+            if (rows.length > 0) {
+                const row = rows[0][0]; // Access the first element of the outer array, then the first element of the inner array
+                console.log([row.eventsID, row.eventNAME, row.eventTIME, row.UserID]);
+                // Step 3: Insert the fetched event for the target user (data.user)
+                await pool.query('INSERT INTO events (eventsID, eventname, eventtime, userID) VALUES (?, ?, ?, ?)', [row.eventsID, data.eventname, row.eventTIME, data.user]);
+
+                console.log("Event shared successfully");
+            } else {
+                throw new Error("Event not found for the source user");
+            }
+        } else {
+            console.log("Event already exists for the target user");
+        }
+    } catch (error) {
+        console.error("Error in shareEvent:", error);
+        throw error; // Rethrow the error to be handled by the caller
+    }
+}
+
+
+
+
+
+
+export async function shareEventGroup(data) {
+    const [members] = await pool.query('SELECT UserID from partof WHERE \
+    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
+    for (const username of members) {
+        shareEvent({
+            user: username.UserID,
+            'eventsid': data.eventid,
+            'eventname': data.eventname,
+        })
+    }
+}
+
 
 
 export async function insertTaskIntoDatabase(taskName, userID) {
