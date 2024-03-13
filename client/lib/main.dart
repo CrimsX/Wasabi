@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:client/login/view.dart';
 
+import 'package:flutter/services.dart';
+
 void main() {
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const WasabiApp());
 }
   

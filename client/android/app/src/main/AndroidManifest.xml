@@ -29,7 +29,8 @@
         <meta-data
             android:name="flutterEmbedding"
           android:value="2" />
-        <!-- Access camera and microphone -->
+    <!-- Access camera and microphone -->
+        <!--
         <uses-feature android:name="android.hardware.camera" />
         <uses-feature android:name="android.hardware.camera.autofocus" />
         <uses-permission android:name="android.permission.CAMERA" />
@@ -39,5 +40,6 @@
         <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
         <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
         <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+        -->
     </application>
 </manifest>

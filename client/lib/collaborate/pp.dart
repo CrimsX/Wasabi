@@ -123,6 +123,7 @@ class _PowerPointScreen2State extends State<PowerPointScreen2> {
                           ),
 
                         const SizedBox(width: 50),
+                        if (slideIndex.value == slideLength)
                         IconButton(
                           iconSize: 40,
                           icon: const Icon(Icons.plus_one),
