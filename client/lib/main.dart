@@ -24,7 +24,7 @@ class WasabiApp extends StatelessWidget {
      theme: ThemeData(
        primarySwatch: Colors.green,
      ),
-      home: Login(),
+      home: const Login(),
     );
   }
 }

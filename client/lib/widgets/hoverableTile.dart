@@ -5,7 +5,7 @@ class hoverableTile extends StatelessWidget {
   VoidCallback onTap;
   bool selected = false;
   
-  hoverableTile({required this.title, required this.onTap});
+  hoverableTile({super.key, required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class hoverableTile extends StatelessWidget {
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
-      tileColor: selected ? Colors.white : Color.fromARGB(255, 67, 153, 70),
+      tileColor: selected ? Colors.white : const Color.fromARGB(255, 67, 153, 70),
       onTap: onTap,
     );
   }

@@ -3,6 +3,23 @@
 import {Server} from 'socket.io'
 
 import {
+  createEvent,
+  getEvents,
+  insertTaskIntoDatabase,
+  updateTaskStatus,
+  undoTaskStatus,
+  deleteTask,
+  getAllTasks,
+  shareToDo,
+  shareToDoGroup,
+  getPowerPoints,
+  createPowerPoint,
+  deletePowerPoint,
+  sharePPT,
+  sharePPTGroup
+} from './database/collaborate.js'
+
+import {
   logIn,
   createAccount,
 } from './database/login.js'
@@ -28,13 +45,6 @@ import {
   fetchChat,
 } from './database/messaging.js'
 
-import {
-  getPowerPoints,
-  createPowerPoint,
-  deletePowerPoint,
-  sharePPT,
-  sharePPTGroup
-} from './database/collaborate.js'
 
 let port = process.env.PORT || 3000;
 
@@ -82,6 +92,98 @@ IO.on("connection", (socket) => {
   /************************************************************************************
    * Account Creation
    ************************************************************************************/
+
+
+    socket.on('createEvent', async (data) => {
+        const result = await createEvent(data);
+        console.log('test');
+    });
+
+
+
+    socket.on('getEvents', async (userID) => {
+        const result = await getEvents(userID);
+        IO.to(socket.id).emit('eventsResponse', result.events);
+    });
+
+
+
+     socket.on('createTask', async (data) => {
+         console.log('Received task data:', data);
+         try {
+           const { taskName, userID } = data;
+           // Call the function from database.js to insert task into the database
+           const result = await insertTaskIntoDatabase(taskName, userID);
+           console.log('Task created successfully:', result);
+           // Emit a confirmation event back to the client
+           socket.emit('taskCreated', { success: true, result });
+         } catch (error) {
+           console.error('Error creating task:', error);
+           // Emit an error event back to the client if task creation fails
+           socket.emit('taskCreationFailed', { success: false, error: error.message });
+         }
+       });
+
+
+     socket.on('updateTaskStatus', async (taskId) => {
+        try {
+          // Call the updateTaskStatus function from the database module
+          const result = await updateTaskStatus(taskId);
+          // Emit a response back to the client indicating whether the task status update was successful
+          IO.to(socket.id).emit('taskStatusUpdated', result);
+        } catch (error) {
+          console.error('Error updating task status:', error);
+          // Emit an error response back to the client if the task status update fails
+          IO.to(socket.id).emit('taskStatusUpdateFailed', { success: false, error: error.message });
+        }
+
+     });
+
+     socket.on('undoTaskStatus', async (taskId) => {
+       try {
+         // Call the function to update task status to 0 (opposite of 1) in the database
+         const result = await undoTaskStatus(taskId);
+         // Emit a response back to the client indicating whether the task status update was successful
+         IO.to(socket.id).emit('taskStatusUndone', result);
+       } catch (error) {
+         console.error('Error undoing task status:', error);
+         // Emit an error response back to the client if the task status update fails
+         IO.to(socket.id).emit('taskStatusUndoFailed', { success: false, error: error.message });
+       }
+     });
+
+       socket.on('deleteTask', async (taskID) => {
+         try {
+           // Call the deleteTask function from the database module
+           const result = await deleteTask(taskID);
+           // Emit a response back to the client indicating whether the task deletion was successful
+           IO.to(socket.id).emit('taskDeleted', result);
+         } catch (error) {
+           console.error('Error deleting task:', error);
+           // Emit an error response back to the client if the task deletion fails
+           IO.to(socket.id).emit('taskDeletionFailed', { success: false, error: error.message });
+         }
+       });
+
+     socket.on('getTasks', async (userID) => {
+       try {
+         const tasks = await getAllTasks(userID);
+         socket.emit('tasks', tasks);
+       } catch (error) {
+         // Handle error
+         console.error('Error:', error.message);
+         socket.emit('error', { message: 'Failed to fetch tasks' });
+       }
+     });
+
+     socket.on('sharetodofriend', async (data) => {
+      await shareToDo(data);
+    })
+
+    socket.on('sharetodogroup', async (data) => {
+      await shareToDoGroup(data);
+    })
+
 
   // Kipp
     socket.on('createaccount', async (data) => {
@@ -330,14 +432,14 @@ IO.on("connection", (socket) => {
       await deletePowerPoint(data);
     })
 
-    socket.on('buildfriendsppt', async (user) => {
+    socket.on('buildfriendscollab', async (user) => {
       const result = await getFriends(user);
-      IO.to(socket.id).emit('buildfriendsppt', result);
+      IO.to(socket.id).emit('buildfriendscollab', result);
     })
 
-    socket.on('buildgroupsppt', async (user) => {
+    socket.on('buildgroupscollab', async (user) => {
       const result = await getServers(user); //TODO: make query
-      IO.to(socket.id).emit('buildgroupsppt', result);
+      IO.to(socket.id).emit('buildgroupscollab', result);
     })
 
     socket.on('sharepptfriend', async (data) => {

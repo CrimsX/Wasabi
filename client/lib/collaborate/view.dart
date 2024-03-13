@@ -1,17 +1,9 @@
-import 'package:client/home/view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart';
 
-import 'package:provider/provider.dart';
-import 'package:client/home/view_model.dart';
-import 'package:client/home/model.dart';
 
-import 'package:intl/intl.dart';
-import 'dart:io';
 
-import 'dart:async';
-import 'package:client/login/view.dart';
 
 import 'package:client/services/network.dart';
 import 'package:client/collaborate/Calendar.dart';
@@ -20,13 +12,12 @@ import 'package:client/collaborate/Draw.dart';
 import 'package:client/collaborate/Powerpoint.dart';
 import 'package:client/collaborate/FileEditing.dart';
 
-import 'package:flutter/material.dart';
 // Ensure all necessary imports are here.
 class Collaborate extends StatefulWidget {
   final String username;
   final String serverIP;
 
-  Collaborate({required this.username, required this.serverIP});
+  const Collaborate({super.key, required this.username, required this.serverIP});
 
   @override
   _CollaborateState createState() => _CollaborateState();
@@ -34,22 +25,34 @@ class Collaborate extends StatefulWidget {
 
 class _CollaborateState extends State<Collaborate> {
   int _selectedTile = 0; // Assuming Calendar is the first tile with index 0
+  Socket? _socket;
+
+  @override
+  void initState() {
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    super.initState();
+    NetworkService.instance.init(
+      serverIP: widget.serverIP,
+      username: widget.username,
+    );
+    _socket = NetworkService.instance.socket;
+  }
 
   // Function to determine the content based on the selected tile
   Widget _getContentForSelectedTile(int index, String username, String serverIP) {
     switch (index) {
       case 0:
-        return CalendarScreen();
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
       case 1:
-        return TodoScreen();
+        return TodoScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
       case 2:
-        return DrawScreen();
+        return const DrawScreen();
       case 3:
-        return PowerPointScreen(username: username, serverIP: serverIP);
+        return PowerPointScreen(username: username, serverIP: serverIP, socket: _socket);
       case 4:
-        return FileEditingScreen();
+        return const FileEditingScreen();
       default:
-        return CalendarScreen(); // Default placeholder
+        return CalendarScreen(username: widget.username, serverIP: widget.serverIP, socket: _socket);
     }
   }
 

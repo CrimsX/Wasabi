@@ -6,9 +6,6 @@ import 'package:client/services/network.dart';
 import 'package:client/voice/view.dart';
 import 'package:client/groupvoice/view.dart';
 
-import 'package:client/home/view.dart';
-import 'package:provider/provider.dart';
-import 'package:client/home/view_model.dart';
 
 class rAppBar extends StatelessWidget {
   String friend = NetworkService.instance.getFriend;
@@ -16,6 +13,8 @@ class rAppBar extends StatelessWidget {
 
   String loggedInUsername = NetworkService.instance.getusername;
   String serverIP = NetworkService.instance.getserverIP;
+
+  rAppBar({super.key});
 
   // Join VoIP
   _joinCall(BuildContext context, {
@@ -58,7 +57,7 @@ class rAppBar extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    Socket? _socket = NetworkService.instance.socket;
+    Socket? socket = NetworkService.instance.socket;
 
     String selfCallerID = NetworkService.instance.getselfCallerID;
     String remoteCallerID = NetworkService.instance.getRemoteCallerID;
@@ -68,10 +67,10 @@ class rAppBar extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: Icon(Icons.call),
+          icon: const Icon(Icons.call),
           onPressed: () {
             if (type == 'DM') {
-              _socket!.emit("requestVoIPID", friend);
+              socket!.emit("requestVoIPID", friend);
               remoteCallerID = NetworkService.instance.getRemoteCallerID;
               print(remoteCallerID);
               print(friend);
@@ -86,12 +85,12 @@ class rAppBar extends StatelessWidget {
               }
             } else if (type == 'group') {
               for (int i = 0; i < groupNames.length; i++) {
-                _socket!.emit("requestVoIPID", groupNames[i]);
+                socket!.emit("requestVoIPID", groupNames[i]);
                 //NetworkService.instance.addGroupCallerID(NetworkService.instance.getRemoteCallerID);
               }
               groupCallerID = NetworkService.instance.getGroupCallerID;
 
-              if (groupCallerID.length != 0) {
+              if (groupCallerID.isNotEmpty) {
                 _joingroupCall(
                   context,
                   callerId: selfCallerID,
@@ -105,12 +104,12 @@ class rAppBar extends StatelessWidget {
         ),
 
         IconButton(
-          icon: Icon(Icons.video_call),
+          icon: const Icon(Icons.video_call),
           onPressed: () {
             if (type == 'DM') {
               //_receiveFriendVoIPID(context);
               //NetworkService.instance.socket!.emit!("requestVoIPID");
-              _socket!.emit("requestVoIPID", friend);
+              socket!.emit("requestVoIPID", friend);
               remoteCallerID = NetworkService.instance.getRemoteCallerID;
               print(remoteCallerID);
               print(friend);
@@ -125,7 +124,7 @@ class rAppBar extends StatelessWidget {
               }
             } else if (type == 'group') {
               for (int i = 0; i < groupNames.length; i++) {
-                _socket!.emit("requestVoIPID", groupNames[i]);
+                socket!.emit("requestVoIPID", groupNames[i]);
                 //NetworkService.instance.addGroupCallerID(NetworkService.instance.getRemoteCallerID);
               }
               groupCallerID = NetworkService.instance.getGroupCallerID;
@@ -144,7 +143,7 @@ class rAppBar extends StatelessWidget {
                   }
                   */
 
-              if (groupCallerID.length != 0) {
+              if (groupCallerID.isNotEmpty) {
                 _joingroupCall(
                   context,
                   callerId: selfCallerID,
@@ -166,7 +165,7 @@ class rAppBar extends StatelessWidget {
           },
           color: Colors.white,
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(right: 25),
         ), 
       ]

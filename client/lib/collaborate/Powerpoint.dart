@@ -8,8 +8,9 @@ import 'dart:async';
 class PowerPointScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
+  Socket? socket;
 
-  PowerPointScreen({required this.username, required this.serverIP});
+  PowerPointScreen({required this.username, required this.serverIP, required this.socket});
   _PowerPointScreenState createState() => _PowerPointScreenState();
 }
 
@@ -17,26 +18,28 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   final List<dynamic> _powerpoints = [];
   final List<dynamic> _friends = [];
   final List<dynamic>_groups = [];
-  Socket? _socket;
+  //Socket? _socket;
 
   @override
   void initState() {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
+    /*
     NetworkService.instance.init(
       serverIP: widget.serverIP,
       username: widget.username,
     );
     _socket = NetworkService.instance.socket;
+    */
     _connectSocket();
 
-    _socket!.emit('getpowerpoints', widget.username);
-    _socket!.emit('buildfriendsppt', widget.username);
-    _socket!.emit('buildgroupsppt', widget.username);
+    widget.socket!.emit('getpowerpoints', widget.username);
+    widget.socket!.emit('buildfriendscollab', widget.username);
+    widget.socket!.emit('buildgroupscollab', widget.username);
   }
 
   void _connectSocket() {
-    _socket!.on('getpowerpoints', (data) {
+    widget.socket!.on('getpowerpoints', (data) {
       if(mounted) {
         print(data);
         setState(() {
@@ -47,15 +50,15 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
       }
     });
 
-    _socket!.on('createppt', (data) {
+    widget.socket!.on('createppt', (data) {
       _createTile(data);
     });
 
-    _socket!.on('buildfriendsppt', (data) {
+    widget.socket!.on('buildfriendscollab', (data) {
       _friends.addAll(data);
     });
 
-    _socket!.on('buildgroupsppt', (data) {
+    widget.socket!.on('buildgroupscollab', (data) {
       _groups.addAll(data);
     });
   }
@@ -68,7 +71,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   }
 
   void _createPptInDatabase(username, title, url) {
-    _socket!.emit('createppt', {
+    widget.socket!.emit('createppt', {
       'userID': username,
       'title': title,
       'url': url
@@ -206,7 +209,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   }
 
   void deletePpt(index, pptid) {
-    _socket!.emit('deleteppt', {'PptID':pptid, 'user':widget.username});
+    widget.socket!.emit('deleteppt', {'PptID':pptid, 'user':widget.username});
     setState(() {
       _powerpoints.removeAt(index);
     });
@@ -322,12 +325,12 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
                     // Perform actions based on the checked items
                     for (int i = 0; i < items.length; i++) {
                       if (checkedItems[i] && option == 0) {
-                        _socket!.emit('sharepptfriend', {
+                        widget.socket!.emit('sharepptfriend', {
                           'user': _friends[i][key],
                           'Ppt': Ppt
                           });
                       } else if (checkedItems[i] && option == 1) {
-                        _socket!.emit('sharepptgroup', {
+                        widget.socket!.emit('sharepptgroup', {
                           'group': _groups[i][key],
                           'Ppt': Ppt
                           });

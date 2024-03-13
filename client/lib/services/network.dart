@@ -1,9 +1,6 @@
 //import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart';
 
-import 'package:provider/provider.dart';
-import 'package:client/home/view_model.dart';
-import 'package:client/home/model.dart';
 
 import 'dart:math';
 
@@ -34,7 +31,7 @@ class NetworkService {
 
     this.serverIP = serverIP;
     this.username = username;
-    this.selfCallerID = selfCallerID;
+    selfCallerID = selfCallerID;
 
     /*
     socket = IO.io(
@@ -111,7 +108,7 @@ class NetworkService {
     }
 
     addGroupNames(String Name) {
-      this.groupNames.add(Name);
+      groupNames.add(Name);
     }
 
     addGroupCallerID(String groupCallerID) {
