@@ -20,19 +20,10 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   final List<dynamic>_groups = [];
 
   bool isWebsite = false;
-  //Socket? _socket;
 
   @override
-  void initState() {
-    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    super.initState();
-    /*
-    NetworkService.instance.init(
-      serverIP: widget.serverIP,
-      username: widget.username,
-    );
-    _socket = NetworkService.instance.socket;
-    */
+  void initState() { 
+    super.initState(); 
     _connectSocket();
 
     widget.socket!.emit('getpowerpoints', widget.username);
@@ -413,7 +404,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
 
     return Scaffold(
     appBar: AppBar(
-      title: const Text('Powerpoint'),
+      title: const Text('Powerpoints'),
       backgroundColor: Colors.green,
     ),
       body: new Stack(
@@ -426,7 +417,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
               ),
             ),
           ),
-          /*
+          
           Positioned(
             top: 0,
             left: 0,
@@ -456,7 +447,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
               ),
             ),
           ),
-          */
+          
           /*
           Positioned(
             top: 0,
@@ -482,23 +473,7 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
           ),
           */
           new Column(
-            children: [
-            /*
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(
-                  child: Text(
-                    'PowerPoints',
-                    style: TextStyle(
-                      fontSize: 24, // Adjust font size as needed
-                      fontWeight: FontWeight.bold, // Adjust font weight as needed
-                      color: Colors.green, // Adjust color as needed
-                    ),
-
-                  ),
-                ),
-              ),
-              */
+            children: [  
               Expanded(
                 child:
                   _buildPptList(_powerpoints)

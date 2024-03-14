@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
+
 import 'package:client/login/view.dart';
 
 void main() {
@@ -7,6 +9,7 @@ void main() {
 }
   
 class WasabiApp extends StatelessWidget {
+   //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   const WasabiApp({Key? key}) : super(key: key);
 
   @override

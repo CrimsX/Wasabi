@@ -8,26 +8,26 @@ class DrawScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text('Draw'),
-      backgroundColor: Colors.green,
-    ),
-    /*
+      appBar: AppBar(
+        title: const Text('Draw'),
+        backgroundColor: Colors.green,
+      ),
+      /*
       body: Center(
         child: Image.asset('assets/DrawingImage.webp'),
       ),
       */
-    body: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: [
-              Expanded(
-                child: WhiteBoard(),
-              ),
-            ],
-          ),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          children: [
+            Expanded(
+              child: WhiteBoard(),
+            ),
+          ],
         ),
+      ),
     );
   }
 }

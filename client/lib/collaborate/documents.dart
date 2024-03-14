@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class FileEditingScreen extends StatelessWidget {
-  const FileEditingScreen({super.key});
+class DocumentsScreen extends StatelessWidget {
+  const DocumentsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
     appBar: AppBar(
-      title: const Text('File Editing'),
+      title: const Text('Documents'),
       backgroundColor: Colors.green,
     ),
       body: Center(

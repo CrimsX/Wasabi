@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'package:socket_io_client/socket_io_client.dart';
+import 'package:client/services/network.dart';
 
 import 'package:provider/provider.dart';
 
@@ -19,29 +21,25 @@ class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
-  IO.Socket? _socket; // Now nullable to safely handle initialization
+  Socket? _socket; // Now nullable to safely handle initialization
   bool isPasswordVisible = false;
 
   @override
   void initState() {
     super.initState();
-    initializeSocket();
-  }
-
-  void initializeSocket() {
-    // Assuming serverIPController contains the full server IP including protocol and port
-    //String serverIP = serverIPController.text.isNotEmpty ? "http://${serverIPController.text}" : 'http://192.168.56.1:3000';
-    String serverIP = "http://localhost:3000";
-
-    // Initialize socket connection
-    _socket = IO.io(serverIP, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false, // Changed to true to ensure connection starts immediately
-    });
-  }
+  } 
 
   void _login(BuildContext context) {
-    _socket!.connect(); 
+    String serverIP = serverIPController.text.isNotEmpty ? serverIPController.text.trim() : 'http://localhost:3000/';
+    //print(serverIP);
+
+    NetworkService.instance.init(
+      serverIP: serverIP,
+      username: usernameController.text.trim(),
+    );
+
+    _socket = NetworkService.instance.socket;
+
     // Check if _socket is initialized
     if (_socket != null) {
       _socket!.emit('login', {
@@ -59,6 +57,7 @@ class _LoginState extends State<Login> {
                 child: HomeScreen(
                   username: usernameController.text.trim(),
                   serverIP: serverIPController.text.trim(),
+                  socket: _socket,
                 ),
               ),
             ),
