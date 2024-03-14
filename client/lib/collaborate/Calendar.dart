@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:client/services/network.dart';
 
 class Event {
   final String name;
@@ -28,27 +29,171 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _showFloatingButton = false;
+  final List<dynamic> _friends = [];
+  final List<dynamic>_groups = [];
+  GlobalKey _calendarKey = GlobalKey();
+
 
   final Map<DateTime, List<CalendarEvent>> _events = {
     DateTime.utc(2024, 2, 20): [
-      CalendarEvent(name: 'Event 1', time: const TimeOfDay(hour: 10, minute: 30)),
-      CalendarEvent(name: 'Event 2', time: const TimeOfDay(hour: 14, minute: 45)),
+      CalendarEvent(name: 'Event 1', time: TimeOfDay(hour: 10, minute: 30)),
+      CalendarEvent(name: 'Event 2', time: TimeOfDay(hour: 14, minute: 45)),
     ],
   };
 
+  void _shareForm(event) {
+    int selectedOption = 0; // Track the selected radio button option
 
-//  @override
-//  void initState() {
- //   super.initState();
- //   initializeSocket();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text("Would you like to share this event?"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RadioListTile(
+                      title: Text('Share with friends'),
+                      value: 0,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                    RadioListTile(
+                      title: Text('Share with group'),
+                      value: 1,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Don\'t share'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  child: Text('Next'),
+                  onPressed: () {
 
-  //  _socket!.on('eventsResponse', (events) {
-   //   setState(() {
-        // Update _events map with fetched events
-  //      _updateEvents(events);
-  //    });
-  //  });
- // }
+                    Navigator.of(context).pop();
+                    _shareSelect(selectedOption, event);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _shareSelect(option, event) {
+    List<dynamic> items = [];
+    String key = "";
+    if (option == 0){
+      items = _friends;
+      key = 'FriendID';
+    } else if (option == 1) {
+      items = _groups;
+      key = 'ServerName';
+    }
+    List<bool> checkedItems = List<bool>.filled(items.length, false); // Initialize with false values
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select Items'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    items.length,
+                        (index) {
+                      return CheckboxListTile(
+                        title: Text(items[index][key]),
+                        value: checkedItems[index],
+                        onChanged: (newValue) {
+                          print('Checkbox $index tapped');
+                          setState(() {
+                            checkedItems[index] = newValue!;
+                          });
+                          print('Checkbox $index is now ${checkedItems[index]}');
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Perform actions based on the checked items
+                    for (int i = 0; i < items.length; i++) {
+
+                      if (checkedItems[i] && option == 0) {
+                        print('Emitting shareEvent with data:');
+                        print({
+                          'user': _friends[i][key],
+                          'eventname': event.name,
+                          'eventTIME': event.time.toString(),
+                          'userID': widget.username,
+                        });
+                        widget.socket!.emit('shareEvent', {
+                          'user': _friends[i][key],
+                          'eventname': event.name,
+                          'eventTIME': event.time.toString(),
+                          'userID': widget.username,
+                        });
+                      } else if (checkedItems[i] && option == 1) {
+                        print('Emitting shareEventGroup with data:');
+                        print({
+                          'group': _groups[i][key],
+                          'user': widget.username,
+                          'eventname': event.name,
+                          'eventTIME': event.time.toString(),
+                        });
+                        widget.socket!.emit('shareEventGroup', {
+                          'group': _groups[i][key],
+                          'user': widget.username,
+                          'eventname': event.name,
+                          'eventTIME': event.time.toString(),
+                        });
+                      }
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text('Share'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
 
   @override
   void initState() {
@@ -56,6 +201,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     print(widget.username);
 
     super.initState();
+    initializeSocket();
     /*
     NetworkService.instance.init(
       serverIP: widget.serverIP,
@@ -64,19 +210,54 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     _socket = NetworkService.instance.socket;
     */
-    initializeSocket();
 
-    widget.socket!.emit('getEvents');
 
-    widget.socket!.on('eventsResponse', (events) {
+
+    widget.socket!.emit('getEvents', widget.username);
+    widget.socket!.on('eventResponse', (events) {
+      print("Received events: $events"); // Log the received events
       if (mounted) {
         setState(() {
           // Update _events map with fetched events
           _updateEvents(events);
-          });
+        });
       }
     });
+
+
+
+
+
+    widget.socket!.on('eventCreated', (eventData) {
+      print("New event created: $eventData");
+      if (mounted) {
+        setState(() {
+          DateTime eventDateTime = DateTime.parse(eventData['eventTIME']).toLocal();
+          DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
+          TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+          var newEvent = CalendarEvent(name: eventData['eventNAME'], time: eventTime);
+
+          DateTime normalizedEventDate = DateTime(eventDate.year, eventDate.month, eventDate.day);
+
+          if (_events.containsKey(normalizedEventDate)) {
+            _events[normalizedEventDate]!.add(newEvent);
+          } else {
+            _events[normalizedEventDate] = [newEvent];
+          }
+
+          // Reset the GlobalKey to force the TableCalendar widget to rebuild
+          _calendarKey = GlobalKey();
+
+          print("setState is called! Events after update: $_events");
+        });
+      }
+    });
+
+
   }
+
+
+
 
 
 
@@ -84,15 +265,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 
   void _updateEvents(List<dynamic> events) {
+    // Clear existing events
     _events.clear();
+
+    // Process each event received from the backend
     for (var event in events) {
-      DateTime eventDate = DateTime.parse(event['eventTIME']);
-      if (_events[eventDate] == null) {
-        _events[eventDate] = [];
-      }
-      _events[eventDate]!.add(CalendarEvent(name: event['eventNAME'], time: TimeOfDay.fromDateTime(eventDate)));
+      DateTime eventDateTime = DateTime.parse(event['eventTime']).toLocal(); // Convert to local time
+      DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
+      TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+
+      _events.putIfAbsent(eventDate, () => []).add(CalendarEvent(name: event['eventName'], time: eventTime));
     }
+
+    // Trigger a UI refresh
+    setState(() {});
   }
+
+
 
   void initializeSocket() {
 
@@ -110,20 +299,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Listen for socket disconnection
     widget.socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
+
+
+    widget.socket!.emit('buildfriendscollab', widget.username);
+    widget.socket!.emit('buildgroupscollab', widget.username);
+
+    // Listen for responses to build friends collaboration
+    widget.socket!.on('buildfriendscollab', (data) {
+      if (mounted) {
+        setState(() {
+          _friends.addAll(data);
+        });
+      }
+    });
+
+    // Listen for responses to build groups collaboration
+    widget.socket!.on('buildgroupscollab', (data) {
+      if (mounted) {
+        setState(() {
+          _groups.addAll(data);
+        });
+      }
+    });
+
+
+
   }
 
-  // Create event
-  void emitCreateEvent({required String eventName, required String eventTime, String? shareToUser, String? shareToServer}) {
+
+  void emitCreateEvent({required String eventName, required String eventTime}) {
     print('Emitting createEvent with name: $eventName, time: $eventTime');
 
-      widget.socket!.emit('createEvent', {
-        'eventName': eventName,
-        'eventTime': eventTime,
-        'userID': widget.username,
-      });
+    widget.socket!.emit('createEvent', {
+      'eventName': eventName,
+      'eventTime': eventTime,
+      'userID': widget.username,
+    });
   }
 
-  // M3
+
 
 
   @override
@@ -132,8 +346,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: Column(
         children: [
           TableCalendar(
+            key: _calendarKey, // edited
             firstDay: DateTime.utc(2010, 10, 16),
-            lastDay: DateTime.utc(2030, 3, 14),
+            lastDay: DateTime.utc(2090, 3, 14),
             focusedDay: _focusedDay,
             calendarFormat: _calendarFormat,
             availableCalendarFormats: const {CalendarFormat.month: 'Month'},
@@ -143,12 +358,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(20.0),
               ),
-              formatButtonTextStyle: const TextStyle(color: Colors.white),
+              formatButtonTextStyle: TextStyle(color: Colors.white),
             ),
             calendarStyle: CalendarStyle(
-              defaultDecoration: const BoxDecoration(shape: BoxShape.circle),
-              weekendDecoration: const BoxDecoration(shape: BoxShape.circle),
-              selectedDecoration: const BoxDecoration(
+              defaultDecoration: BoxDecoration(shape: BoxShape.circle),
+              weekendDecoration: BoxDecoration(shape: BoxShape.circle),
+              selectedDecoration: BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
               ),
@@ -185,37 +400,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     child: _buildEventsMarker(date, events),
                   );
                 }
-                return null;
               },
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _selectedDay != null ? _getEventsForDay(_selectedDay!)
-                  .length : 0,
+              itemCount: _selectedDay != null ? _getEventsForDay(_selectedDay!).length : 0,
               itemBuilder: (context, index) {
                 if (_selectedDay != null) {
                   final events = _getEventsForDay(_selectedDay!);
                   final event = events[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 4.0, horizontal: 8.0),
-                    color: Colors
-                        .green,
+                    margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                     child: ListTile(
-                      leading: const Icon(Icons.event, color: Colors.white),
-                      // Icon color changed to white
+                      leading: Icon(Icons.event, color: Colors.white),
                       title: Text(
                         event.name,
-                        style: const TextStyle(color: Colors
-                            .white), // Text color changed to white
+                        style: TextStyle(color: Colors.white),
                       ),
                       subtitle: Text(
                         event.time?.format(context) ?? '',
-                        style: const TextStyle(color: Colors
-                            .white), // Text color changed to white
-                      ), // Icon color changed to white
-                    ), // Add this to change the card's background color to ensure white text is visible
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.group_add_outlined, color: Colors.white),
+                        onPressed: () => _shareForm(event),
+                      ),
+                    ),
+                    color: Colors.green,
                   );
                 } else {
                   return Container(); // No selected day
@@ -230,11 +442,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ? FloatingActionButton(
           backgroundColor: Colors.green,
           onPressed: () => _showAddEventDialog(context),
-          child: const Icon(Icons.add, color: Colors.white)
+          child: Icon(Icons.add, color: Colors.white)
       )
           : null,
     );
   }
+
+
+
+
+
+
+
+
+
+
 
   List<CalendarEvent> _getEventsForDay(DateTime day) {
     return _events[_normalizeDateTime(day)]?.cast<CalendarEvent>() ?? [];
@@ -254,11 +476,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Center(
         child: Text(
           '${events.length}',
-          style: const TextStyle().copyWith(color: Colors.white, fontSize: 12.0),
+          style: TextStyle().copyWith(color: Colors.white, fontSize: 12.0),
         ),
       ),
     );
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   void _showAddEventDialog(BuildContext context) {
     TextEditingController eventNameController = TextEditingController();
@@ -267,32 +508,51 @@ class _CalendarScreenState extends State<CalendarScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) => AddEventDialog(
-        onSaveEvent:(eventName, eventTime, shareToUser, shareToServer) {
-          if (eventName.isNotEmpty) {
-            print("1");
-            final selectedDayNormalized = _normalizeDateTime(_selectedDay ?? _focusedDay);
-            print("2");
-            if (_events[selectedDayNormalized] != null) {
-              _events[selectedDayNormalized]!.add(CalendarEvent(name: eventName, time: pickedTime));
-              print("3");
-            } else {
-              emitCreateEvent(eventName: eventName, eventTime: eventTime, shareToUser: shareToUser, shareToServer: shareToServer);
-              print("4");
+        selectedDay: _selectedDay ?? _focusedDay, // For selected day
+        onSaveEvent: (eventName, eventTime) {
+          if (eventName.isNotEmpty && eventTime != null) {
+            final selectedDayNormalized =
+            _normalizeDateTime(_selectedDay ?? _focusedDay);
+
+            // Check if pickedTime is not null
+            if (pickedTime != null) {
+              // Add the event only if pickedTime is not null
+              if (_events.containsKey(selectedDayNormalized)) {
+                _events[selectedDayNormalized]!.add(
+                    CalendarEvent(name: eventName, time: pickedTime));
+              } else {
+                _events[selectedDayNormalized] = [
+                  CalendarEvent(name: eventName, time: pickedTime)
+                ];
+              }
             }
-            setState(() {}); // Refresh UI to show new event
-            print("5");
+
+            // Move the emitCreateEvent call here
+            emitCreateEvent(
+                eventName: eventName,
+                eventTime: eventTime);
+            // Do not call setState here
           }
-          print('6');
         },
       ),
     );
   }
 }
 
-class AddEventDialog extends StatefulWidget {
-  final Function(String eventName, String eventTime, String? shareToUser, String? shareToServer) onSaveEvent;
 
-  const AddEventDialog({Key? key, required this.onSaveEvent}) : super(key: key);
+
+
+class AddEventDialog extends StatefulWidget {
+  final DateTime selectedDay;
+  final Function(String eventName, String eventTime) onSaveEvent;
+
+  const AddEventDialog({
+    Key? key,
+    required this.selectedDay,
+    required this.onSaveEvent
+  }) : super(key: key);
+
+
 
   @override
   _AddEventDialogState createState() => _AddEventDialogState();
@@ -300,8 +560,6 @@ class AddEventDialog extends StatefulWidget {
 
 class _AddEventDialogState extends State<AddEventDialog> {
   final TextEditingController eventNameController = TextEditingController();
-  final TextEditingController shareToUserController = TextEditingController();
-  final TextEditingController shareToServerController = TextEditingController();
   TimeOfDay? pickedTime;
 
   void _selectTime() async {
@@ -319,46 +577,43 @@ class _AddEventDialogState extends State<AddEventDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Create Event"),
+      title: Text("Create Event"),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             TextField(
               controller: eventNameController,
-              decoration: const InputDecoration(hintText: "Name of Event"),
+              decoration: InputDecoration(hintText: "Name of Event"),
             ),
             ListTile(
               title: Text(
                   "Time of Event: ${pickedTime?.format(context) ?? 'Not Set'}"),
-              trailing: const Icon(Icons.timer),
+              trailing: Icon(Icons.timer),
               onTap: _selectTime,
-            ),
-            TextField(
-              controller: shareToUserController,
-              decoration: const InputDecoration(hintText: "Share to user (Optional)"),
-            ),
-            TextField(
-              controller: shareToServerController,
-              decoration: const InputDecoration(
-                  hintText: "Share to server (Optional)"),
             ),
           ],
         ),
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Cancel'),
+          child: Text('Cancel'),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: const Text('Save'),
+          child: Text('Save'),
           onPressed: () {
             if (eventNameController.text.isNotEmpty && pickedTime != null) {
-              // Format the time and call the onSaveEvent callback
-              final DateTime now = DateTime.now();
-              final DateTime eventDateTime = DateTime(now.year, now.month, now.day, pickedTime!.hour, pickedTime!.minute);
-              final String formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(eventDateTime);
-              widget.onSaveEvent(eventNameController.text, formattedTime, shareToUserController.text, shareToServerController.text);
+              final eventDateTimeUTC = DateTime.utc(
+                widget.selectedDay.year,
+                widget.selectedDay.month,
+                widget.selectedDay.day,
+                pickedTime!.hour,
+                pickedTime!.minute,
+              );
+              final String formattedTime =
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(eventDateTimeUTC);
+
+              widget.onSaveEvent(eventNameController.text, formattedTime);
               Navigator.of(context).pop();
             }
           },
@@ -367,6 +622,8 @@ class _AddEventDialogState extends State<AddEventDialog> {
     );
   }
 }
+
+
 
 class CalendarEvent {
   final String name;
