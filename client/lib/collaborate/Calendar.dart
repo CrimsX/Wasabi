@@ -306,16 +306,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Listen for responses to build friends collaboration
     widget.socket!.on('buildfriendscollab', (data) {
-      setState(() {
-        _friends.addAll(data);
-      });
+      if (mounted) {
+        setState(() {
+          _friends.addAll(data);
+        });
+      }
     });
 
     // Listen for responses to build groups collaboration
     widget.socket!.on('buildgroupscollab', (data) {
-      setState(() {
-        _groups.addAll(data);
-      });
+      if (mounted) {
+        setState(() {
+          _groups.addAll(data);
+        });
+      }
     });
 
 
