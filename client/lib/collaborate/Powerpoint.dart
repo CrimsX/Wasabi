@@ -18,6 +18,8 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   final List<dynamic> _powerpoints = [];
   final List<dynamic> _friends = [];
   final List<dynamic>_groups = [];
+
+  bool isWebsite = false;
   //Socket? _socket;
 
   @override
@@ -115,6 +117,10 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
         );
       },
     );
+  }
+
+  void _createPP() {
+
   }
 
   _launchUrl(url) async {
@@ -397,31 +403,119 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Center(
-            child: Text(
-              'PowerPoints',
-              style: TextStyle(
-                fontSize: 24, // Adjust font size as needed
-                fontWeight: FontWeight.bold, // Adjust font weight as needed
-                color: Colors.green, // Adjust color as needed
-              ),
+    String slideType;
+    // add !
+    if (isWebsite) {
+      slideType = 'Slides';
+    } else {
+      slideType = "Website";
+    }
 
+    return Scaffold(
+    appBar: AppBar(
+      title: const Text('Powerpoint'),
+      backgroundColor: Colors.green,
+    ),
+      body: new Stack(
+        children: <Widget>[
+          Container(
+            decoration: new BoxDecoration(
+              image: new DecorationImage(
+                image: new AssetImage("assets/PowerpointImage.webp"),
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
+              ),
             ),
-            )
           ),
-          Expanded(
-            child: _buildPptList(_powerpoints)
-                 ),
+          /*
+          Positioned(
+            top: 0,
+            left: 0,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+              ),
+              child: ColoredBox(
+                color: Colors.black12,
+                child:  TextButton(
+                  style: TextButton.styleFrom(
+                    //foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(16.0),
+                    //padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    textStyle: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    if (isWebsite) {
+                      isWebsite = false;
+                    } else {
+                      isWebsite = true;
+                    }
+                    setState(() {});
+                  },
+                  child: Text(slideType),
+                ),
+              ),
+            ),
+          ),
+          */
+          /*
+          Positioned(
+            top: 0,
+            right: 0,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+              ),
+              child: ColoredBox(
+                color: Colors.black12,
+                child:  TextButton(
+                  style: TextButton.styleFrom(
+                    //foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(16.0),
+                    //padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    textStyle: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {},
+                  child: const Text('Export'),
+                ),
+              ),
+            ),
+          ),
+          */
+          new Column(
+            children: [
+            /*
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                    'PowerPoints',
+                    style: TextStyle(
+                      fontSize: 24, // Adjust font size as needed
+                      fontWeight: FontWeight.bold, // Adjust font weight as needed
+                      color: Colors.green, // Adjust color as needed
+                    ),
+
+                  ),
+                ),
+              ),
+              */
+              Expanded(
+                child:
+                  _buildPptList(_powerpoints)
+              ), 
+            ],
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        onPressed: _createPowerpoint,
+        onPressed: () {
+          if (!isWebsite) {
+            _createPowerpoint();
+          } else {
+            _createPP();    
+          }
+        },
         child: Icon(Icons.add, color: Colors.white),
       ),
     );

@@ -330,6 +330,10 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+    appBar: AppBar(
+      title: const Text('Todo list'),
+      backgroundColor: Colors.green,
+    ),
       body: Column(
         children: [
           Expanded(

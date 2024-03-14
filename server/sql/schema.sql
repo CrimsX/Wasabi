@@ -158,6 +158,19 @@ CREATE TABLE tasks (
     taskNAME VARCHAR(300) NOT NULL,
     taskStatus INT NOT NULL CHECK (taskStatus IN (0, 1)),
     UserID VARCHAR(20),
-    PRIMARY KEY (tasksID, UserID),
+    PRIMARY KEY (taskID, UserID),
     FOREIGN KEY (UserID) REFERENCES client(UserID)
 );
+
+/*
+CREATE TABLE pp {
+    ppID INT AUTO_INCREMENT,
+    userID VARCHAR(20),
+    ppName VARCHAR(100) NOT NULL,
+    ppSlideNum INT NOT NULL,
+    ppSlideHeader VARCHAR(100) NOT NULL,
+    ppSlideContent VARCHAR(1000) NOT NULL,
+    PRIMARY KEY (ppID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+};
+*/
