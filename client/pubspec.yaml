@@ -43,6 +43,7 @@ dependencies:
   hive: ^2.2.3
   share_plus: ^7.2.2
   url_launcher: ^6.1.6
+  whiteboard: ^0.0.2
 
 
 dev_dependencies:
