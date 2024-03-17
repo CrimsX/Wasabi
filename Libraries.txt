@@ -7,6 +7,7 @@ mysql2
 dotenv
 nodemon
 bcrypt
+prisma
 
 Flutter:
 socket.io
