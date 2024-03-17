@@ -5,6 +5,8 @@ import 'package:client/services/network.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'dart:async';
 
+import 'pp.dart';
+
 class PowerPointScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
@@ -417,8 +419,17 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
               ),
             ),
           ),
-          
-          Positioned(
+           
+          new Column(
+            children: [  
+              Expanded(
+                child:
+                  _buildPptList(_powerpoints)
+              ), 
+            ],
+          ),
+
+Positioned(
             top: 0,
             left: 0,
             child: ClipRRect(
@@ -472,14 +483,8 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
             ),
           ),
           */
-          new Column(
-            children: [  
-              Expanded(
-                child:
-                  _buildPptList(_powerpoints)
-              ), 
-            ],
-          ),
+
+
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -488,7 +493,15 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
           if (!isWebsite) {
             _createPowerpoint();
           } else {
-            _createPP();    
+            //_createPP();   
+            
+            Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PowerPointScreen2(),
+                    ),
+                    );
+            
           }
         },
         child: Icon(Icons.add, color: Colors.white),
