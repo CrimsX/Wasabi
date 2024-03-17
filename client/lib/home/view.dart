@@ -65,18 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool start = true;
 
   @override
-  void initState() {
-    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    /*
-    print(widget.username);
-    if (widget.serverIP == '') {
-      //widget.serverIP = "https://wasabi-server.fly.dev/";
-      widget.serverIP = "http://localhost:3000";
-    } else {
-      widget.serverIP = "http://${widget.serverIP}:3000/";
-    }
-    */
-
+  void initState() { 
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _serverListCompleter = Completer<List<Widget>>();

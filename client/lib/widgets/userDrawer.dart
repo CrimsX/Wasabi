@@ -10,9 +10,9 @@ import 'package:client/login/view.dart';
 
 import 'package:client/collaborate/Calendar.dart';
 import 'package:client/collaborate/Todo.dart';
-import 'package:client/collaborate/Draw.dart';
+import 'package:client/collaborate/draw/view.dart';
 import 'package:client/collaborate/Powerpoint.dart';
-import 'package:client/collaborate/documents.dart';
+import 'package:client/collaborate/documents/view.dart';
 
 class userDrawer extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();

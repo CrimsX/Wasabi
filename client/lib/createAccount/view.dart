@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'view_model.dart';
+import 'viewModel.dart';
 
 class CreateAccount extends StatefulWidget {
   String serverIP = "";

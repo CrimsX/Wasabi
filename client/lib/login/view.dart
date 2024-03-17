@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'view_model.dart';
+import 'viewModel.dart';
 import 'model.dart';
 
 import '../createAccount/view.dart';
