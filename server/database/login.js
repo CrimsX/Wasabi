@@ -1,5 +1,6 @@
 import mysql from 'mysql2'
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
 
 dotenv.config()
 
@@ -8,9 +9,11 @@ const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
 export async function logIn(data) {
     try {
         const { userID, password } = data;
+
         // Fetch the password for the given userID
-        const [rows] = await pool.query('SELECT Pass FROM client WHERE UserID = ? AND Pass = ?', [userID, password]);
-        if (rows.length > 0) {
+        const [rows] = await pool.query('SELECT Pass FROM client WHERE UserID = ?', [userID]);
+
+        if (bcrypt.compareSync(password, rows[0]["Pass"])) {
             // If a row is found, the password matches
             return { success: true, message: "Login successful" };
         } else {
@@ -26,13 +29,21 @@ export async function logIn(data) {
 // for create account to insert the username and password
 export async function createAccount(data) {
     try {
-        const { userID, Firstname, Lastname, password } = data;
+        const { userID, displayName, password } = data;
 
-        // will implement hashing for password next time
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
 
         // inserts userID FirstName, LastNAme, and password.
-        const [result] = await pool.query("INSERT INTO client (UserID,  Firstname, Lastname, Pass) VALUES (?, ?, ?, ?)", [userID, Firstname, Lastname, password]);
-        return { success: true, message: "Account created successfully.", userID: userID };
+        const [check] = await pool.query('SELECT COUNT(UserID) FROM client WHERE UserID = ?', [userID]);
+        //console.log(check[0]['COUNT(UserID)']);
+
+        if (check[0]['COUNT(UserID)'] > 0) {
+            return { success: false, message: "Username already exists." };
+        } else {
+          const [result] = await pool.query("INSERT INTO client (UserID,  displayName, Pass) VALUES (?, ?, ?)", [userID, displayName, hash]);
+          return { success: true, message: "Account created successfully.", userID: userID };
+        }
     } catch (error) {
         console.error("Error creating account:", error.message);
         return { success: false, message: "Failed to create account.", error: error.message };

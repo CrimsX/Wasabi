@@ -24,9 +24,6 @@ class HomeScreen extends StatefulWidget {
   String serverIP = '';
   Socket? socket;
 
-  //String username = NetworkService.instance.getusername;
-  //String serverIP = NetworkService.instance.getserverIP;
-
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({super.key, required this.username, required this.serverIP, required this.socket});
   @override
@@ -84,15 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _friendsListCompleter = Completer<List<Widget>>();
     _serverListCompleter = Completer<List<Widget>>();
 
-/*
-    NetworkService.instance.init(
-      serverIP: widget.serverIP,
-      username: widget.username,
-    );
-
-
-    _socket = NetworkService.instance.socket;
-    */
     _socket = widget.socket;
 
     _connectSocket();
