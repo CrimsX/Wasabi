@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 
-import 'package:flutter_pptx/flutter_pptx.dart';
+//import 'package:flutter_pptx/flutter_pptx.dart';
 import 'package:file_saver/file_saver.dart';
 
 import 'dart:typed_data';
@@ -14,7 +14,7 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-
+/*
 Future<void> downloadFile(String name, Uint8List bytes) async {
   await FileSaver.instance.saveFile(
       name: name,
@@ -36,7 +36,7 @@ Future<void> downloadPresentation(FlutterPowerPoint pres) async {
     //await file.writeAsBytes(bytes);
     downloadFile('presentation.pptx', bytes);      
   }
-
+*/
 class PowerPointScreen2 extends StatefulWidget {
   //HomeScreen({required this.username, required this.serverIP});
   State<PowerPointScreen2> createState() => _PowerPointScreen2State();

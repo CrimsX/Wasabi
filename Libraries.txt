@@ -25,6 +25,7 @@ isar_flutter_libs
 path_provider
 hive_flutter
 peerdart
+flutter_quill
 
 fly.io
 planetscale
