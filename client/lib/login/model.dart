@@ -1,3 +1,10 @@
+class LoginModel {
+  Servers? selectedServer;
+  bool isPasswordVisible;
+
+  LoginModel({this.selectedServer = Servers.server1, this.isPasswordVisible = false});
+}
+
 enum Servers {
   server1("Wasabi", "https://wasabi-server.fly.dev/"),
   server2("localhost", 'http://localhost:8080/'),

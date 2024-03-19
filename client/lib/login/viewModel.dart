@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'model.dart';
 
 import 'package:socket_io_client/socket_io_client.dart';
@@ -8,10 +9,31 @@ import 'package:provider/provider.dart';
 import 'package:client/home/view.dart';
 import 'package:client/home/view_model.dart';
 
-class SocketEvents extends ChangeNotifier {
-  late Socket? _socket;
-  Socket get socket => _socket!;
+class LoginViewModel extends ChangeNotifier {
+  LoginModel model = new LoginModel();
 
+  Servers? get selectedServer => model.selectedServer;
+  bool get isPasswordVisible => model.isPasswordVisible;
+
+  Socket get socket => _socket!;
+  late Socket? _socket;
+
+  // Model updates
+  //
+  // Set selected server
+  void setServer(Servers? server) {
+    model.selectedServer = server;
+    notifyListeners();
+  }
+
+  // Toggle password visibility
+  void togglePasswordVisibility() {
+    model.isPasswordVisible = !model.isPasswordVisible;
+    notifyListeners();
+  }
+
+  // Socket events
+  //
   // Initialize socket connection
   void connect(String serverIP, String username) {
     NetworkService.instance.init(
@@ -27,7 +49,7 @@ class SocketEvents extends ChangeNotifier {
   }
 
   // Send login request
-  void login(BuildContext context, String username, String password) {
+  void userLogin(BuildContext context, String username, String password) {
     String serverIP = NetworkService.instance.serverIP;
 
     _socket!.emit('login', {

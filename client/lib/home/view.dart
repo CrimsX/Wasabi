@@ -84,6 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _socket!.disconnect();
+  }
+
   ///Socet Connection
   //
   // should be able to move this to network.dart

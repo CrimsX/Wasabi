@@ -19,11 +19,7 @@ class _LoginState extends State<Login> {
   final TextEditingController serverController = TextEditingController();
   final TextEditingController serverIPController = TextEditingController();
 
-  Servers? selectedServer = Servers.server1;
-
-  bool isPasswordVisible = false;
-
-  final SocketEvents socketEvents = SocketEvents();
+  final LoginViewModel viewModel = LoginViewModel();
 
   @override
   void initState() {
@@ -33,11 +29,13 @@ class _LoginState extends State<Login> {
   @override
   void dispose() {
     super.dispose();
-    socketEvents.disconnect();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Clear the server IP input
+    serverIPController.clear();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -92,7 +90,7 @@ class _LoginState extends State<Login> {
                       const SizedBox(height: 20),
                       TextFormField(
                         controller: passwordController,
-                        obscureText: !isPasswordVisible,
+                        obscureText: !viewModel.isPasswordVisible,
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'Enter your password',
@@ -100,11 +98,11 @@ class _LoginState extends State<Login> {
                           suffixIcon: GestureDetector(
                             onTap: () {
                               setState(() {
-                                isPasswordVisible = !isPasswordVisible;
+                                viewModel.togglePasswordVisibility();
                               });
                             },
                             child: Icon(
-                              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              viewModel.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                               color: Colors.black,
                             ),
                           ),
@@ -129,8 +127,11 @@ class _LoginState extends State<Login> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CreateAccount(serverIP: serverIPController.text.isNotEmpty ? "http://" + serverIPController.text.trim() + ":8080/" : selectedServer!.serverIP),
-
+                                  builder: (context) => CreateAccount(
+                                    serverIP: serverIPController.text.isNotEmpty
+                                      ? "http://" + serverIPController.text.trim() + ":8080/" 
+                                      : viewModel.selectedServer!.serverIP
+                                  ),
                                 ),
                               );
                             },
@@ -149,13 +150,15 @@ class _LoginState extends State<Login> {
                       const SizedBox(height: 30),
                       MaterialButton(
                         onPressed: () {
-                          String serverIP = serverIPController.text.isNotEmpty ? "http://" + serverIPController.text.trim() + ":8080/" : selectedServer!.serverIP;
+                          String serverIP = serverIPController.text.isNotEmpty
+                            ? "http://" + serverIPController.text.trim() + ":8080/"
+                            : viewModel.selectedServer!.serverIP;
 
                           // Connect to the server
-                          socketEvents.connect(serverIP, usernameController.text.trim());
+                          viewModel.connect(serverIP, usernameController.text.trim());
 
                           // Attempt to login
-                          socketEvents.login(context, usernameController.text.trim(), passwordController.text.trim());
+                          viewModel.userLogin(context, usernameController.text.trim(), passwordController.text.trim());
                         },
                         height: 45,
                         color: Colors.lightGreen,
@@ -175,7 +178,7 @@ class _LoginState extends State<Login> {
           ),
 
           // Server Selection
-          if (selectedServer != Servers.server3) ... {
+          if (viewModel.selectedServer != Servers.server4) ... {
             Positioned(
               bottom: 0,
               right: 0,
@@ -186,7 +189,7 @@ class _LoginState extends State<Login> {
                 label: const Text('Server'),
                 onSelected: (Servers? server) {
                   setState(() {
-                    selectedServer = server;
+                    viewModel.setServer(server);
                   });
                 },
                 dropdownMenuEntries:
@@ -230,7 +233,7 @@ class _LoginState extends State<Login> {
                     MaterialButton(
                       onPressed: () {
                         setState(() {
-                          selectedServer = Servers.server1;
+                          viewModel.setServer(Servers.server1);
                         });
                       },
                       minWidth: 50,
