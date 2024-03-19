@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
+
 import 'package:client/login/view.dart';
 
 void main() {
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const WasabiApp());
 }
   
@@ -23,6 +26,7 @@ class WasabiApp extends StatelessWidget {
      debugShowCheckedModeBanner: false,
      theme: ThemeData(
        primarySwatch: Colors.green,
+       scaffoldBackgroundColor: Colors.white,
      ),
       home: const Login(),
     );

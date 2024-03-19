@@ -6,6 +6,8 @@ socket.io
 mysql2
 dotenv
 nodemon
+bcrypt
+prisma
 
 Flutter:
 socket.io
@@ -17,7 +19,13 @@ libsignal_protocol_dart
 table_calendar
 hive
 flutter_pptx
-share_plus
+url_launcher
+file_saver
+isar_flutter_libs
+path_provider
+hive_flutter
+peerdart
+flutter_quill
 
 fly.io
 planetscale

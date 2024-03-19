@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model ReceiveCall {
+  CallID                                String? @db.VarChar(20)
+  ReceiverID                            String? @db.VarChar(20)
+  client_ReceiveCall_CallIDToclient     client? @relation("ReceiveCall_CallIDToclient", fields: [CallID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "ReceiveCall_ibfk_1")
+  client_ReceiveCall_ReceiverIDToclient client? @relation("ReceiveCall_ReceiverIDToclient", fields: [ReceiverID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "ReceiveCall_ibfk_2")
+
+  @@index([CallID], map: "CallID")
+  @@index([ReceiverID], map: "ReceiverID")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model access {
+  DocumentID Int?
+  UserID     String?   @db.VarChar(20)
+  Privilege  String?   @db.VarChar(10)
+  client     client?   @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "access_ibfk_1")
+  document   document? @relation(fields: [DocumentID], references: [DocumentID], onDelete: NoAction, onUpdate: NoAction, map: "access_ibfk_2")
+
+  @@index([DocumentID], map: "DocumentID")
+  @@index([UserID], map: "UserID")
+  @@ignore
+}
+
+model callinfo {
+  CallID        Int     @id
+  StartTime     String? @db.VarChar(20)
+  EndTime       String? @db.VarChar(20)
+  Duration      String? @db.VarChar(15)
+  CallType      String? @db.VarChar(15)
+  Online_status String? @db.VarChar(15)
+  CallerID      String? @db.VarChar(20)
+  client        client? @relation(fields: [CallerID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "callinfo_ibfk_1")
+
+  @@index([CallerID], map: "CallerID")
+}
+
+model client {
+  UserID                                     String             @id @db.VarChar(20)
+  displayname                                String             @db.VarChar(20)
+  Pass                                       String             @db.VarChar(100)
+  ReceiveCall_ReceiveCall_CallIDToclient     ReceiveCall[]      @relation("ReceiveCall_CallIDToclient") @ignore
+  ReceiveCall_ReceiveCall_ReceiverIDToclient ReceiveCall[]      @relation("ReceiveCall_ReceiverIDToclient") @ignore
+  access                                     access[]           @ignore
+  callinfo                                   callinfo[]
+  document                                   document[]
+  events                                     events[]
+  groupmsgsender                             groupmsgsender[]   @ignore
+  partof                                     partof[]           @ignore
+  powerpoints                                powerpoints[]
+  receivedmessages                           receivedmessages[] @ignore
+  sentmessages                               sentmessages[]     @ignore
+  servertable                                servertable[]
+  tasks                                      tasks[]
+}
+
+model document {
+  DocumentID       Int      @id
+  UserID           String?  @db.VarChar(20)
+  DocumentTitle    String?  @db.VarChar(50)
+  Content          String?  @db.VarChar(5000)
+  DateCreated      String?  @db.VarChar(15)
+  LastModifiedDate String?  @db.VarChar(15)
+  access           access[] @ignore
+  client           client?  @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "document_ibfk_1")
+
+  @@index([UserID], map: "UserID")
+}
+
+model encryption {
+  EncryptID     Int        @id
+  EncryptedMsg  String?    @db.VarChar(500)
+  EncryptionKey String?    @db.VarChar(500)
+  messages      messages[]
+}
+
+model events {
+  eventsID  Int      @default(autoincrement())
+  eventNAME String   @db.VarChar(100)
+  eventTIME DateTime @db.DateTime(0)
+  UserID    String   @db.VarChar(20)
+  client    client   @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "events_ibfk_1")
+
+  @@id([eventsID, UserID])
+  @@index([UserID], map: "UserID")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model friends {
+  UserID   String? @db.VarChar(20)
+  FriendID String? @db.VarChar(20)
+
+  @@ignore
+}
+
+model groupmsgencryption {
+  EncryptID     Int         @id
+  EncryptedMsg  String?     @db.VarChar(500)
+  EncryptionKey String?     @db.VarChar(500)
+  groupmsgs     groupmsgs[]
+}
+
+model groupmsgs {
+  GroupMsgID         Int                 @id @default(autoincrement())
+  DateReceived       BigInt
+  DataSent           String              @db.VarChar(500)
+  MsgContent         String              @db.VarChar(500)
+  EncryptID          Int?
+  ServerID           Int?
+  servertable        servertable?        @relation(fields: [ServerID], references: [ServerID], onDelete: NoAction, onUpdate: NoAction, map: "groupmsgs_ibfk_1")
+  groupmsgencryption groupmsgencryption? @relation(fields: [EncryptID], references: [EncryptID], onDelete: NoAction, onUpdate: NoAction, map: "groupmsgs_ibfk_2")
+  groupmsgsender     groupmsgsender[]    @ignore
+
+  @@index([EncryptID], map: "EncryptID")
+  @@index([ServerID], map: "ServerID")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model groupmsgsender {
+  UserID     String?    @db.VarChar(20)
+  GroupMsgID Int?
+  client     client?    @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "groupmsgsender_ibfk_1")
+  groupmsgs  groupmsgs? @relation(fields: [GroupMsgID], references: [GroupMsgID], onDelete: NoAction, onUpdate: NoAction, map: "groupmsgsender_ibfk_2")
+
+  @@index([GroupMsgID], map: "GroupMsgID")
+  @@index([UserID], map: "UserID")
+  @@ignore
+}
+
+model messages {
+  MessageID        Int                @id @default(autoincrement())
+  DateReceived     BigInt
+  DataSent         String             @db.VarChar(500)
+  MsgContent       String             @db.VarChar(500)
+  EncryptID        Int?
+  ChatID           Int?
+  encryption       encryption?        @relation(fields: [EncryptID], references: [EncryptID], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_1")
+  receivedmessages receivedmessages[] @ignore
+  sentmessages     sentmessages[]     @ignore
+
+  @@index([EncryptID], map: "EncryptID")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model partof {
+  UserID      String?      @db.VarChar(20)
+  ServerID    Int?
+  servertable servertable? @relation(fields: [ServerID], references: [ServerID], onDelete: NoAction, onUpdate: NoAction, map: "partof_ibfk_1")
+  client      client?      @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "partof_ibfk_2")
+
+  @@index([ServerID], map: "ServerID")
+  @@index([UserID], map: "UserID")
+  @@ignore
+}
+
+model powerpoints {
+  PptID   Int    @default(autoincrement())
+  PptName String @db.VarChar(100)
+  Ppturl  String @db.VarChar(1000)
+  UserID  String @db.VarChar(20)
+  client  client @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "powerpoints_ibfk_1")
+
+  @@id([PptID, UserID])
+  @@index([UserID], map: "UserID")
+}
+
+model privatechat {
+  ChatID Int     @id @default(autoincrement())
+  User1  String? @db.VarChar(20)
+  User2  String? @db.VarChar(20)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model receivedmessages {
+  UserID    String?   @db.VarChar(20)
+  MessageID Int?
+  client    client?   @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "receivedmessages_ibfk_1")
+  messages  messages? @relation(fields: [MessageID], references: [MessageID], onDelete: NoAction, onUpdate: NoAction, map: "receivedmessages_ibfk_2")
+
+  @@index([MessageID], map: "MessageID")
+  @@index([UserID], map: "UserID")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model sentmessages {
+  UserID    String?   @db.VarChar(20)
+  MessageID Int?
+  client    client?   @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "sentmessages_ibfk_1")
+  messages  messages? @relation(fields: [MessageID], references: [MessageID], onDelete: NoAction, onUpdate: NoAction, map: "sentmessages_ibfk_2")
+
+  @@index([MessageID], map: "MessageID")
+  @@index([UserID], map: "UserID")
+  @@ignore
+}
+
+model servertable {
+  ServerID     Int         @id @default(autoincrement())
+  ServerName   String      @db.VarChar(50)
+  Owner        String?     @db.VarChar(20)
+  CreationDate String?     @db.VarChar(15)
+  groupmsgs    groupmsgs[]
+  partof       partof[]    @ignore
+  client       client?     @relation(fields: [Owner], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "servertable_ibfk_1")
+
+  @@index([Owner], map: "Owner")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tasks {
+  taskID     Int    @default(autoincrement())
+  taskNAME   String @db.VarChar(300)
+  taskStatus Int
+  UserID     String @db.VarChar(20)
+  client     client @relation(fields: [UserID], references: [UserID], onDelete: NoAction, onUpdate: NoAction, map: "tasks_ibfk_1")
+
+  @@id([taskID, UserID])
+  @@index([UserID], map: "UserID")
+}

@@ -5,12 +5,9 @@ import 'package:provider/provider.dart';
 import 'view_model.dart';
 import 'model.dart';
 
-// Mobile
-//import 'package:flutter/services.dart';
-
 import 'package:client/services/network.dart';
 
-import 'package:client/widgets/sideBar.dart';
+import 'package:client/widgets/userDrawer.dart';
 import 'package:client/widgets/rAppBar.dart';
 import 'package:client/widgets/landingPage.dart';
 import 'package:client/widgets/hoverableTile.dart';
@@ -25,12 +22,10 @@ import 'dart:async';
 class HomeScreen extends StatefulWidget {
   String username = '';
   String serverIP = '';
-
-  //String username = NetworkService.instance.getusername;
-  //String serverIP = NetworkService.instance.getserverIP;
+  Socket? socket;
 
   //HomeScreen({Key? key, required this.username}) : super(key: key);
-  HomeScreen({super.key, required this.username, required this.serverIP});
+  HomeScreen({super.key, required this.username, required this.serverIP, required this.socket});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -70,27 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool start = true;
 
   @override
-  void initState() {
-    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    print(widget.username);
-    if (widget.serverIP == '') {
-      //widget.serverIP = "https://wasabi-server.fly.dev/";
-      widget.serverIP = "http://localhost:3000";
-    } else {
-      widget.serverIP = "http://${widget.serverIP}:3000/";
-    }
-
+  void initState() { 
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _serverListCompleter = Completer<List<Widget>>();
 
-    NetworkService.instance.init(
-      serverIP: widget.serverIP,
-      username: widget.username,
-    );
+    _socket = widget.socket;
 
-
-    _socket = NetworkService.instance.socket;
     _connectSocket();
 
     _socket!.emit('friends', widget.username);
@@ -101,6 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() => incomingSDPOffer = data);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _socket!.disconnect();
   }
 
   ///Socet Connection
@@ -606,7 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       drawer:
-        sideBar(),
+        userDrawer(),
 
       endDrawer: Drawer( // Define the end drawer
         child: ListView(

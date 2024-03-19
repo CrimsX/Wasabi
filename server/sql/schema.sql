@@ -4,18 +4,8 @@ USE wasabi;
 
 CREATE TABLE client (
     UserID VARCHAR(20) PRIMARY KEY,
-    Firstname VARCHAR(1000) NOT NULL,
-    Lastname VARCHAR(1000) NOT NULL,
-    Pass VARCHAR(30) NOT NULL
-    );
-
-CREATE TABLE powerpoints (
-    PptID INTEGER AUTO_INCREMENT,
-    PptName VARCHAR(100) NOT NULL,
-    Ppturl VARCHAR(1000) NOT NULL,
-    UserID VARCHAR(20),
-    PRIMARY KEY (PptID, UserID),
-    FOREIGN KEY (UserID) REFERENCES client(UserID)
+    displayname VARCHAR(20) NOT NULL,
+    Pass VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE friends (

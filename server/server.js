@@ -48,7 +48,7 @@ import {
 } from './database/messaging.js'
 
 
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || 8080;
 
 //const app = express();
 //const httpServer = http.createServer(app);
@@ -219,6 +219,8 @@ IO.on("connection", (socket) => {
   // Kipp
     socket.on('createaccount', async (data) => {
        const result = await createAccount(data);
+      socket.emit('createaccountResponse', {success: result.success, message: result.message});
+    /*
           if (result.success) {
               // Inform the client of the successful account creation
               socket.emit('accountCreated', result);
@@ -226,6 +228,7 @@ IO.on("connection", (socket) => {
               // Inform the client that account creation failed
               socket.emit('accountCreationFailed', result);
           }
+          */
     });
 
     socket.on('login', async (data) => {
