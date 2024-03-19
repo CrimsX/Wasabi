@@ -11,12 +11,11 @@ import 'package:client/home/view_model.dart';
 
 class LoginViewModel extends ChangeNotifier {
   LoginModel model = new LoginModel();
-
   Servers? get selectedServer => model.selectedServer;
   bool get isPasswordVisible => model.isPasswordVisible;
 
-  Socket get socket => _socket!;
   late Socket? _socket;
+  Socket get socket => _socket!;
 
   // Model updates
   //

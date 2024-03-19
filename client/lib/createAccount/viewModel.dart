@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
 
+import 'model.dart';
+
 import 'package:socket_io_client/socket_io_client.dart';
 
-class SocketEvents extends ChangeNotifier {
+class createAccountViewModel extends ChangeNotifier {
+  createAccountModel model = new createAccountModel();
+  bool get isAccountCreated => model.accountCreated;
+  bool get isPasswordVisible => model.isPasswordVisible;
+
   late Socket? _socket;
   Socket get socket => _socket!;
 
-  bool accountCreated = false;
+  // Model updates
+  //
+  // Toggle password visibility
+  void togglePasswordVisibility() {
+    model.isPasswordVisible = !model.isPasswordVisible;
+    notifyListeners();
+  }
 
+  // Socket events
+  // 
   // Initialize socket connection
   void connect(String serverIP) {
     _socket = io(serverIP, <String, dynamic>{
@@ -27,14 +41,14 @@ class SocketEvents extends ChangeNotifier {
   void createAccountResponse(BuildContext context) {
     _socket!.on('createaccountResponse', (data) {
       if (data["success"]) {
-        accountCreated = true;
+        model.accountCreated = true;
       } else {
-        accountCreated = false;
+        model.accountCreated = false;
       }
 
       // Dialog response
-      String dialogTitle = accountCreated ? "Account Created" : "Account Creation Failed";
-      String dialogContent = accountCreated ? "Your account has been successfully created." : "Please try again with a different username.";
+      String dialogTitle = model.accountCreated ? "Account Created" : "Account Creation Failed";
+      String dialogContent = model.accountCreated ? "Your account has been successfully created." : "Please try again with a different username.";
 
       // Show dialog
       showDialog(
@@ -47,7 +61,7 @@ class SocketEvents extends ChangeNotifier {
             actions: [
               TextButton(
                 onPressed: () {
-                  if (accountCreated) {
+                  if (model.accountCreated) {
                     Navigator.of(context)..pop()..pop();
                   } else {
                     Navigator.of(context)..pop();

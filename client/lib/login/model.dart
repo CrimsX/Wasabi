@@ -2,7 +2,10 @@ class LoginModel {
   Servers? selectedServer;
   bool isPasswordVisible;
 
-  LoginModel({this.selectedServer = Servers.server1, this.isPasswordVisible = false});
+  LoginModel({
+    this.selectedServer = Servers.server1,
+    this.isPasswordVisible = false
+  });
 }
 
 enum Servers {

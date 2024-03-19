@@ -16,21 +16,19 @@ class _CreateAccountState extends State<CreateAccount> {
 
   final TextEditingController passwordController = TextEditingController();
 
-  bool isPasswordVisible = false;
-
-  SocketEvents socketEvents = SocketEvents();
+  createAccountViewModel viewModel = createAccountViewModel();
 
   @override
   void initState() {
     super.initState();
-    socketEvents.connect(widget.serverIP);
-    socketEvents.createAccountResponse(context);
+    viewModel.connect(widget.serverIP);
+    viewModel.createAccountResponse(context);
   }
 
   @override
   void dispose() {
     super.dispose();
-    socketEvents.disconnect();
+    viewModel.disconnect();
   }
 
   @override
@@ -123,14 +121,14 @@ class _CreateAccountState extends State<CreateAccount> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: passwordController,
-                    obscureText: !isPasswordVisible,
+                    obscureText: !viewModel.isPasswordVisible,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       hintText: 'Create password',
                       prefixIcon: const Icon(Icons.lock, color: Colors.black, size: 18),
                       suffixIcon: GestureDetector(
-                        onTap: () => setState(() => isPasswordVisible = !isPasswordVisible),
-                        child: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.black, size: 18),
+                        onTap: () => setState(() => viewModel.togglePasswordVisibility()),
+                        child: Icon(viewModel.isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.black, size: 18),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey.shade200, width: 2),
@@ -147,7 +145,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   const SizedBox(height: 30),
                   MaterialButton(
                     onPressed: () {
-                      socketEvents.createAccount(
+                      viewModel.createAccount(
                         context,
                         usernameController.text.trim(),
                         displayNameController.text.trim(),
