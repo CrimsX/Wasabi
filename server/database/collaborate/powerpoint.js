@@ -61,8 +61,8 @@ export async function newSlide(data) {
     WHERE Name = ? AND userID = ? AND SlideNum = ?', [data.title, data.userID, data.num]);
     if (check.length !== 0) {
       await pool.query('UPDATE WasabiSlides \
-      SET SlideNum = ?, SlideHeader = ?, SlideContent = ? \
-      WHERE Name = ? AND userID = ?', [data.num, data.header, data.content, data.title, data.userID]);
+      SET SlideHeader = ?, SlideContent = ? \
+      WHERE SlideNum = ? AND Name = ? AND userID = ?', [data.header, data.content, data.num, data.title, data.userID]);
       const [result] = await pool.query('SELECT * FROM WasabiSlides \
       WHERE userID = ? AND Name = ?', [data.userID, data.title]);
       return result;

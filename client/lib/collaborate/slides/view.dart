@@ -23,6 +23,9 @@ import 'package:file_saver/file_saver.dart';
 
 //import 'package:flutter/foundation.dart';
 
+// Keyboard input
+import 'package:flutter/services.dart';
+
 class SlidesView extends StatefulWidget {
 
   const SlidesView({super.key});
@@ -48,7 +51,7 @@ class _SlidesViewState extends State<SlidesView> {
     viewModel.socketEvents();
  
     // Delay to allow socket to connect
-    Future.delayed(const Duration(milliseconds: 50), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {});
     });
   }
@@ -297,6 +300,7 @@ class _WasabiSlidesViewState extends State<WasabiSlidesView> {
   final List<dynamic> _friends = [];
   final List<dynamic>_groups = [];
   TextEditingController titleController = TextEditingController(text: "Untitled Powerpoint");
+  bool presenting = false;
 
 
   void initState() {
@@ -322,18 +326,39 @@ class _WasabiSlidesViewState extends State<WasabiSlidesView> {
 
 
     widget.socket!.on('getSlide', (data) {
+      print(data);
       //print(slideIndex.value);
       //print(data);
       //print(data[0]['SlideHeader']);
+      if (mounted) {
+      setState(() {
+      //_powerpoints.add(data[0]);
       headingController.text = data[0]['SlideHeader'];
       //print(data['header']);
       //headingController.text = data['header'];
       bulletController.text = data[0]['SlideContent'];
+          });}
+
+      //setState(() {});
+          
     });
 
     widget.socket!.on('getTotalSlides', (data) {
-        //print(data[0]['COUNT(*)']);
+        print(data[0]['COUNT(*)']);
+        slideLength = (data[0]['COUNT(*)'] - 1);
+    print (slideLength);
+        //slideLength = data[0]['COUNT(*)'];
     });
+
+/*
+    widget.socket!.on('onChanges', (data) {
+                                    widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+setState(() {headingController.text = data[0]['SlideHeader'];
+bulletController.text = data[0]['SlideContent'];
+});
+      })
+    */
+widget.newSlide = false;
     
   }
   /*
@@ -393,6 +418,7 @@ final pres = await createPresentation();
 
   @override
   Widget build(BuildContext context) {
+    if (!presenting) {
     return Scaffold(
     appBar: AppBar(
     backgroundColor: Colors.green,
@@ -421,12 +447,16 @@ final pres = await createPresentation();
                 ElevatedButton.icon(
                 onPressed: () {
                   setState(() {
-                    //editing = false;
+                    saveSlide(slideIndex, headingController, bulletController);
+
+                    slideIndex.value = 0;
+                    presenting = true;
                   });
                 },
                 icon: const Icon(Icons.arrow_right_outlined, size: 32),
                 label: const Text('Present'),
               ),
+              /*
               const SizedBox(width: 10),
               ElevatedButton.icon(
                 onPressed: () {
@@ -437,6 +467,7 @@ final pres = await createPresentation();
                 icon: const Icon(Icons.lock),
                 label: const Text('Share'),
               ),         
+              */
             ],
     ),
       body: ValueListenableBuilder(
@@ -494,7 +525,10 @@ final pres = await createPresentation();
                             iconSize: 40,
                             icon: const Icon(Icons.navigate_before_rounded),
                             onPressed: () {
+                              saveSlide(slideIndex, headingController, bulletController);
                               prevSlide(context);
+                                    widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+
                             }
                           ),
 
@@ -504,10 +538,16 @@ final pres = await createPresentation();
                             iconSize: 40,
                             icon: const Icon(Icons.navigate_next_rounded),
                             onPressed: () {
+                                                            saveSlide(slideIndex, headingController, bulletController);
+
                               nextSlide(context);
+                                    widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+
+
+                                                          
                             }
                           ),
-
+/*
                         const SizedBox(width: 50),
                         if (slideIndex.value != 0)
                           IconButton(
@@ -517,7 +557,7 @@ final pres = await createPresentation();
                               firstSlide(context);
                             }
                           ),
-
+*/
                         const SizedBox(width: 50),
                         if (slideIndex.value == slideLength)
                         IconButton(
@@ -525,6 +565,15 @@ final pres = await createPresentation();
                           icon: const Icon(Icons.plus_one),
                           onPressed: () {
                             slideLength++;
+                            //saveSlide(slideIndex + 1);
+                            widget.socket?.emit('createSlide', {
+      'userID': NetworkService.instance.getusername,
+      'title': titleController.text,
+      'num': (slideIndex.value + 1),
+      'header': '',
+      'content': '',
+    });
+
                             setState(() {});
                           }
                         ),
@@ -587,5 +636,84 @@ final pres = await createPresentation();
         },
       ),
     );
+    } else {
+      return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+              setState(() {slideIndex.value = 0;
+              presenting = false;});
+            },
+            const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+              //setState(() {presenting = false;});
+              if (slideIndex.value > 0) {
+              prevSlide(context);
+                                                  widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+
+              //setState(() {});
+            }
+                          
+                          
+            },
+            const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+              print(slideIndex.value);
+              //setState(() {presenting = false;});
+              if (slideIndex.value < slideLength) {
+              nextSlide(context);
+                                                  widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+
+              //setState(() {});
+              }
+            },
+        },
+        child: Focus(
+        autofocus: true,
+        /*child: Column(
+        children: <Widget> [
+        const Text('test'),
+        ]
+        ) */
+        child: Scaffold(
+      appBar: AppBar(
+        //title: const Text('Draw'),
+        //backgroundColor: Colors.green,
+        //elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      
+      body: Center(
+        child: Column(
+        children: <Widget> [
+        const SizedBox(height: 128),
+        Expanded(
+          child: Column(
+          //mainAxisAlignment: MainAxisAlignment.center,
+          //crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+          children: [
+            SizedBox(height: 64),
+            Text(headingController.text, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
+            SizedBox(height: 48),
+            Text(bulletController.text, style: const TextStyle(fontSize: 36)),
+          ],
+                ),
+              ),
+            ],
+          ),
+        ),
+                ],
+        )
+        //Image.asset('assets/DrawingImage.webp'),
+      ),
+
+        )
+        )
+        
+      );
+      //return Scaffold();
+        
+      }
   }
 }
