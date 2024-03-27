@@ -483,4 +483,26 @@ IO.on("connection", (socket) => {
     socket.on('sharepptgroup', async (data) => {
       await sharePPTGroup(data);
     })
+  /************************************************************************************
+   * Draw
+   ************************************************************************************/
+    socket.on('joinwhiteboard', () => {
+      socket.join('d1');
+    })
+
+    socket.on('senddrawing', (data) => {
+      IO.to('d1').emit('fetchlive', (data));
+    })
+
+    socket.on('clear', (username) => {
+      IO.to('d1').emit('clear', (username));
+    })
+
+    socket.on('undo', (username) => {
+      IO.to('d1').emit('undo', (username));
+    })
+
+    socket.on('redo', (username) => {
+      IO.to('d1').emit('redo', (username));
+    })
 });
