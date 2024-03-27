@@ -5,47 +5,6 @@ dotenv.config()
 
 const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
 
-export async function getPowerPoints(UserID) {
-    const [result] = await pool.query('SELECT * from powerpoints \
-    WHERE UserID = ?;', [UserID]);
-    return result;
-}
-
-export async function createPowerPoint(data) {
-    await pool.query('INSERT INTO powerpoints (PptName, Ppturl, UserID) \
-    VALUES (?, ?, ?)', [data.title, data.url, data.userID]);
-    const [result] = await pool.query('SELECT * FROM powerpoints \
-    WHERE Ppturl = ?', [data.url]);
-    return result;
-}
-
-export async function deletePowerPoint(data) {
-    console.log(data.PptID)
-    console.log(data.user)
-    await pool.query('DELETE FROM powerpoints WHERE PptID = ? AND UserID = ?', [data.PptID, data.user]);
-}
-
-export async function sharePPT(data) {
-    const [check] = await pool.query('SELECT * FROM powerpoints \
-    WHERE PptID = ? AND UserID = ?', [data.Ppt.PptID, data.user]);
-    console.log(check.length===0);
-    if (check.length === 0) {
-        await pool.query('INSERT INTO powerpoints (PptID, PptName, Ppturl, UserID) \
-    VALUES (?, ?, ?, ?)', [data.Ppt.PptID, data.Ppt.PptName, data.Ppt.Ppturl, data.user]);
-    }
-}
-
-export async function sharePPTGroup(data) {
-    const [members] = await pool.query('SELECT UserID from partof WHERE \
-    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.Ppt.UserID]);
-    for (const username of members) {
-        sharePPT({
-            user: username.UserID,
-            Ppt: data.Ppt
-        })
-    }
-}
-
 export async function createEvent(data) {
     try {
         console.log('Attempting to create event with data:', data);
@@ -64,8 +23,6 @@ export async function createEvent(data) {
     }
 }
 
-
-
 export async function getEvents(userID) {
     try {
         const [rows] = await pool.query("SELECT eventName, eventTime FROM events WHERE UserID = ?", [userID]);
@@ -78,10 +35,6 @@ export async function getEvents(userID) {
         throw new Error('Failed to fetch events');
     }
 }
-
-
-
-
 
 export async function shareEvent(data) {
     // Check for necessary data
@@ -119,11 +72,6 @@ export async function shareEvent(data) {
     }
 }
 
-
-
-
-
-
 export async function shareEventGroup(data) {
     const [members] = await pool.query('SELECT UserID from partof WHERE \
     ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
@@ -135,8 +83,6 @@ export async function shareEventGroup(data) {
         })
     }
 }
-
-
 
 export async function insertTaskIntoDatabase(taskName, userID) {
     try {

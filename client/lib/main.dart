@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:client/login/view.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const WasabiApp());
 }
