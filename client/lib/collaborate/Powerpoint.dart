@@ -24,8 +24,8 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
   bool isWebsite = false;
 
   @override
-  void initState() { 
-    super.initState(); 
+  void initState() {
+    super.initState();
     _connectSocket();
 
     widget.socket!.emit('getpowerpoints', widget.username);
@@ -419,13 +419,13 @@ class _PowerPointScreenState extends State<PowerPointScreen> {
               ),
             ),
           ),
-           
+
           new Column(
-            children: [  
+            children: [
               Expanded(
                 child:
                   _buildPptList(_powerpoints)
-              ), 
+              ),
             ],
           ),
 
@@ -458,7 +458,7 @@ Positioned(
               ),
             ),
           ),
-          
+
           /*
           Positioned(
             top: 0,
@@ -493,15 +493,15 @@ Positioned(
           if (!isWebsite) {
             _createPowerpoint();
           } else {
-            //_createPP();   
-            
+            //_createPP();
+
             Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => PowerPointScreen2(),
                     ),
                     );
-            
+
           }
         },
         child: Icon(Icons.add, color: Colors.white),
