@@ -573,6 +573,7 @@ final pres = await createPresentation();
       'header': '',
       'content': '',
     });
+                            widget.newSlide = false;
 
                             setState(() {});
                           }
