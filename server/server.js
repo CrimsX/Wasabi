@@ -53,6 +53,7 @@ import {
     saveDocumentContent,
     shareDocument,
     shareDocumentGroup,
+    fetchDocuments,
 } from './database/collaborate/documents.js'
 
 let port = process.env.PORT || 8080;
@@ -144,6 +145,21 @@ IO.on("connection", (socket) => {
   socket.on('shareDocumentGroup', async (data) => {
          await shareDocumentGroup(data);
   });
+
+  socket.on('fetchDocuments', async (userID) => {
+    try {
+      const documents = await fetchDocuments(userID);
+      socket.emit('documents', documents);
+    } catch (error) {
+      console.error('Error:', error.message);
+      socket.emit('error', { message: 'Failed to fetch documents' });
+    }
+  });
+
+
+
+
+
 
 
 

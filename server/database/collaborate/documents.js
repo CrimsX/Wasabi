@@ -54,3 +54,17 @@ export async function shareDocumentGroup(data) {
         })
     }
 }
+
+
+export async function fetchDocuments(userID) {
+  try {
+    const [rows] = await pool.query("SELECT DocumentID, DocumentTitle, Content FROM document WHERE UserID = ?", [userID]);
+    console.log("Retrieved documents:", rows);
+    console.log(userID);
+
+    return { success: true, documents: rows }; // Changed 'events' to 'documents'
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    throw new Error('Failed to fetch documents');
+  }
+}

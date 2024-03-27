@@ -8,6 +8,7 @@ class DocumentsScreen extends StatefulWidget {
   final String serverIP;
   final Socket? socket;
 
+
   DocumentsScreen({
     Key? key,
     required this.username,
@@ -28,6 +29,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   Timer? _saveTimer;
   final List<dynamic> _friends = [];
   final List<dynamic>_groups = [];
+  List<dynamic> _documents = [];
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     // Initialize the socket connection
     initializeSocket();
     _startSaveTimer();
+    fetchDocuments();
   }
 
   void dispose() {
@@ -76,10 +79,35 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       // Listen for responses to build groups collaboration
       widget.socket!.on('buildgroupscollab', (data) {
         if (mounted) {
-        setState(() {
-          _groups.addAll(data);
-        });
-      }
+          setState(() {
+            _groups.addAll(data);
+          });
+        }
+      });
+    }
+  }
+
+  void fetchDocuments() {
+    // Emit an event to request documents from the backend
+    if (widget.socket != null) {
+      widget.socket!.emit('fetchDocuments', widget.username);
+
+      // Listen for the response from the server
+      widget.socket!.on('documents', (data) {
+        if (data != null && data is Map<String, dynamic> && data['documents'] is List) {
+          setState(() {
+            // Safely cast to List<dynamic>
+            _documents = List.from(data['documents']);
+          });
+        } else {
+          print("Invalid or null data received for documents");
+        }
+      });
+
+
+      // Listen for any error response from the server
+      widget.socket!.on('error', (data) {
+        print('Error fetching documents: ${data['message']}');
       });
     }
   }
@@ -133,8 +161,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   void _startSaveTimer() {
     print('timer called');
     _saveTimer = Timer.periodic(Duration(seconds: 2), (_) {
-        _saveContent();
-        print('save content called');
+      _saveContent();
+      print('save content called');
     });
   }
 
@@ -296,124 +324,138 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     );
   }
 
-
-
-
-
-
   // share docs //
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: !editing
-        ? AppBar(
-            title: const Text('Documents'),
-            backgroundColor: Colors.green,
-          )
+          ? AppBar(
+        title: const Text('Documents'),
+        backgroundColor: Colors.green,
+      )
 
-        : AppBar(
-            backgroundColor: Colors.green,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  editing = false;
-                });
-              },
-            ),
+          : AppBar(
+        backgroundColor: Colors.green,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              editing = false;
+            });
+          },
+        ),
 
-            actions: [
-              ElevatedButton.icon(
-                onPressed: () { _shareDocument();
-                 // setState(() {
-                 //   editing = false;
-                //  });
-                },
-                icon: const Icon(Icons.lock),
-                label: const Text('Share'),
-              ),         
-            ],
-
-            title: Row(
-              children: [
-                const Icon(Icons.edit),
-                SizedBox(
-                  width: 200,
-                  child: TextField(
-                    controller: titleController,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.white,
-                        ),
-                      ),
-                      contentPadding: EdgeInsets.only(left: 10),
-                    ),
-                    onChanged: (value) {
-                      // Update document title as the user types
-                      updateDocumentTitle(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
+        actions: [
+          ElevatedButton.icon(
+            onPressed: () { _shareDocument();
+              // setState(() {
+              //   editing = false;
+              //  });
+            },
+            icon: const Icon(Icons.lock),
+            label: const Text('Share'),
           ),
+        ],
+
+        title: Row(
+          children: [
+            const Icon(Icons.edit),
+            SizedBox(
+              width: 200,
+              child: TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.white,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.only(left: 10),
+                ),
+                onChanged: (value) {
+                  // Update document title as the user types
+                  updateDocumentTitle(value);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
 
       // Background image
-      body: !editing 
-        // Background image
-        ? new Stack(
-          children: <Widget>[
-            Container(
-              decoration: new BoxDecoration(
-                image: new DecorationImage(
-                  image: new AssetImage("assets/FileEdit.webp"),
-                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
+      body: !editing
+      // Background image
+          ? Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/FileEdit.webp"),
+                colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5), BlendMode.dstATop),
+              ),
+            ),
+          ),
+          ListView.builder(
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              final document = _documents[index];
+              return ListTile(
+                title: Text(document['DocumentTitle'] ?? 'Untitled Document'),
+                onTap: () {
+                  // Navigate to a screen to view/edit the selected document
+                  // You can create a new screen or dialog for this purpose
+                  // For example:
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => DocumentDetailsScreen(document: document),
+                  //   ),
+                  // );
+                },
+              );
+            },
+          ),
+        ],
+      )
+
+      // Quill editor
+          : QuillProvider(
+        configurations: QuillConfigurations(
+          controller: _controller,
+          sharedConfigurations: const QuillSharedConfigurations(
+            locale: Locale('en'),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const QuillToolbar(),
+            Expanded(
+              child: SizedBox(
+                width: 750,
+                child: Card(
+                  color: Colors.white,
+                  elevation: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: QuillEditor.basic(
+                      configurations: const QuillEditorConfigurations(
+                        readOnly: false,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
-        )
-
-        // Quill editor
-        : QuillProvider(
-          configurations: QuillConfigurations(
-            controller: _controller,
-            sharedConfigurations: const QuillSharedConfigurations(
-              locale: Locale('en'),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const QuillToolbar(),
-              Expanded(
-                child: SizedBox(
-                  width: 750,
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(30.0),
-                      child: QuillEditor.basic(
-                        configurations: const QuillEditorConfigurations(
-                          readOnly: false,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
+      ),
 
-        // New document button
+      // New document button
       floatingActionButton: !editing
           ? FloatingActionButton(
         backgroundColor: Colors.green,
@@ -425,7 +467,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         },
         child: Icon(Icons.add, color: Colors.white),
       )
-
           : null,
     );
   }
