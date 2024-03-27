@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:client/collaborate/documents/landingpage.dart';
+
+
 
 class DocumentsScreen extends StatefulWidget {
   final String username;
@@ -38,16 +42,34 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize the socket connection
     initializeSocket();
     _startSaveTimer();
-    if (widget.documentTitle != null) {
-      titleController.text = widget.documentTitle!;
+    titleController = TextEditingController(text: widget.documentTitle ?? "Untitled Document");
+
+    // Check if documentContent is not null and not empty
+    if (widget.documentContent != null && widget.documentContent!.trim().isNotEmpty) {
+      try {
+        // Parse the JSON string into a Dart object
+        final content = jsonDecode(widget.documentContent!);
+        // Initialize the Document with parsed content
+        final document = Document.fromJson(content);
+        // Use the Document to initialize the QuillController
+        _controller = QuillController(document: document, selection: TextSelection.collapsed(offset: 0));
+      } catch (e) {
+        // If JSON parsing fails, log the error and initialize with a basic controller
+        print("Error parsing document content: $e");
+        _controller = QuillController.basic();
+      }
+    } else {
+      // If there's no document content, start with a basic controller
+      _controller = QuillController.basic();
     }
   }
 
+
   void dispose() {
     titleController.dispose();
+    _saveTimer?.cancel();
     super.dispose();
   }
 
@@ -116,10 +138,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   // Create and update //
 
   void _startSaveTimer() {
-    print('timer called');
+   // print('timer called');
     _saveTimer = Timer.periodic(Duration(seconds: 2), (_) {
       _saveContent();
-      print('save content called');
+   //   print('save content called');
     });
   }
 
@@ -128,12 +150,15 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     // Get the content from the editor
     if (_controller.document != null) {
       // Get the content from the editor
-      String content = _controller.document.toPlainText();
-      widget.socket!.emit('saveDocumentContent',
-          {'documentId': widget.documentId, 'content': content});
-      print('Content saved: $content');
+      final String content = jsonEncode(_controller.document.toDelta().toJson());
+      widget.socket!.emit('saveDocumentContent', {
+        'documentId': widget.documentId,
+        'content': content,
+      });
+
+    //  print('Content saved: $content');
     } else {
-      print("null");
+    //  print("null");
     }
   }
 
@@ -292,7 +317,16 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context); // Go back to the previous screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DocumentsMenu(
+                    username: widget.username, // Ensure this variable holds the current username
+                    serverIP: widget.serverIP, // Ensure this variable holds the correct server IP
+                    socket: widget.socket, // Ensure this variable holds the socket connection
+                  ),
+                ),
+              );
           },
         ),
         actions: [

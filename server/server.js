@@ -115,10 +115,12 @@ IO.on("connection", (socket) => {
 
   socket.on('saveDocumentContent', async (data) => {
     const { documentId, content } = data;
+    console.log('Socket save Doc')
     try {
       // Call a function to save the document content to the database
       await saveDocumentContent(documentId, content);
       socket.emit('documentContentSaved', { success: true });
+      console.log('Socket save Doc 2')
     } catch (error) {
       console.error('Error saving document content:', error);
       socket.emit('documentContentSaveFailed', { success: false, error: error.message });

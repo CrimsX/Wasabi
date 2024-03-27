@@ -1,6 +1,7 @@
 import 'package:client/collaborate/documents/view.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:client/home/view.dart';
 
 class DocumentsMenu extends StatefulWidget {
   final String username;
@@ -92,6 +93,21 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
       appBar: AppBar(
         title: const Text('Documents'),
         backgroundColor: Colors.green,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(
+                  username: widget.username, // Ensure this variable holds the current username
+                  serverIP: widget.serverIP, // Ensure this variable holds the correct server IP
+                  socket: widget.socket, // Ensure this variable holds the socket connection
+                ),
+              ),
+            );
+          },
+        ),
       ),
       body: Stack(
         children: <Widget>[

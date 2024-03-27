@@ -69,7 +69,7 @@ CREATE TABLE document (
     DocumentID INT AUTO_INCREMENT,
     UserID VARCHAR(20),
     DocumentTitle VARCHAR(50) NOT NULL,
-    Content VARCHAR(5000),
+    Content JSON,
     PRIMARY KEY (DocumentID, UserID),
     FOREIGN KEY (UserID) REFERENCES client(UserID)
     );

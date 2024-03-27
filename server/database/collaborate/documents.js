@@ -26,10 +26,13 @@ export async function createNewDocument(username) {
 }
 
 export async function saveDocumentContent(documentId, content) {
+  console.log('func 3 called')
+  const contentString = JSON.stringify(content); // Ensure content is a string
   const query = 'UPDATE document SET Content = ? WHERE DocumentID = ?';
-  const [result] = await pool.query(query, [content, documentId]);
+  const [result] = await pool.query(query, [contentString, documentId]);
   return result;
 }
+
 
 
 export async function shareDocument(data) {
@@ -37,8 +40,9 @@ export async function shareDocument(data) {
     WHERE DocumentID = ? AND UserID = ?', [data.documentId, data.friendId]);
     console.log(check.length===0);
     if (check.length === 0) {
-        await pool.query('INSERT INTO document (DocumentID, UserID, DocumentTitle, Content) \
-    VALUES (?, ?, ?, ?)', [data.documentId, data.friendId, data.documentTitle, data.content]);
+        const contentString = JSON.stringify(data.content);
+        await pool.query('INSERT INTO document (DocumentID, UserID, DocumentTitle, Content) VALUES (?, ?, ?, ?)',
+        [data.documentId, data.friendId, data.documentTitle, contentString]);
     }
 }
 
