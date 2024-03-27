@@ -1,3 +1,4 @@
+import 'package:client/collaborate/documents/landingpage.dart';
 import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart';
@@ -242,7 +243,7 @@ class collabDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
-                    child: DocumentsScreen(
+                    child: DocumentsMenu( //DocumentsScreen
                         username: loggedInUsername,
                         serverIP: serverIP,
                         socket: _socket

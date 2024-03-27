@@ -19,9 +19,10 @@ export async function createNewDocument(username) {
 
   // Get the last inserted ID
   const documentId = result.insertId;
-  const documentTitle = 'Untitled Document'
+  const documentTitle = result.DocumentTitle;
+  const Content = result.Content;
 
-  return { documentId, documentTitle };
+  return { documentId, documentTitle, Content};
 }
 
 export async function saveDocumentContent(documentId, content) {

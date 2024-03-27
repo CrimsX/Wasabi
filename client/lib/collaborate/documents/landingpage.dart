@@ -1,3 +1,4 @@
+import 'package:client/collaborate/documents/view.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -17,9 +18,11 @@ class DocumentsMenu extends StatefulWidget {
   State<DocumentsMenu> createState() => _DocumentsMenuState();
 }
 
-
 class _DocumentsMenuState extends State<DocumentsMenu> {
   List<dynamic> _documents = [];
+  int? documentId; // Document ID variable
+  String? documentTitle; // Document title variable
+  String? documentContent; // Document content variable
 
   @override
   void initState() {
@@ -27,7 +30,6 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
     initializeSocket();
     fetchDocuments();
   }
-
 
   void initializeSocket() {
     if (widget.socket != null) {
@@ -57,15 +59,16 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
     }
   }
 
-
-
   void createNewDocument() {
     if (widget.socket != null) {
       widget.socket!.emit('createNewDocument', {'username': widget.username});
       widget.socket!.on('documentCreated', (data) {
         if (mounted) {
           setState(() {
-            print('New document created with ID: ${data['documentId']}');
+            documentId = data['documentId']; // Update documentId with document ID received from the server
+            documentTitle = data['documentTitle']; // Update documentTitle with document title received from the server
+            documentContent = data['Content']; // Update documentContent with document content received from the server
+            print('New document created with ID: $documentId');
           });
         }
       });
@@ -80,6 +83,11 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
 
   @override
   Widget build(BuildContext context) {
+    return _buildFirstScreen(context);
+  }
+
+  // First screen widget
+  Widget _buildFirstScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Documents'),
@@ -103,7 +111,19 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
               return ListTile(
                 title: Text(document['DocumentTitle'] ?? 'Untitled Document'),
                 onTap: () {
-                  // Implement navigation to document editing/viewing
+                  Navigator.push(
+                    context,
+                      MaterialPageRoute(
+                      builder: (context) => DocumentsScreen(
+                      username: widget.username,
+                      serverIP: widget.serverIP,
+                      socket: widget.socket,
+                      documentId: document['DocumentID'], // Assuming 'document' is a Map with these keys
+                      documentTitle: document['DocumentTitle'],
+                      documentContent: document['Content'], // Pass the Content
+                    ),
+                      )
+                  );
                 },
               );
             },
@@ -112,8 +132,24 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        onPressed: createNewDocument,
-        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          // Call the function to create a new document
+          createNewDocument();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DocumentsScreen(
+                  username: widget.username,
+                  serverIP: widget.serverIP,
+                  socket: widget.socket,
+                  documentId: documentId, // Pass the documentId variable
+                  documentTitle: documentTitle, // Pass the documentTitle variable
+                  documentContent: documentContent,
+              ),
+            ),
+          );
+        },
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

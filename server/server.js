@@ -129,14 +129,15 @@ IO.on("connection", (socket) => {
     const { username } = data;
     try {
       // Insert a new document into the database
-      const { documentId, documentTitle } = await createNewDocument(username);
-      // Emit the newly created document ID and title back to the client
-      socket.emit('documentCreated', { documentId, documentTitle });
+      const { documentId, documentTitle, Content } = await createNewDocument(username);
+      // Emit the newly created document ID, title, and content back to the client
+      socket.emit('documentCreated', { documentId, documentTitle, Content });
     } catch (error) {
       console.error('Error creating new document:', error);
       socket.emit('documentCreationFailed', { error: error.message });
     }
   });
+
 
   socket.on('shareDocument', async (data) => {
         await shareDocument(data);

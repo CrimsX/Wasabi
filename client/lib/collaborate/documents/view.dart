@@ -7,13 +7,18 @@ class DocumentsScreen extends StatefulWidget {
   final String username;
   final String serverIP;
   final Socket? socket;
-
+  final int? documentId;
+  final String? documentTitle;
+  final String? documentContent;
 
   DocumentsScreen({
     Key? key,
     required this.username,
     required this.serverIP,
-    required this.socket,
+    this.socket,
+    this.documentId,
+    this.documentTitle,
+    this.documentContent,
   }) : super(key: key);
 
   @override
@@ -25,11 +30,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   TextEditingController(text: "Untitled Document");
   QuillController _controller = QuillController.basic();
   bool editing = false;
-  int? documentId;
   Timer? _saveTimer;
   final List<dynamic> _friends = [];
   final List<dynamic>_groups = [];
-  List<dynamic> _documents = [];
+
 
   @override
   void initState() {
@@ -37,7 +41,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     // Initialize the socket connection
     initializeSocket();
     _startSaveTimer();
-    fetchDocuments();
+    if (widget.documentTitle != null) {
+      titleController.text = widget.documentTitle!;
+    }
   }
 
   void dispose() {
@@ -87,77 +93,28 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     }
   }
 
-  void fetchDocuments() {
-    // Emit an event to request documents from the backend
-    if (widget.socket != null) {
-      widget.socket!.emit('fetchDocuments', widget.username);
 
-      // Listen for the response from the server
-      widget.socket!.on('documents', (data) {
-        if (data != null && data is Map<String, dynamic> && data['documents'] is List) {
-          setState(() {
-            // Safely cast to List<dynamic>
-            _documents = List.from(data['documents']);
-          });
-        } else {
-          print("Invalid or null data received for documents");
-        }
-      });
-
-
-      // Listen for any error response from the server
-      widget.socket!.on('error', (data) {
-        print('Error fetching documents: ${data['message']}');
-      });
-    }
-  }
 
 
   // Create and update //
 
 
   void updateDocumentTitle(String newTitle) {
-    if (widget.socket != null && documentId != null) {
+    if (widget.socket != null && widget.documentId != null) {
       // Emit the event to update document title
       widget.socket!.emit('updateDocumentTitle', {
-        'documentId': documentId, // Use documentId here
+        'documentId': widget.documentId, // Use documentId here
         'newTitle': newTitle,
       });
     }
   }
 
-  void createNewDocument() {
-    if (widget.socket != null) {
-      // Emit the event to create a new document
-      widget.socket!.emit('createNewDocument', {'username': widget.username});
 
-      // Listen for the response from the server
-      widget.socket!.on('documentCreated', (data) {
-        if (mounted) {
-          setState(() {
-            // Handle the document creation response
-            // For example, you can navigate to the newly created document page
-            documentId = data['documentId'];
-            print('New document created with ID: ${data['documentId']}');
-          });
-        }
-      });
 
-      // Listen for any error response from the server
-      widget.socket!.on('documentCreationFailed', (data) {
-        if (mounted) {
-          setState(() {
-            // Handle the document creation failure
-            print('Failed to create document: ${data['error']}');
-          });
-        }
-      });
-    }
-  }
+
 
   // Create and update //
 
-  // Timer auto save //
   void _startSaveTimer() {
     print('timer called');
     _saveTimer = Timer.periodic(Duration(seconds: 2), (_) {
@@ -173,7 +130,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       // Get the content from the editor
       String content = _controller.document.toPlainText();
       widget.socket!.emit('saveDocumentContent',
-          {'documentId': documentId, 'content': content});
+          {'documentId': widget.documentId, 'content': content});
       print('Content saved: $content');
     } else {
       print("null");
@@ -295,9 +252,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           print('Share with friend: ${items[i][key]}');
                           widget.socket!.emit('shareDocument', {
                             'friendId': items[i][key],
-                            'documentTitle': titleController.text,
+                            'documentTitle': widget.documentTitle,
                             'content': _controller.document.toPlainText(),
-                            'documentId': documentId,
+                            'documentId': widget.documentId,
                           });
                         } else if (option == 1) {
                           // Share with collaborators logic
@@ -305,9 +262,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           widget.socket!.emit('shareDocumentGroup', {
                             'group': _groups[i][key],
                             'user': widget.username,
-                            'documentTitle': titleController.text,
+                            'documentTitle': widget.documentTitle,
                             'content': _controller.document.toPlainText(),
-                            'documentId': documentId,
+                            'documentId': widget.documentId,
                           });
                         }
                       }
@@ -326,38 +283,27 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   // share docs //
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !editing
-          ? AppBar(
-        title: const Text('Documents'),
-        backgroundColor: Colors.green,
-      )
-
-          : AppBar(
+      appBar: AppBar(
         backgroundColor: Colors.green,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            setState(() {
-              editing = false;
-            });
+            Navigator.pop(context); // Go back to the previous screen
           },
         ),
-
         actions: [
           ElevatedButton.icon(
-            onPressed: () { _shareDocument();
-              // setState(() {
-              //   editing = false;
-              //  });
+            onPressed: () {
+              _shareDocument();
             },
             icon: const Icon(Icons.lock),
             label: const Text('Share'),
           ),
         ],
-
         title: Row(
           children: [
             const Icon(Icons.edit),
@@ -384,45 +330,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         ),
       ),
 
-      // Background image
-      body: !editing
-      // Background image
-          ? Stack(
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/FileEdit.webp"),
-                colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5), BlendMode.dstATop),
-              ),
-            ),
-          ),
-          ListView.builder(
-            itemCount: _documents.length,
-            itemBuilder: (context, index) {
-              final document = _documents[index];
-              return ListTile(
-                title: Text(document['DocumentTitle'] ?? 'Untitled Document'),
-                onTap: () {
-                  // Navigate to a screen to view/edit the selected document
-                  // You can create a new screen or dialog for this purpose
-                  // For example:
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => DocumentDetailsScreen(document: document),
-                  //   ),
-                  // );
-                },
-              );
-            },
-          ),
-        ],
-      )
-
       // Quill editor
-          : QuillProvider(
+      body: QuillProvider(
         configurations: QuillConfigurations(
           controller: _controller,
           sharedConfigurations: const QuillSharedConfigurations(
@@ -455,19 +364,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         ),
       ),
 
-      // New document button
-      floatingActionButton: !editing
-          ? FloatingActionButton(
-        backgroundColor: Colors.green,
-        onPressed: () {
-          setState(() {
-            editing = true; // Set editing to true
-          });
-          createNewDocument(); // Call the function to create a new document
-        },
-        child: Icon(Icons.add, color: Colors.white),
-      )
-          : null,
     );
   }
 }
