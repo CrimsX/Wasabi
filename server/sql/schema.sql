@@ -66,14 +66,14 @@ CREATE TABLE partof (
     );
 
 CREATE TABLE document (
-    DocumentID INTEGER PRIMARY KEY,
+    DocumentID INT AUTO_INCREMENT,
     UserID VARCHAR(20),
-    DocumentTitle VARCHAR(50),
+    DocumentTitle VARCHAR(50) NOT NULL,
     Content VARCHAR(5000),
-    DateCreated VARCHAR(15),
-    LastModifiedDate VARCHAR(15),
-    FOREIGN Key (UserID) REFERENCES client(UserID)
+    PRIMARY KEY (DocumentID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
     );
+
 
 CREATE TABLE access (
     DocumentID INTEGER,
@@ -100,6 +100,15 @@ CREATE TABLE ReceiveCall (
     FOREIGN Key (CallID) REFERENCES client(UserID),
     FOREIGN Key (ReceiverID) REFERENCES client(UserID)
     );
+
+CREATE TABLE events (
+    eventsID INT AUTO_INCREMENT,
+    eventNAME VARCHAR(100) NOT NULL,
+    eventTIME DATETIME NOT NULL,
+    UserID VARCHAR(20),
+    PRIMARY KEY (eventsID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
+);
 
 CREATE TABLE groupmsgencryption (
     EncryptID INTEGER PRIMARY KEY,
@@ -134,14 +143,8 @@ CREATE TABLE powerpoints (
     FOREIGN KEY (UserID) REFERENCES client(UserID)
 );
 
-CREATE TABLE events (
-    eventsID INT AUTO_INCREMENT,
-    eventNAME VARCHAR(100) NOT NULL,
-    eventTIME DATETIME NOT NULL,
-    UserID VARCHAR(20),
-    PRIMARY KEY (eventsID, UserID),
-    FOREIGN KEY (UserID) REFERENCES client(UserID)
-);
+
+
 
 CREATE TABLE tasks (
     taskID INT AUTO_INCREMENT,

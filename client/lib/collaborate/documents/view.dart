@@ -1,23 +1,301 @@
 import 'package:flutter/material.dart';
-
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'dart:async';
 
 class DocumentsScreen extends StatefulWidget {
+  final String username;
+  final String serverIP;
+  final Socket? socket;
 
-  DocumentsScreen({super.key});
+  DocumentsScreen({
+    Key? key,
+    required this.username,
+    required this.serverIP,
+    required this.socket,
+  }) : super(key: key);
+
   @override
   State<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
 class _DocumentsScreenState extends State<DocumentsScreen> {
-  TextEditingController titleController = TextEditingController(text: "Untitled Document");
+  TextEditingController titleController =
+  TextEditingController(text: "Untitled Document");
   QuillController _controller = QuillController.basic();
   bool editing = false;
+  int? documentId;
+  Timer? _saveTimer;
+  final List<dynamic> _friends = [];
+  final List<dynamic>_groups = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the socket connection
+    initializeSocket();
+    _startSaveTimer();
+  }
 
   void dispose() {
     titleController.dispose();
     super.dispose();
   }
+
+  // Method to initialize the socket connection and listeners
+  void initializeSocket() {
+    if (widget.socket != null) {
+      // Listen for socket connection successful
+      widget.socket!.on('connect', (_) => print('Connected to the socket server'));
+
+      // Listen for socket connection error
+      widget.socket!.on('connect_error', (data) => print('Connection error: $data'));
+
+      // Listen for socket connection timeout
+      widget.socket!.on('connect_timeout', (data) => print('Connection timeout: $data'));
+
+      // Listen for any errors
+      widget.socket!.on('error', (data) => print('Error: $data'));
+
+      // Listen for socket disconnection
+      widget.socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
+
+      // Emit socket events
+      widget.socket!.emit('buildfriendscollab', widget.username);
+      widget.socket!.emit('buildgroupscollab', widget.username);
+
+      // Listen for responses to build friends collaboration
+      widget.socket!.on('buildfriendscollab', (data) {
+        if (mounted) {
+          setState(() {
+            _friends.addAll(data);
+          });
+        }
+      });
+
+      // Listen for responses to build groups collaboration
+      widget.socket!.on('buildgroupscollab', (data) {
+        if (mounted) {
+        setState(() {
+          _groups.addAll(data);
+        });
+      }
+      });
+    }
+  }
+
+
+  // Create and update //
+
+
+  void updateDocumentTitle(String newTitle) {
+    if (widget.socket != null && documentId != null) {
+      // Emit the event to update document title
+      widget.socket!.emit('updateDocumentTitle', {
+        'documentId': documentId, // Use documentId here
+        'newTitle': newTitle,
+      });
+    }
+  }
+
+  void createNewDocument() {
+    if (widget.socket != null) {
+      // Emit the event to create a new document
+      widget.socket!.emit('createNewDocument', {'username': widget.username});
+
+      // Listen for the response from the server
+      widget.socket!.on('documentCreated', (data) {
+        if (mounted) {
+          setState(() {
+            // Handle the document creation response
+            // For example, you can navigate to the newly created document page
+            documentId = data['documentId'];
+            print('New document created with ID: ${data['documentId']}');
+          });
+        }
+      });
+
+      // Listen for any error response from the server
+      widget.socket!.on('documentCreationFailed', (data) {
+        if (mounted) {
+          setState(() {
+            // Handle the document creation failure
+            print('Failed to create document: ${data['error']}');
+          });
+        }
+      });
+    }
+  }
+
+  // Create and update //
+
+  // Timer auto save //
+  void _startSaveTimer() {
+    print('timer called');
+    _saveTimer = Timer.periodic(Duration(seconds: 2), (_) {
+        _saveContent();
+        print('save content called');
+    });
+  }
+
+  // Method to save the content
+  void _saveContent() {
+    // Get the content from the editor
+    if (_controller.document != null) {
+      // Get the content from the editor
+      String content = _controller.document.toPlainText();
+      widget.socket!.emit('saveDocumentContent',
+          {'documentId': documentId, 'content': content});
+      print('Content saved: $content');
+    } else {
+      print("null");
+    }
+  }
+
+  // Timer auto save //
+
+  // share docs //
+
+  void _shareDocument() {
+    int selectedOption = 0; // Track the selected radio button option
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text("Would you like to share this document?"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RadioListTile(
+                      title: Text('Share with Friends'),
+                      value: 0,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                    RadioListTile(
+                      title: Text('Share with Collaborators'),
+                      value: 1,
+                      groupValue: selectedOption,
+                      onChanged: (int? value) {
+                        setState(() {
+                          selectedOption = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Don\'t share'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  child: Text('Next'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _shareSelect(selectedOption);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _shareSelect(int option) {
+    List<dynamic> items = [];
+    String key = "";
+    if (option == 0){
+      items = _friends;
+      key = 'FriendID';
+    } else if (option == 1) {
+      items = _groups;
+      key = 'ServerName';
+    }
+    List<bool> checkedItems = List<bool>.filled(items.length, false); // Initialize with false values
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select Items'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    items.length,
+                        (index) {
+                      return CheckboxListTile(
+                        title: Text(items[index][key]),
+                        value: checkedItems[index],
+                        onChanged: (newValue) {
+                          setState(() {
+                            checkedItems[index] = newValue!;
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Perform actions based on the checked items
+                    for (int i = 0; i < items.length; i++) {
+                      if (checkedItems[i] && option == 0) {
+                        // Share with friends logic
+                        print('Share with friends: ${items[i][key]}');
+                      } else if (checkedItems[i] && option == 1) {
+                        // Share with collaborators logic
+                        print('Share with collaborators: ${items[i][key]}');
+                      }
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text('Share'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
+  void _shareWithFriends() {
+    // Implement logic to select friends to share with
+    // For example, show a dialog with a list of friends
+  }
+
+  void _shareWithCollaborators() {
+    // Implement logic to select collaborators to share with
+    // For example, show a dialog with a list of collaborators
+  }
+
+  // share docs //
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +319,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
             actions: [
               ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    editing = false;
-                  });
+                onPressed: () { _shareDocument();
+                 // setState(() {
+                 //   editing = false;
+                //  });
                 },
                 icon: const Icon(Icons.lock),
                 label: const Text('Share'),
@@ -67,6 +345,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                       ),
                       contentPadding: EdgeInsets.only(left: 10),
                     ),
+                    onChanged: (value) {
+                      // Update document title as the user types
+                      updateDocumentTitle(value);
+                    },
                   ),
                 ),
               ],
@@ -124,18 +406,19 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         ),
 
         // New document button
-      floatingActionButton: !editing 
-        ? FloatingActionButton(
-          backgroundColor: Colors.green,
-          onPressed: () {  
-            setState(() {
-            editing = true;
-            });
-          },
-          child: Icon(Icons.add, color: Colors.white),
-        )
+      floatingActionButton: !editing
+          ? FloatingActionButton(
+        backgroundColor: Colors.green,
+        onPressed: () {
+          setState(() {
+            editing = true; // Set editing to true
+          });
+          createNewDocument(); // Call the function to create a new document
+        },
+        child: Icon(Icons.add, color: Colors.white),
+      )
 
-        : null,      
+          : null,
     );
   }
 }

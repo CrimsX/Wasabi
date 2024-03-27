@@ -47,6 +47,11 @@ import {
   fetchChat,
 } from './database/messaging.js'
 
+import {
+    updateDocumentTitle,
+    createNewDocument,
+    saveDocumentContent,
+} from './database/collaborate/documents.js'
 
 let port = process.env.PORT || 8080;
 
@@ -92,8 +97,45 @@ IO.on("connection", (socket) => {
   //IO.emit("Active connections:", Array.from(active));
 
   /************************************************************************************
-   * Account Creation
+   * file edit
    ************************************************************************************/
+  socket.on('updateDocumentTitle', async (data) => {
+    const { documentId, newTitle } = data;
+    try {
+      await updateDocumentTitle(documentId, newTitle);
+      socket.emit('documentTitleUpdated', { success: true, documentId, newTitle });
+    } catch (error) {
+      console.error('Error updating document title:', error);
+      socket.emit('documentTitleUpdateFailed', { success: false, error: error.message });
+    }
+  });
+
+  socket.on('saveDocumentContent', async (data) => {
+    const { documentId, content } = data;
+    try {
+      // Call a function to save the document content to the database
+      await saveDocumentContent(documentId, content);
+      socket.emit('documentContentSaved', { success: true });
+    } catch (error) {
+      console.error('Error saving document content:', error);
+      socket.emit('documentContentSaveFailed', { success: false, error: error.message });
+    }
+  });
+
+  socket.on('createNewDocument', async (data) => {
+    const { username } = data;
+    try {
+      // Insert a new document into the database
+      const { documentId, documentTitle } = await createNewDocument(username);
+      // Emit the newly created document ID and title back to the client
+      socket.emit('documentCreated', { documentId, documentTitle });
+    } catch (error) {
+      console.error('Error creating new document:', error);
+      socket.emit('documentCreationFailed', { error: error.message });
+    }
+  });
+
+
 
 
      /************************************************************************************

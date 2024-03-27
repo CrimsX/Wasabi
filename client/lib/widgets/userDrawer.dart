@@ -242,7 +242,11 @@ class collabDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
-                    child: DocumentsScreen(),
+                    child: DocumentsScreen(
+                        username: loggedInUsername,
+                        serverIP: serverIP,
+                        socket: _socket
+                    ),
                   ),
                 ),
               );
