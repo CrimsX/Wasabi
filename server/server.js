@@ -51,6 +51,8 @@ import {
     updateDocumentTitle,
     createNewDocument,
     saveDocumentContent,
+    shareDocument,
+    shareDocumentGroup,
 } from './database/collaborate/documents.js'
 
 let port = process.env.PORT || 8080;
@@ -134,6 +136,16 @@ IO.on("connection", (socket) => {
       socket.emit('documentCreationFailed', { error: error.message });
     }
   });
+
+  socket.on('shareDocument', async (data) => {
+        await shareDocument(data);
+  });
+
+  socket.on('shareDocumentGroup', async (data) => {
+         await shareDocumentGroup(data);
+  });
+
+
 
 
 

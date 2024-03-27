@@ -261,12 +261,27 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   onPressed: () {
                     // Perform actions based on the checked items
                     for (int i = 0; i < items.length; i++) {
-                      if (checkedItems[i] && option == 0) {
-                        // Share with friends logic
-                        print('Share with friends: ${items[i][key]}');
-                      } else if (checkedItems[i] && option == 1) {
-                        // Share with collaborators logic
-                        print('Share with collaborators: ${items[i][key]}');
+                      if (checkedItems[i]) {
+                        if (option == 0) {
+                          // Share with friends logic
+                          print('Share with friend: ${items[i][key]}');
+                          widget.socket!.emit('shareDocument', {
+                            'friendId': items[i][key],
+                            'documentTitle': titleController.text,
+                            'content': _controller.document.toPlainText(),
+                            'documentId': documentId,
+                          });
+                        } else if (option == 1) {
+                          // Share with collaborators logic
+                          print('Share with collaborators: ${items[i][key]}');
+                          widget.socket!.emit('shareDocumentGroup', {
+                            'group': _groups[i][key],
+                            'user': widget.username,
+                            'documentTitle': titleController.text,
+                            'content': _controller.document.toPlainText(),
+                            'documentId': documentId,
+                          });
+                        }
                       }
                     }
                     Navigator.pop(context);
@@ -283,15 +298,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
 
 
-  void _shareWithFriends() {
-    // Implement logic to select friends to share with
-    // For example, show a dialog with a list of friends
-  }
 
-  void _shareWithCollaborators() {
-    // Implement logic to select collaborators to share with
-    // For example, show a dialog with a list of collaborators
-  }
+
 
   // share docs //
 

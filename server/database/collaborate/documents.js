@@ -29,3 +29,28 @@ export async function saveDocumentContent(documentId, content) {
   const [result] = await pool.query(query, [content, documentId]);
   return result;
 }
+
+
+export async function shareDocument(data) {
+    const [check] = await pool.query('SELECT * FROM document \
+    WHERE DocumentID = ? AND UserID = ?', [data.documentId, data.friendId]);
+    console.log(check.length===0);
+    if (check.length === 0) {
+        await pool.query('INSERT INTO document (DocumentID, UserID, DocumentTitle, Content) \
+    VALUES (?, ?, ?, ?)', [data.documentId, data.friendId, data.documentTitle, data.content]);
+    }
+}
+
+
+export async function shareDocumentGroup(data) {
+    const [members] = await pool.query('SELECT UserID from partof WHERE \
+    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
+    for (const username of members) {
+        shareDocument({
+            user: username.UserID,
+            'DocumentID': data.documentId,
+            'DocumentTitle': data.documentTitle,
+            'Content': data.Content
+        })
+    }
+}
