@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
 
 async function getCurrentGroupMsgID(data) {
     const [id] = await pool.query('SELECT GroupMsgID FROM groupmsgs WHERE DateReceived = ?;', [data.sentAt.toString()])

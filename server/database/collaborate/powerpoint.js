@@ -5,7 +5,7 @@ import {Server} from 'socket.io'
 
 dotenv.config()
 
-const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
 
 // Wasabi slides
 export async function socketSlides(socket, IO) {
