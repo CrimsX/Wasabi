@@ -49,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _serverList = [];
   final List<Widget> _serverMemberList = [];
   String currentChatServer= '';
+  String currentChatServerName= '';
   dynamic server;
 
   late Completer<List<Widget>> _friendsListCompleter;
@@ -65,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool start = true;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _serverListCompleter = Completer<List<Widget>>();
@@ -186,6 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Provider.of<MessageProvider>(context, listen: false).notifyListeners();
               currentChatServer = server['ServerID'].toString();
               print(currentChatServer);
+              currentChatServerName= server['ServerName'];
+              print(currentChatServerName);
               _connectToGroupChat(currentChatServer);
               _socket!.emit('getservermembers', currentChatServer);
               FocusScope.of(context).requestFocus(_focusNode);
@@ -363,6 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Provider.of<MessageProvider>(context, listen: false).messages.clear();
           Provider.of<MessageProvider>(context, listen: false).notifyListeners();
           currentChatServer = serverID;
+          currentChatServerName= serverName;
           _connectToGroupChat(serverID);
           FocusScope.of(context).requestFocus(_focusNode);
         }
@@ -457,31 +461,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {});
               },
             ),
+            Visibility(
+              visible: (start || isServer),
+              child: IconButton(
+                  icon: const Icon(Icons.message),
+                  onPressed: () {
+                    start = false;
+                    isServer = false;
+                    NetworkService.instance.setType('DM');
 
-            IconButton(
-              icon: const Icon(Icons.message),
-              onPressed: () {
-                start = false;
-                isServer = false;
-                NetworkService.instance.setType('DM');
-
-                setState(() {});
-              },
-              tooltip: 'DM',
+                    setState(() {});
+                  },
+                  tooltip: 'DM',
+                ),
             ),
+            Visibility(
+              visible: (start || !isServer),
+              child: IconButton(
+                icon: const Icon(Icons.groups_2_rounded),
+                onPressed: () {
+                  start = false;
+                  isServer = true;
+                  NetworkService.instance.setType('group');
+                  currentChatServer = '';
+                  currentChatServerName = '';
 
-            IconButton(
-              icon: const Icon(Icons.groups_2_rounded),
-              onPressed: () {
-                start = false;
-                isServer = true;
-                NetworkService.instance.setType('group');
-                currentChatServer = '';
-
-                setState(() {});
-              },
-              tooltip: 'Server',
-            ),
+                  setState(() {});
+                },
+                tooltip: 'Server',
+                )
+              ),
 
             const SizedBox(width: 1),
 
@@ -515,7 +524,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  _socket!.disconnect();
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Cancel'),
@@ -527,6 +535,42 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     tooltip: 'Add Friend',
                   ),
+
+                  Visibility(
+                    visible: (currentChatFriend != ""),
+                   child: IconButton(
+                    icon: const Icon(Icons.person_remove),
+                    onPressed: () {
+                        showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Remove Friend'),
+                            content: Text(
+                              'Remove $currentChatFriend from friends?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                    _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Remove'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      },
+                      tooltip: "Remove Friend",
+                   )
+                  )
                 ],
               ),
 
@@ -569,6 +613,43 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     tooltip: 'Create Group',
                   ),
+                   Visibility(
+                    visible: (currentChatServer != ''),
+                    child: IconButton(
+                      icon: const Icon(Icons.group_remove),
+                      onPressed:() {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text(
+                                  'Leave Server',
+                                ),
+                              content: Text(
+                                'Are you sure you want to leave $currentChatServerName?', // Center the body text horizontally
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _socket!.emit('leaveserver', {'owner': widget.username, 'serverName': currentChatServerName});
+                                  },
+                                  child: const Text('Leave'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      tooltip: 'Leave Group',
+                    ),
+                  ),
                 ],
               ),
           ]
@@ -580,13 +661,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (!start) ... {
             rAppBar(),
-
-            IconButton(
-              icon: const Icon(Icons.group_rounded),
-              onPressed: () {
-                _scaffoldKey.currentState!.openEndDrawer();
-              },
-              color: Colors.white,
+            Visibility(
+              visible: isServer && currentChatServer != "",
+              child: IconButton(
+                icon: const Icon(Icons.group_rounded),
+                onPressed: () {
+                  _scaffoldKey.currentState!.openEndDrawer();
+                },
+                color: Colors.white,
+                tooltip: "Server Members",
+              )
             ),
           }
         ],
