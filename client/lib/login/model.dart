@@ -12,7 +12,7 @@ enum Servers {
   server1("Wasabi", "https://wasabi-server.fly.dev/"),
   server2("localhost", 'http://localhost:8080/'),
   server3("Kipp", 'http://192.168.56.1:8080/'),
-  server4("Add Server", '');
+  server4("Enter Server IP", '');
 
   const Servers(this.serverName, this.serverIP);
   final String serverName;
