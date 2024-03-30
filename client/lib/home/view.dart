@@ -48,6 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
   final List<Widget> _serverMemberList = [];
+  final List<String> _serverMemberIDs = [];
+  final List<String> _friendIDs = [];
   String currentChatServer= '';
   String currentChatServerName= '';
   dynamic server;
@@ -105,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ///builds tiles on the end drawer for each friend in the db
     _socket!.on('friends', (data) {
       for (var friend in data) {
+        _friendIDs.add(friend['FriendID']);
         _friendsList.add(
           hoverableTile(
             title: friend['FriendID'],
@@ -222,10 +225,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _socket!.on('getservermembers', (data) {
       _serverMemberList.clear();
+      _serverMemberIDs.clear();
       for (var member in data) {
         if (member['UserID'] != widget.username) {
           NetworkService.instance.groupNames.add(member['UserID']);
         }
+        _serverMemberIDs.add(member['UserID']);
         _serverMemberList.add(
           hoverableTile(
             title: member['UserID'],
@@ -332,6 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Function to build the friend tile
   _buildFriendTile(friendID){
+    _friendIDs.add(friendID);
     return hoverableTile(
       title: friendID,
       onTap: () {
@@ -412,6 +418,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  populateInviteList(inviteList) {
+    for (var username in _friendIDs) {
+      if (!_serverMemberIDs.contains(username)) {
+        inviteList.add(username);
+      }
+    }
   }
 
   /// the drawer and header
@@ -663,13 +677,93 @@ class _HomeScreenState extends State<HomeScreen> {
             rAppBar(),
             Visibility(
               visible: isServer && currentChatServer != "",
-              child: IconButton(
-                icon: const Icon(Icons.group_rounded),
-                onPressed: () {
-                  _scaffoldKey.currentState!.openEndDrawer();
-                },
-                color: Colors.white,
-                tooltip: "Server Members",
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.insert_invitation),
+                    onPressed: () {
+                      List<String> inviteList = [];
+                      populateInviteList(inviteList);
+                      if (inviteList.length == 0) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("No Friends to Invite"),
+                            );
+                        }
+                        );
+                      } else {
+                        List<bool> checkedItems = List<bool>.filled(inviteList.length, false); // Initialize with false values
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (BuildContext context, StateSetter setState) {
+                                return AlertDialog(
+                                  title: Text('Invite to $currentChatServerName'),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(
+                                        inviteList.length,
+                                        (index) {
+                                          return CheckboxListTile(
+                                            title: Text(inviteList[index]),
+                                            value: checkedItems[index],
+                                            onChanged: (newValue) {
+                                              print('Checkbox $index tapped');
+                                              setState(() {
+                                                checkedItems[index] = newValue!;
+                                              });
+                                              print('Checkbox $index is now ${checkedItems[index]}');
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Perform actions based on the checked items
+                                        for (int i = 0; i < inviteList.length; i++) {
+                                          if (checkedItems[i]){
+                                            print(inviteList[i]);
+                                          }
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Invite'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }
+
+                    },
+                    color: Colors.white,
+                    tooltip: "Invite to Group",
+                  ),
+
+                  IconButton(
+                    icon: const Icon(Icons.group_rounded),
+                    onPressed: () {
+                      _scaffoldKey.currentState!.openEndDrawer();
+                    },
+                    color: Colors.white,
+                    tooltip: "Server Members",
+                  )
+                ]
               )
             ),
           }
