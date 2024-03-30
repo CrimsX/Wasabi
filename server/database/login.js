@@ -13,11 +13,11 @@ export async function logIn(data) {
 
         // Fetch the password for the given userID
         const [rows] = await pool.query('SELECT Pass FROM client WHERE UserID = ?', [userID]);
-        console.log(rows[0]["Pass"])
-        console.log(password);
-        console.log(bcrypt.compareSync(password, rows[0]["Pass"]))
-        //if (bcrypt.compareSync(password, rows[0]["Pass"])) {
-        if (password === rows[0]["Pass"]) {
+        //console.log(rows[0]["Pass"])
+        //console.log(password);
+        //console.log(bcrypt.compareSync(password, rows[0]["Pass"]))
+        if (bcrypt.compareSync(password, rows[0]["Pass"])) {
+        //if (password === rows[0]["Pass"]) {
         // If a row is found, the password matches
             return { success: true, message: "Login successful" };
         } else {
