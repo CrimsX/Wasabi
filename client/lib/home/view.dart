@@ -549,42 +549,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     tooltip: 'Add Friend',
                   ),
-
-                  Visibility(
-                    visible: (currentChatFriend != ""),
-                   child: IconButton(
-                    icon: const Icon(Icons.person_remove),
-                    onPressed: () {
-                        showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Remove Friend'),
-                            content: Text(
-                              'Remove $currentChatFriend from friends?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                    _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Remove'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                      },
-                      tooltip: "Remove Friend",
-                   )
-                  )
                 ],
               ),
 
@@ -593,7 +557,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.group_add),
+                    icon: const Icon(Icons.add_box),
                     onPressed:() {
                       showDialog(
                         context: context,
@@ -626,44 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     tooltip: 'Create Group',
-                  ),
-                   Visibility(
-                    visible: (currentChatServer != ''),
-                    child: IconButton(
-                      icon: const Icon(Icons.group_remove),
-                      onPressed:() {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text(
-                                  'Leave Server',
-                                ),
-                              content: Text(
-                                'Are you sure you want to leave $currentChatServerName?', // Center the body text horizontally
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    _socket!.emit('leaveserver', {'owner': widget.username, 'serverName': currentChatServerName});
-                                  },
-                                  child: const Text('Leave'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      tooltip: 'Leave Group',
-                    ),
-                  ),
+                  )
                 ],
               ),
           ]
@@ -680,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.insert_invitation),
+                    icon: const Icon(Icons.group_add),
                     onPressed: () {
                       List<String> inviteList = [];
                       populateInviteList(inviteList);
@@ -689,7 +616,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text("No Friends to Invite"),
+                              title: Text('Invite to $currentChatServerName'),
+                              content: Text(
+                                'No Friends To Invite :(', // Center the body text horizontally
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Ok'),
+                                ),
+                              ]
                             );
                         }
                         );
@@ -762,10 +700,80 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     color: Colors.white,
                     tooltip: "Server Members",
-                  )
+                  ),
+
+                  IconButton(
+                      icon: const Icon(Icons.door_back_door),
+                      onPressed:() {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text(
+                                  'Leave Server',
+                                ),
+                              content: Text(
+                                'Are you sure you want to leave $currentChatServerName?', // Center the body text horizontally
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _socket!.emit('leaveserver', {'owner': widget.username, 'serverName': currentChatServerName});
+                                  },
+                                  child: const Text('Leave'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      tooltip: 'Leave Group',
+                    ),
                 ]
               )
             ),
+            Visibility(
+              visible: (!isServer && currentChatFriend != ""),
+              child: IconButton(
+                icon: const Icon(Icons.person_remove),
+                onPressed: () {
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Remove Friend'),
+                        content: Text(
+                          'Remove $currentChatFriend from friends?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                                _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Remove'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              tooltip: "Remove Friend",
+            )
+          )
           }
         ],
       ),
