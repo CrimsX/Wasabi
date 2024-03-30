@@ -164,10 +164,10 @@ class collabDrawer extends StatelessWidget {
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
                     child: CalendarScreen(
-                      username: loggedInUsername, 
+                      username: loggedInUsername,
                       serverIP: serverIP,
                       socket: _socket
-                    ),  
+                    ),
                   ),
                 ),
               );
@@ -207,7 +207,10 @@ class collabDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
-                    child: const DrawScreen(),
+                    child: DrawScreen(
+                      username: loggedInUsername,
+                      socket: _socket
+                    ),
                   ),
                 ),
               );
@@ -251,6 +254,6 @@ class collabDrawer extends StatelessWidget {
           ),
         ],
       ),
-    );  
+    );
   }
 }
