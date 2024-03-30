@@ -3,6 +3,21 @@
 import {Server} from 'socket.io'
 
 import {
+  socketSlides,
+  newSlide,
+  getAllSlides,
+  getSlide,
+  deleteSlide,
+  shareSlide,
+
+  getPowerPoints,
+  createPowerPoint,
+  deletePowerPoint,
+  sharePPT,
+  sharePPTGroup,
+} from './database/collaborate/powerpoint.js'
+
+import {
   createEvent,
   getEvents,
   insertTaskIntoDatabase,
@@ -12,11 +27,6 @@ import {
   getAllTasks,
   shareToDo,
   shareToDoGroup,
-  getPowerPoints,
-  createPowerPoint,
-  deletePowerPoint,
-  sharePPT,
-  sharePPTGroup,
   shareEventGroup,
   shareEvent,
 } from './database/collaborate.js'
@@ -46,7 +56,6 @@ import {
   storeMessage,
   fetchChat,
 } from './database/messaging.js'
-
 
 let port = process.env.PORT || 8080;
 
@@ -451,6 +460,10 @@ IO.on("connection", (socket) => {
   /************************************************************************************
    * Powerpoint
    ************************************************************************************/
+    // Wasabi Slides
+    socketSlides(socket, IO);
+    
+    // Web Slides
     socket.on('getpowerpoints', async (username) => {
       const ppts = await getPowerPoints(username);
       console.log(ppts);

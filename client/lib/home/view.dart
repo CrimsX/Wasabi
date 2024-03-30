@@ -680,7 +680,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 /// container design for the textfield bottom:
-
+                if(currentChatFriend != '' || currentChatServer != '')
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   color: Colors.white,

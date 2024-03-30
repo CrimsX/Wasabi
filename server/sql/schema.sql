@@ -152,15 +152,13 @@ CREATE TABLE tasks (
     FOREIGN KEY (UserID) REFERENCES client(UserID)
 );
 
-/*
-CREATE TABLE pp {
-    ppID INT AUTO_INCREMENT,
+CREATE TABLE WasabiSlides (
+    ID INT AUTO_INCREMENT,
     userID VARCHAR(20),
-    ppName VARCHAR(100) NOT NULL,
-    ppSlideNum INT NOT NULL,
-    ppSlideHeader VARCHAR(100) NOT NULL,
-    ppSlideContent VARCHAR(1000) NOT NULL,
-    PRIMARY KEY (ppID, UserID),
-    FOREIGN KEY (UserID) REFERENCES client(UserID)
-};
-*/
+    Name VARCHAR(100) NOT NULL,
+    SlideNum INT NOT NULL,
+    SlideHeader VARCHAR(100) NOT NULL,
+    SlideContent VARCHAR(1000) NOT NULL,
+    PRIMARY KEY (ID, userID),
+    FOREIGN KEY (userID) REFERENCES client(UserID)
+);
