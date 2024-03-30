@@ -11,7 +11,7 @@ import 'package:client/login/view.dart';
 import 'package:client/collaborate/Calendar.dart';
 import 'package:client/collaborate/Todo.dart';
 import 'package:client/collaborate/draw/view.dart';
-import 'package:client/collaborate/Powerpoint.dart';
+import 'package:client/collaborate/slides/view.dart';
 import 'package:client/collaborate/documents/view.dart';
 
 class userDrawer extends StatelessWidget {
@@ -157,6 +157,7 @@ class collabDrawer extends StatelessWidget {
             title: const Text('Calendar'),
             leading: const Icon(Icons.calendar_today),
             onTap: () {
+              Navigator.of(context)..pop()..pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -178,6 +179,7 @@ class collabDrawer extends StatelessWidget {
             title: const Text('Todo List'),
             leading: const Icon(Icons.checklist_rtl),
             onTap: () {
+              Navigator.of(context)..pop()..pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -199,6 +201,7 @@ class collabDrawer extends StatelessWidget {
             title: const Text('Draw'),
             leading: const Icon(Icons.brush),
             onTap: () {
+              Navigator.of(context)..pop()..pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -211,21 +214,18 @@ class collabDrawer extends StatelessWidget {
             },
           ),
 
-          // Handle powerpoint button click
+          // Handle slides button click
           ListTile(
-            title: const Text('Powerpoints'),
+            title: const Text('Slides'),
             leading: const Icon(Icons.slideshow),
             onTap: () {
+              Navigator.of(context)..pop()..pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
-                    child: PowerPointScreen(
-                      username: loggedInUsername,
-                      serverIP: serverIP,
-                      socket: _socket
-                    ),
+                    child: SlidesView(),
                   ),
                 ),
               );
@@ -237,6 +237,7 @@ class collabDrawer extends StatelessWidget {
             title: const Text('Documents'),
             leading: const Icon(Icons.edit),
             onTap: () {
+              Navigator.of(context)..pop()..pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(
