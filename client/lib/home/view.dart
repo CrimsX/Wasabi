@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
   String serverIP = '';
   Socket? socket;
 
+
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({super.key, required this.username, required this.serverIP, required this.socket});
   @override
@@ -176,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var server in data) {
         _serverList.add(
           hoverableTile(
+            key: ValueKey<int>(server['ServerID']),
             title: server['ServerName'],
             onTap: () {
               if (currentChatServer == server['ServerID'].toString()) {
@@ -237,6 +239,30 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: (){},
           )
         );
+      }
+    });
+
+    _socket!.on('invite', (data) {
+      print(data);
+      setState(() {
+          _serverList.add(_buildServerTile(data['serverName'], data['serverID']));
+        });
+    });
+
+    _socket!.on('leaveserver', (data) {
+      print(_serverList);
+      for (int i = 0; i < _serverList.length; i++) {
+        int serverKey = (_serverList[i].key as ValueKey<int>).value;
+        print(serverKey);
+        if (serverKey == int.parse(data['serverID']))
+        {
+          print('hi');
+          setState(() {
+            _serverList.removeAt(i);
+          });
+          print(_serverList);
+          return;
+        }
       }
     });
   }
@@ -335,6 +361,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  getFriendIndex(friendID) {
+    for (int i = 0; i < _friendIDs.length; i++){
+      if (_friendIDs[i] == friendID) {
+        return i;
+      }
+    }
+  }
+
   // Function to build the friend tile
   _buildFriendTile(friendID){
     _friendIDs.add(friendID);
@@ -361,6 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Function to build the server tile
   _buildServerTile(serverName, serverID){
     return hoverableTile(
+      key: ValueKey<int>(int.parse(serverID)),
       title: serverName,
       onTap: () {
         //check if previously connected to another chat and leaves chat room if it is
@@ -374,6 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
           currentChatServer = serverID;
           currentChatServerName= serverName;
           _connectToGroupChat(serverID);
+          _socket!.emit('getservermembers', currentChatServer);
           FocusScope.of(context).requestFocus(_focusNode);
         }
       },
@@ -674,8 +710,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                         for (int i = 0; i < inviteList.length; i++) {
                                           if (checkedItems[i]){
                                             print(inviteList[i]);
+                                            print(currentChatServer);
+                                            widget.socket!.emit('invite', {
+                                              'friendID': inviteList[i],
+                                              'serverName': currentChatServerName,
+                                              'serverID': currentChatServer
+                                              });
+                                             _serverMemberIDs.add(inviteList[i]);
+                                              _serverMemberList.add(
+                                                hoverableTile(
+                                                  title: inviteList[i],
+                                                    onTap: (){},
+                                                )
+                                              );
                                           }
                                         }
+                                        setState(() => {});
                                         Navigator.pop(context);
                                       },
                                       child: Text('Invite'),
@@ -719,7 +769,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    _socket!.emit('leaveserver', {'owner': widget.username, 'serverName': currentChatServerName});
+                                    _socket!.emit('leaveserver', {'username': widget.username, 'serverID': currentChatServer});
                                   },
                                   child: const Text('Leave'),
                                 ),
@@ -755,7 +805,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         actions: [
                           TextButton(
                             onPressed: () {
-                                _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
+                              int index = getFriendIndex(currentChatFriend);
+                              _friendIDs.removeAt(index);
+                              setState(() {_friendsList.removeAt(index);});
+                              _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
                               Navigator.of(context).pop();
                             },
                             child: const Text('Remove'),

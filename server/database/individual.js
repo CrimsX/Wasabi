@@ -54,3 +54,8 @@ export async function addFriend(friendID, userID) {
         return false;
     }
 }
+
+export async function removeFriend(friendID, userID) {
+        await pool.query("DELETE FROM friends WHERE UserID = ? AND FriendID = ?;", [userID, friendID]);
+        await pool.query("DELETE FROM friends WHERE UserID = ? AND FriendID = ?;", [friendID, userID]);
+}
