@@ -16,7 +16,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:flutter_pptx/flutter_pptx.dart';
 import 'package:file_saver/file_saver.dart';
 
-//import 'dart:typed_data';
+import 'dart:typed_data';
 
 //import 'dart:io';
 //import 'dart:developer';
@@ -264,29 +264,6 @@ class _SlidesViewState extends State<SlidesView> {
 }
 
 class WasabiSlidesView extends StatefulWidget {
-  /*
-Future<void> downloadFile(String name, Uint8List bytes) async {
-  await FileSaver.instance.saveFile(
-      name: name,
-      bytes: bytes,
-      //file: file,
-      //String? filePath,
-      ext: ".ppt",
-      //MimeType mimeType = MimeType.other,
-      //mimeType: application/vnd.openxmlformats-officedocument.presentationml.presentation,
-      //custommimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      //mimeType: MimeType.microsoftPresentation,
-      );
-  }
-
-Future<void> downloadPresentation(FlutterPowerPoint pres) async {
-    final bytes = await pres.save();
-    if (bytes == null) return;
-    //final file = File("presentation2.pptx");
-    //await file.writeAsBytes(bytes);
-    downloadFile('presentation.pptx', bytes);      
-  }
-*/
   String slideName = '';
   Socket? socket;
   bool newSlide = true;
@@ -305,9 +282,13 @@ class _WasabiSlidesViewState extends State<WasabiSlidesView> {
 
   void initState() {
     super.initState();
+    //saveSlide(slideIndex, headingController, bulletController);
+
     if (widget.slideName != '') {
       titleController.text = widget.slideName;
-    }
+    } else {
+      widget.slideName = titleController.text;
+      }
  
     widget.socket!.emit('buildfriendscollab', username);
     widget.socket!.emit('buildgroupscollab', username);
@@ -345,7 +326,7 @@ class _WasabiSlidesViewState extends State<WasabiSlidesView> {
 
     widget.socket!.on('getTotalSlides', (data) {
         print(data[0]['COUNT(*)']);
-        slideLength = (data[0]['COUNT(*)'] - 1);
+        slideLength = (data[0]['COUNT(*)']);
     print (slideLength);
         //slideLength = data[0]['COUNT(*)'];
     });
@@ -358,6 +339,41 @@ bulletController.text = data[0]['SlideContent'];
 });
       })
     */
+
+  widget.socket!.on('exportSlides', (data) {
+           final pres = FlutterPowerPoint();
+
+    //print(data);
+    for (var i = 0; i < slideLength; i++) {
+    if (i == 0) {
+      print(data[i]['SlideHeader']);
+      String title = data[i]['SlideHeader'];
+    pres.addTitleSlide(title: title.toTextValue(),);
+    //print(data[i]['SlideHeader']);
+    } else {
+      String title = data[i]['SlideHeader'];
+      List<String> splitBullet = data[i]['SlideContent'].split('\n');
+      //print(splitBullet);
+      //for (var j = 0; j < splitBullet.length; j++) {
+        //print(splitBullet[j]);
+      //}
+
+      pres.addTitleAndBulletsSlide(
+        title: title.toTextValue(),
+        bullets: splitBullet.map((e) => e.toTextValue()).toList(),
+
+        //data[i]['SlideContent'].toTextValue(),
+      );
+
+      
+          
+    }
+
+      //widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': i});
+    }
+    downloadPresentation(pres);
+  });
+
 widget.newSlide = false;
     
   }
@@ -372,31 +388,18 @@ widget.newSlide = false;
   print(box.get('numbers'));
   */
 
-/*
-Future<FlutterPowerPoint> createPresentation() async {
-  final pres = FlutterPowerPoint();
-    pres.addBlankSlide();
-}
-final pres = await createPresentation();
-            await downloadPresentation(pres);
-*/
   final TextEditingController headingController = TextEditingController();
   final TextEditingController bulletController = TextEditingController();
 
-  int slideLength = 0;
+  int slideLength = 1;
 
-  final ValueNotifier<int> slideIndex = ValueNotifier(0);
+  final ValueNotifier<int> slideIndex = ValueNotifier(1);
 
   void nextSlide(BuildContext context) {
-    slideIndex.value++;
   }
 
   void prevSlide(BuildContext context) {
     slideIndex.value--;
-  }
-
-  void firstSlide(BuildContext context) {
-    slideIndex.value = 0;
   }
 
   void saveSlide(ValueNotifier<int> slideIndex, TextEditingController headingController, TextEditingController bulletController) {
@@ -409,12 +412,33 @@ final pres = await createPresentation();
     });
   }
 
+  Future<void> downloadFile(String name, Uint8List bytes) async {
+    }
+
+Future<void> downloadPresentation(FlutterPowerPoint pres) async {
+    //final bytes = await pres.save();
+    //if (bytes == null) return;
+    //final file = File("presentation2.pptx");
+    //await file.writeAsBytes(bytes);
+    //downloadFile('presentation', bytes);      
+    await FileSaver.instance.saveFile(
+      name: widget.slideName,
+      bytes: await pres.save(),
+      //file: file,
+      //String? filePath,
+      ext: ".ppt",
+      //MimeType mimeType = MimeType.other,
+      //mimeType: application/vnd.openxmlformats-officedocument.presentationml.presentation,
+      //custommimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      //mimeType: MimeType.microsoftPresentation,
+      );
+
+  }
 
   
-  
-
-  
-
+  void createPresentation() {
+     //downloadPresentation(pres);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -449,25 +473,28 @@ final pres = await createPresentation();
                   setState(() {
                     saveSlide(slideIndex, headingController, bulletController);
 
-                    slideIndex.value = 0;
+                    slideIndex.value = 1;
+                    widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
                     presenting = true;
                   });
                 },
-                icon: const Icon(Icons.arrow_right_outlined, size: 32),
-                label: const Text('Present'),
+                icon: const Icon(Icons.arrow_right_outlined, size: 32, color: Colors.black),
+                label: const Text('Present', style: TextStyle(color: Colors.black)),
               ),
-              /*
-              const SizedBox(width: 10),
+                            const SizedBox(width: 24),
+
+              //const SizedBox(width: 10),
               ElevatedButton.icon(
                 onPressed: () {
-                  setState(() {
-                    //editing = false;
-                  });
+                  //createPresentation();
+                  widget.socket!.emit('exportSlides', {'name': widget.slideName, 'username': username});
                 },
-                icon: const Icon(Icons.lock),
-                label: const Text('Share'),
-              ),         
-              */
+                icon: const Icon(Icons.save, color: Colors.black),
+                label: const Text('Export', style: TextStyle(color: Colors.black)),
+              ),        
+                            const SizedBox(width: 24),
+
+            
             ],
     ),
       body: ValueListenableBuilder(
@@ -494,6 +521,7 @@ final pres = await createPresentation();
                             ),
 
                             SizedBox(height: 48),
+                            if (slideIndex.value != 1) ... {
                             TextFormField(
                               controller: bulletController,
                               decoration: const InputDecoration(
@@ -502,6 +530,7 @@ final pres = await createPresentation();
                               ),
                               maxLines: 24,
                             ),
+                            }
                           ],
                         ),
                       ),
@@ -511,59 +540,54 @@ final pres = await createPresentation();
               ],
             ),
             Positioned(
-              left: 0,
-              bottom: 0,
+              left: 8,
+              bottom: 8,
               child: ClipRRect(
                 borderRadius:
-                  const BorderRadius.only(topRight: Radius.circular(10)),
+                  const BorderRadius.all(Radius.circular(10)),
                   child: ColoredBox(
-                    color: Colors.black12,
+                    color: Colors.green,
                     child: Row(
                       children: [
-                        if (slideIndex.value != 0)
+                      const SizedBox(width: 16),
+                        if (slideIndex.value != 1) ... {
                           IconButton(
                             iconSize: 40,
                             icon: const Icon(Icons.navigate_before_rounded),
                             onPressed: () {
                               saveSlide(slideIndex, headingController, bulletController);
-                              prevSlide(context);
-                                    widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
-
+                              //prevSlide(context);
+                              slideIndex.value--;
+                                    widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
                             }
                           ),
-
-                        SizedBox(width: slideIndex.value == 0 ? 90 : 50),
+} else ... {
+    const SizedBox(width: 56),
+  },
+                        //SizedBox(width: slideIndex.value == 0 ? 24 : 24),
+                      const SizedBox(width: 16),
                         if (slideIndex.value < slideLength)
                           IconButton(
                             iconSize: 40,
                             icon: const Icon(Icons.navigate_next_rounded),
                             onPressed: () {
                                                             saveSlide(slideIndex, headingController, bulletController);
+                              //nextSlide(context);
+                                  slideIndex.value++;
+                                  print(widget.slideName);
+                                  print(username);
+                                  print(slideIndex.value);
 
-                              nextSlide(context);
-                                    widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
-
-
-                                                          
+                                    widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
                             }
                           ),
-/*
-                        const SizedBox(width: 50),
-                        if (slideIndex.value != 0)
-                          IconButton(
-                            iconSize: 40,
-                            icon: const Icon(Icons.first_page),
-                            onPressed: () {
-                              firstSlide(context);
-                            }
-                          ),
-*/
                         const SizedBox(width: 50),
                         if (slideIndex.value == slideLength)
                         IconButton(
                           iconSize: 40,
                           icon: const Icon(Icons.plus_one),
                           onPressed: () {
+                            saveSlide(slideIndex, headingController, bulletController);
                             slideLength++;
                             //saveSlide(slideIndex + 1);
                             widget.socket?.emit('createSlide', {
@@ -578,45 +602,41 @@ final pres = await createPresentation();
                             setState(() {});
                           }
                         ),
+                        const SizedBox(width: 16),
+                                              
                       ],
                     ),
                   ),
                 ),
-              ),
-
-              
+              ), 
 
               Positioned(
-                right: 0,
-                bottom: 0,
+                right: 8,
+                bottom: 8,
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   child: ColoredBox(
-                    color: Colors.black12,
+                    color: Colors.green,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Text(
-                        '${slideIndex.value + 1}',
+                        '${slideIndex.value}',
                         style: Theme.of(context)
                           .textTheme
                           .displaySmall
-                          ?.copyWith(color: Theme.of(context).primaryColor),
+                          ?.copyWith(color: Colors.black),
                       ),
                     ),
                   ),
                 ),
               ),
               Positioned(
-                left: 0,
-                top: 0,
+                left: 8,
+                top: 8,
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   child: ColoredBox(
-                    color: Colors.black12,
+                    color: Colors.green,
                     child:  TextButton(
                       style: TextButton.styleFrom(
                     //foregroundColor: Colors.white,
@@ -627,7 +647,7 @@ final pres = await createPresentation();
                       onPressed: () {
                           saveSlide(slideIndex, headingController, bulletController);
                         },
-                      child: const Text('Save'),
+                      child: const Text('Save', style: TextStyle(color: Colors.black)),
                     ),
                   ),
                 ),
@@ -641,79 +661,66 @@ final pres = await createPresentation();
       return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
           const SingleActivator(LogicalKeyboardKey.escape): () {
-              setState(() {slideIndex.value = 0;
-              presenting = false;});
+            slideIndex.value = 1;
+              presenting = false;
+            widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
+              setState(() {});
             },
             const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
-              //setState(() {presenting = false;});
-              if (slideIndex.value > 0) {
-              prevSlide(context);
-                                                  widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
+              if (slideIndex.value > 1) {
+              //prevSlide(context);
+              slideIndex.value--;
+                                                  widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
 
-              //setState(() {});
             }
                           
                           
             },
             const SingleActivator(LogicalKeyboardKey.arrowRight): () {
               print(slideIndex.value);
-              //setState(() {presenting = false;});
               if (slideIndex.value < slideLength) {
               nextSlide(context);
-                                                  widget.socket!.emit('getSlide',{'name': widget.slideName, 'username': username, 'slideNum': slideIndex.value});
-
-              //setState(() {});
+              slideIndex.value++;
+                                                  widget.socket!.emit('getSlide',{'name': titleController.text, 'username': username, 'slideNum': slideIndex.value});
+                                                  print('xdd');
+                                                  print(slideLength);
+              //print(bulletController.text.split('\n'));
+              print('xdddd');
               }
             },
         },
         child: Focus(
         autofocus: true,
-        /*child: Column(
-        children: <Widget> [
-        const Text('test'),
-        ]
-        ) */
+      
         child: Scaffold(
       appBar: AppBar(
-        //title: const Text('Draw'),
-        //backgroundColor: Colors.green,
-        //elevation: 0,
+       
         automaticallyImplyLeading: false,
       ),
       
       body: Center(
         child: Column(
         children: <Widget> [
-        const SizedBox(height: 128),
         Expanded(
           child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          //crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+         
           children: [
-            SizedBox(height: 64),
             Text(headingController.text, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
-            SizedBox(height: 48),
             Text(bulletController.text, style: const TextStyle(fontSize: 36)),
           ],
-                ),
-              ),
-            ],
+          
           ),
         ),
                 ],
         )
-        //Image.asset('assets/DrawingImage.webp'),
       ),
 
         )
         )
         
       );
-      //return Scaffold();
         
       }
   }

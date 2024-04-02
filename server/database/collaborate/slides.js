@@ -40,7 +40,11 @@ export async function socketWasabiSlides(socket, IO) {
     socket.on('getTotalSlides', async (data) => {
       const result = await totalSlides(data);
       IO.to(socket.id).emit('getTotalSlides', result);
-    
+    })
+
+    socket.on('exportSlides', async (data) => {
+      const result = await exportSlides(data);
+      IO.to(socket.id).emit('exportSlides', result);
     })
 }
 
@@ -65,7 +69,7 @@ export async function newSlide(data) {
 
 export async function getAllSlides(userID) {
     const [result] = await pool.query('SELECT Name from WasabiSlides \
-    WHERE userID = ? AND SlideNum = 0;', [userID]);
+    WHERE userID = ? AND SlideNum = 1;', [userID]);
     return result;
 }
 
@@ -115,6 +119,16 @@ export async function totalSlides(data) {
     'SELECT COUNT(*) \
     FROM WasabiSlides \
     WHERE userID = ? AND Name = ?',
+    [data.username, data.name]);
+  return result;
+}
+
+export async function exportSlides(data) {
+  const [result] = await pool.query(
+    'SELECT * \
+    FROM WasabiSlides \
+    WHERE userID = ? AND Name = ? \
+    ORDER BY SlideNum',
     [data.username, data.name]);
   return result;
 }
