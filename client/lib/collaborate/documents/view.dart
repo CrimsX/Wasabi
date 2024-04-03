@@ -3,6 +3,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:client/collaborate/documents/landingpage.dart';
 
 
@@ -78,6 +79,20 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         _controller = QuillController.basic();
       }
     }
+    _controller.document.changes.listen((event) {
+      String content = jsonEncode(_controller.document.toDelta().toJson());
+      _saveContent();
+      print(content);
+      widget.socket!.emit('fetchDocumentContent', {
+        'documentId': widget.documentId,
+        'content': content,
+      });
+    });
+  }
+  void _handleControllerChanges() {
+    // Handle changes to the controller here
+    // For example, you can access the current content of the editor using _controller.document.toPlainText()
+    print('Controller content changed: ${_controller.document.toPlainText()}');
   }
 
   void dispose() {
@@ -131,18 +146,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           });
         }
       });
-
-
-      // Fetches the document.
-
-      String content = jsonEncode(_controller.document.toDelta().toJson());
-      print(widget.documentContent);
-      print(widget.documentId);
-      widget.socket!.emit('fetchDocumentContent', {
-        'documentId': widget.documentId,
-        'content': widget.documentContent,
-      });
-
 
 
       // BroadcastContent is called,
@@ -418,7 +421,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         ),
       ),
 
-      // Quill editor
+       // Quill editor
       body: QuillProvider(
         configurations: QuillConfigurations(
           controller: _controller,

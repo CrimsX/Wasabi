@@ -16,8 +16,8 @@ export async function logIn(data) {
         //console.log(rows[0]["Pass"])
         //console.log(password);
         //console.log(bcrypt.compareSync(password, rows[0]["Pass"]))
-        if (bcrypt.compareSync(password, rows[0]["Pass"])) {
-        //if (password === rows[0]["Pass"]) {
+        //if (bcrypt.compareSync(password, rows[0]["Pass"])) {
+        if (password === rows[0]["Pass"]) {
         // If a row is found, the password matches
             return { success: true, message: "Login successful" };
         } else {
