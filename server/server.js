@@ -106,7 +106,7 @@ IO.on("connection", (socket) => {
   * Account Creation
   ************************************************************************************/
   socketLogin(socket, IO);
-  
+
   /************************************************************************************
   * Document :
   ************************************************************************************/
@@ -545,7 +545,7 @@ IO.on("connection", (socket) => {
 
     // Web Slides
     socketWebSlides(socket, IO);
-    
+
     socket.on('buildfriendscollab', async (user) => {
       const result = await getFriends(user);
       IO.to(socket.id).emit('buildfriendscollab', result);
@@ -555,7 +555,7 @@ IO.on("connection", (socket) => {
       const result = await getServers(user); //TODO: make query
       IO.to(socket.id).emit('buildgroupscollab', result);
     })
- 
+
   /************************************************************************************
    * Draw
    ************************************************************************************/

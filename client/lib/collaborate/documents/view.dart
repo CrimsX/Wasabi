@@ -95,7 +95,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     print('Controller content changed: ${_controller.document.toPlainText()}');
   }
 
-  void dispose() {
+  void leaveRooms() {
     //  titleController.dispose();
     _saveTimer?.cancel();
 
@@ -185,9 +185,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       'newTitle': newTitle,
     });
   }
-
-
-
 
 
   // Create and update //
@@ -372,17 +369,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            dispose();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DocumentsMenu(
-                  username: widget.username, // Ensure this variable holds the current username
-                  serverIP: widget.serverIP, // Ensure this variable holds the correct server IP
-                  socket: widget.socket, // Ensure this variable holds the socket connection
-                ),
-              ),
-            );
+            leaveRooms();
+            Navigator.pop(context);
           },
         ),
         actions: [

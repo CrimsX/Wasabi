@@ -48,9 +48,11 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
       widget.socket!.emit('fetchDocuments', widget.username);
       widget.socket!.on('documents', (data) {
         if (data != null && data is Map<String, dynamic> && data['documents'] is List) {
-          setState(() {
-            _documents = List.from(data['documents']);
-          });
+          if (mounted) {
+            setState(() {
+              _documents = List.from(data['documents']);
+            });
+          }
         } else {
           print("Invalid or null data received for documents");
         }
@@ -113,6 +115,8 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
+            Navigator.pop(context);
+            /*
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -122,7 +126,7 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
                   socket: widget.socket, // Ensure this variable holds the socket connection
                 ),
               ),
-            );
+            );*/
           },
         ),
       ),
