@@ -20,6 +20,7 @@ class slidesViewModel extends ChangeNotifier {
 
   String username = NetworkService.instance.getusername;
 
+  // Toggle between Website and Wasabi Slides
   void toggleIsWebsite() {
     model.isWebsite = !model.isWebsite;
     notifyListeners();
@@ -54,7 +55,7 @@ class slidesViewModel extends ChangeNotifier {
     socket!.emit('buildgroupscollab', username);
   }
 
-  // Create a new PowerPoint
+  // Create a new google slides
   void createPowerpoint(BuildContext context) {
     TextEditingController addTitleController = TextEditingController();
     showDialog(
@@ -94,7 +95,7 @@ class slidesViewModel extends ChangeNotifier {
     );
   }
 
-  // Enter the link to the PowerPoint
+  // Enter the link
   void _enterLinkToPpt(BuildContext context, title) {
     TextEditingController addURLController = TextEditingController();
     showDialog(
@@ -160,8 +161,7 @@ class slidesViewModel extends ChangeNotifier {
     );
   }
 
-
-  // Share a PowerPoint with friends or groups
+  // Share a slides
   void shareForm(BuildContext context, Ppt, bool isWebsite) {
     int selectedOption = 0; // Track the selected radio button option
 
@@ -220,6 +220,7 @@ class slidesViewModel extends ChangeNotifier {
     );
   }
 
+  // Select who to share with
   void shareSelect(BuildContext context, option, Ppt, bool isWebsite) {
     List<dynamic> items = [];
     String key = "";
@@ -313,4 +314,8 @@ class slidesViewModel extends ChangeNotifier {
       },
     );
   } 
+}
+
+class wasabiSlidesViewModel extends ChangeNotifier {
+
 }

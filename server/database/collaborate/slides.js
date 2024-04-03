@@ -5,10 +5,10 @@ import {Server} from 'socket.io'
 
 dotenv.config()
 
-const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
 
 // Wasabi slides
-export async function socketSlides(socket, IO) {
+export async function socketWasabiSlides(socket, IO) {
     socket.on('getSlides', async (username) => {
       const ppts = await getAllSlides(username);
       console.log(ppts);
@@ -27,19 +27,7 @@ export async function socketSlides(socket, IO) {
 
     socket.on('deleteSlide', async (data) => {
       await deleteSlide(data);
-    })
-
-    /*
-    socket.on('buildfriendscollab', async (user) => {
-      const result = await getFriends(user);
-      IO.to(socket.id).emit('buildfriendscollab', result);
-    })
-
-    socket.on('buildgroupscollab', async (user) => {
-      const result = await getServers(user); //TODO: make query
-      IO.to(socket.id).emit('buildgroupscollab', result);
-    })
-    */
+    }) 
 
     socket.on('shareSlideFriend', async (data) => {
       await shareSlide(data);
@@ -52,7 +40,11 @@ export async function socketSlides(socket, IO) {
     socket.on('getTotalSlides', async (data) => {
       const result = await totalSlides(data);
       IO.to(socket.id).emit('getTotalSlides', result);
-    
+    })
+
+    socket.on('exportSlides', async (data) => {
+      const result = await exportSlides(data);
+      IO.to(socket.id).emit('exportSlides', result);
     })
 }
 
@@ -77,7 +69,7 @@ export async function newSlide(data) {
 
 export async function getAllSlides(userID) {
     const [result] = await pool.query('SELECT Name from WasabiSlides \
-    WHERE userID = ? AND SlideNum = 0;', [userID]);
+    WHERE userID = ? AND SlideNum = 1;', [userID]);
     return result;
 }
 
@@ -131,9 +123,44 @@ export async function totalSlides(data) {
   return result;
 }
 
+export async function exportSlides(data) {
+  const [result] = await pool.query(
+    'SELECT * \
+    FROM WasabiSlides \
+    WHERE userID = ? AND Name = ? \
+    ORDER BY SlideNum',
+    [data.username, data.name]);
+  return result;
+}
+
 // Web slides
 //
 //
+export async function socketWebSlides(socket, IO) {
+  socket.on('getpowerpoints', async (username) => {
+      const ppts = await getPowerPoints(username);
+      console.log(ppts);
+      IO.to(socket.id).emit('getpowerpoints', ppts);
+    })
+
+    socket.on('createppt', async (data) => {
+      const result = await createPowerPoint(data);
+      IO.to(socket.id).emit('createppt', result)
+    })
+
+    socket.on('deleteppt', async (data) => {
+      await deletePowerPoint(data);
+    })
+
+    socket.on('sharepptfriend', async (data) => {
+      await sharePPT(data);
+    })
+
+    socket.on('sharepptgroup', async (data) => {
+      await sharePPTGroup(data);
+    })
+}
+
 export async function getPowerPoints(UserID) {
     const [result] = await pool.query('SELECT * from powerpoints \
     WHERE UserID = ?;', [UserID]);

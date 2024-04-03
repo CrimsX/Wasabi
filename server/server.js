@@ -3,19 +3,9 @@
 import {Server} from 'socket.io'
 
 import {
-  socketSlides,
-  newSlide,
-  getAllSlides,
-  getSlide,
-  deleteSlide,
-  shareSlide,
-
-  getPowerPoints,
-  createPowerPoint,
-  deletePowerPoint,
-  sharePPT,
-  sharePPTGroup,
-} from './database/collaborate/powerpoint.js'
+  socketWasabiSlides,
+  socketWebSlides,
+} from './database/collaborate/slides.js'
 
 import {
   createEvent,
@@ -32,8 +22,7 @@ import {
 } from './database/collaborate.js'
 
 import {
-  logIn,
-  createAccount,
+  socketLogin,
 } from './database/login.js'
 
 import {
@@ -114,12 +103,13 @@ IO.on("connection", (socket) => {
   //IO.emit("Active connections:", Array.from(active));
 
   /************************************************************************************
-   * Account Creation
-   ************************************************************************************/
-
-     /************************************************************************************
-       * Document :
-       ************************************************************************************/
+  * Account Creation
+  ************************************************************************************/
+  socketLogin(socket, IO);
+  
+  /************************************************************************************
+  * Document :
+  ************************************************************************************/
 
   socket.on('updateDocumentTitle', async (data) => {
       const { documentId, newTitle } = data;
@@ -203,11 +193,9 @@ IO.on("connection", (socket) => {
       console.log('Broadcast successful')
   });
 
-
-
-     /************************************************************************************
-       * Calendar :
-       ************************************************************************************/
+  /************************************************************************************
+  * Calendar :
+  ************************************************************************************/
 
 
    socket.on('createEvent', async (data) => {
@@ -324,33 +312,9 @@ IO.on("connection", (socket) => {
       await shareToDoGroup(data);
     })
 
-
-  // Kipp
-    socket.on('createaccount', async (data) => {
-       const result = await createAccount(data);
-      socket.emit('createaccountResponse', {success: result.success, message: result.message});
-    /*
-          if (result.success) {
-              // Inform the client of the successful account creation
-              socket.emit('accountCreated', result);
-          } else {
-              // Inform the client that account creation failed
-              socket.emit('accountCreationFailed', result);
-          }
-          */
-    });
-
-    socket.on('login', async (data) => {
-      console.log('Attempting login for:', data.userID);
-      const result = await logIn(data);
-      IO.to(socket.id).emit('loginResponse', result);
-    });
-
-
   /************************************************************************************
    * Voice Calls
    ************************************************************************************/
-// Kipp
 
   socket.on("makeCall", (data) => {
     let calleeId = data.calleeId;
@@ -577,24 +541,11 @@ IO.on("connection", (socket) => {
    * Powerpoint
    ************************************************************************************/
     // Wasabi Slides
-    socketSlides(socket, IO);
+    socketWasabiSlides(socket, IO);
 
     // Web Slides
-    socket.on('getpowerpoints', async (username) => {
-      const ppts = await getPowerPoints(username);
-      console.log(ppts);
-      IO.to(socket.id).emit('getpowerpoints', ppts);
-    })
-
-    socket.on('createppt', async (data) => {
-      const result = await createPowerPoint(data);
-      IO.to(socket.id).emit('createppt', result)
-    })
-
-    socket.on('deleteppt', async (data) => {
-      await deletePowerPoint(data);
-    })
-
+    socketWebSlides(socket, IO);
+    
     socket.on('buildfriendscollab', async (user) => {
       const result = await getFriends(user);
       IO.to(socket.id).emit('buildfriendscollab', result);
@@ -604,14 +555,7 @@ IO.on("connection", (socket) => {
       const result = await getServers(user); //TODO: make query
       IO.to(socket.id).emit('buildgroupscollab', result);
     })
-
-    socket.on('sharepptfriend', async (data) => {
-      await sharePPT(data);
-    })
-
-    socket.on('sharepptgroup', async (data) => {
-      await sharePPTGroup(data);
-    })
+ 
   /************************************************************************************
    * Draw
    ************************************************************************************/

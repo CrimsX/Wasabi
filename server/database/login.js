@@ -4,8 +4,21 @@ import bcrypt from 'bcrypt'
 
 dotenv.config()
 
-const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
-//const pool = mysql.createPool(process.env.DATABASE_URL).promise();
+//const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
+
+export async function socketLogin(socket, IO) {
+  socket.on('login', async (data) => {
+    console.log('Attempting login for:', data.userID);
+    const result = await logIn(data);
+    IO.to(socket.id).emit('loginResponse', result);
+  });
+
+  socket.on('createaccount', async (data) => {
+    const result = await createAccount(data);
+    socket.emit('createaccountResponse', {success: result.success, message: result.message}); 
+  });
+}
 
 export async function logIn(data) {
     try {
