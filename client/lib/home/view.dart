@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
   String serverIP = '';
   Socket? socket;
 
+
   //HomeScreen({Key? key, required this.username}) : super(key: key);
   HomeScreen({super.key, required this.username, required this.serverIP, required this.socket});
   @override
@@ -48,7 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controllerServerName = TextEditingController();
   final List<Widget> _serverList = [];
   final List<Widget> _serverMemberList = [];
+  final List<String> _serverMemberIDs = [];
+  final List<String> _friendIDs = [];
   String currentChatServer= '';
+  String currentChatServerName= '';
   dynamic server;
 
   late Completer<List<Widget>> _friendsListCompleter;
@@ -65,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool start = true;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     _friendsListCompleter = Completer<List<Widget>>();
     _serverListCompleter = Completer<List<Widget>>();
@@ -104,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ///builds tiles on the end drawer for each friend in the db
     _socket!.on('friends', (data) {
       for (var friend in data) {
+        _friendIDs.add(friend['FriendID']);
         _friendsList.add(
           hoverableTile(
             title: friend['FriendID'],
@@ -172,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var server in data) {
         _serverList.add(
           hoverableTile(
+            key: ValueKey<int>(server['ServerID']),
             title: server['ServerName'],
             onTap: () {
               if (currentChatServer == server['ServerID'].toString()) {
@@ -186,6 +192,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Provider.of<MessageProvider>(context, listen: false).notifyListeners();
               currentChatServer = server['ServerID'].toString();
               print(currentChatServer);
+              currentChatServerName= server['ServerName'];
+              print(currentChatServerName);
               _connectToGroupChat(currentChatServer);
               _socket!.emit('getservermembers', currentChatServer);
               FocusScope.of(context).requestFocus(_focusNode);
@@ -219,16 +227,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _socket!.on('getservermembers', (data) {
       _serverMemberList.clear();
+      _serverMemberIDs.clear();
       for (var member in data) {
         if (member['UserID'] != widget.username) {
           NetworkService.instance.groupNames.add(member['UserID']);
         }
+        _serverMemberIDs.add(member['UserID']);
         _serverMemberList.add(
           hoverableTile(
             title: member['UserID'],
               onTap: (){},
           )
         );
+      }
+    });
+
+    _socket!.on('invite', (data) {
+      print(data);
+      setState(() {
+          _serverList.add(_buildServerTile(data['serverName'], data['serverID']));
+        });
+    });
+
+    _socket!.on('leaveserver', (data) {
+      print(_serverList);
+      for (int i = 0; i < _serverList.length; i++) {
+        int serverKey = (_serverList[i].key as ValueKey<int>).value;
+        print(serverKey);
+        if (serverKey == int.parse(data['serverID']))
+        {
+          print('hi');
+          setState(() {
+            _serverList.removeAt(i);
+          });
+          print(_serverList);
+          return;
+        }
       }
     });
   }
@@ -327,8 +361,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  getFriendIndex(friendID) {
+    for (int i = 0; i < _friendIDs.length; i++){
+      if (_friendIDs[i] == friendID) {
+        return i;
+      }
+    }
+  }
+
   // Function to build the friend tile
   _buildFriendTile(friendID){
+    _friendIDs.add(friendID);
     return hoverableTile(
       title: friendID,
       onTap: () {
@@ -352,6 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Function to build the server tile
   _buildServerTile(serverName, serverID){
     return hoverableTile(
+      key: ValueKey<int>(int.parse(serverID)),
       title: serverName,
       onTap: () {
         //check if previously connected to another chat and leaves chat room if it is
@@ -363,7 +407,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Provider.of<MessageProvider>(context, listen: false).messages.clear();
           Provider.of<MessageProvider>(context, listen: false).notifyListeners();
           currentChatServer = serverID;
+          currentChatServerName= serverName;
           _connectToGroupChat(serverID);
+          _socket!.emit('getservermembers', currentChatServer);
           FocusScope.of(context).requestFocus(_focusNode);
         }
       },
@@ -408,6 +454,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  populateInviteList(inviteList) {
+    for (var username in _friendIDs) {
+      if (!_serverMemberIDs.contains(username)) {
+        inviteList.add(username);
+      }
+    }
   }
 
   /// the drawer and header
@@ -457,31 +511,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {});
               },
             ),
+            Visibility(
+              visible: (start || isServer),
+              child: IconButton(
+                  icon: const Icon(Icons.message),
+                  onPressed: () {
+                    start = false;
+                    isServer = false;
+                    NetworkService.instance.setType('DM');
 
-            IconButton(
-              icon: const Icon(Icons.message),
-              onPressed: () {
-                start = false;
-                isServer = false;
-                NetworkService.instance.setType('DM');
-
-                setState(() {});
-              },
-              tooltip: 'DM',
+                    setState(() {});
+                  },
+                  tooltip: 'DM',
+                ),
             ),
+            Visibility(
+              visible: (start || !isServer),
+              child: IconButton(
+                icon: const Icon(Icons.groups_2_rounded),
+                onPressed: () {
+                  start = false;
+                  isServer = true;
+                  NetworkService.instance.setType('group');
+                  currentChatServer = '';
+                  currentChatServerName = '';
 
-            IconButton(
-              icon: const Icon(Icons.groups_2_rounded),
-              onPressed: () {
-                start = false;
-                isServer = true;
-                NetworkService.instance.setType('group');
-                currentChatServer = '';
-
-                setState(() {});
-              },
-              tooltip: 'Server',
-            ),
+                  setState(() {});
+                },
+                tooltip: 'Server',
+                )
+              ),
 
             const SizedBox(width: 1),
 
@@ -515,7 +574,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  _socket!.disconnect();
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Cancel'),
@@ -535,7 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.group_add),
+                    icon: const Icon(Icons.add_box),
                     onPressed:() {
                       showDialog(
                         context: context,
@@ -568,7 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     tooltip: 'Create Group',
-                  ),
+                  )
                 ],
               ),
           ]
@@ -580,14 +638,195 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (!start) ... {
             rAppBar(),
+            Visibility(
+              visible: isServer && currentChatServer != "",
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.group_add),
+                    onPressed: () {
+                      List<String> inviteList = [];
+                      populateInviteList(inviteList);
+                      if (inviteList.length == 0) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Invite to $currentChatServerName'),
+                              content: Text(
+                                'No Friends To Invite :(', // Center the body text horizontally
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Ok'),
+                                ),
+                              ]
+                            );
+                        }
+                        );
+                      } else {
+                        List<bool> checkedItems = List<bool>.filled(inviteList.length, false); // Initialize with false values
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (BuildContext context, StateSetter setState) {
+                                return AlertDialog(
+                                  title: Text('Invite to $currentChatServerName'),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(
+                                        inviteList.length,
+                                        (index) {
+                                          return CheckboxListTile(
+                                            title: Text(inviteList[index]),
+                                            value: checkedItems[index],
+                                            onChanged: (newValue) {
+                                              print('Checkbox $index tapped');
+                                              setState(() {
+                                                checkedItems[index] = newValue!;
+                                              });
+                                              print('Checkbox $index is now ${checkedItems[index]}');
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Perform actions based on the checked items
+                                        for (int i = 0; i < inviteList.length; i++) {
+                                          if (checkedItems[i]){
+                                            print(inviteList[i]);
+                                            print(currentChatServer);
+                                            widget.socket!.emit('invite', {
+                                              'friendID': inviteList[i],
+                                              'serverName': currentChatServerName,
+                                              'serverID': currentChatServer
+                                              });
+                                             _serverMemberIDs.add(inviteList[i]);
+                                              _serverMemberList.add(
+                                                hoverableTile(
+                                                  title: inviteList[i],
+                                                    onTap: (){},
+                                                )
+                                              );
+                                          }
+                                        }
+                                        setState(() => {});
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Invite'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }
 
-            IconButton(
-              icon: const Icon(Icons.group_rounded),
-              onPressed: () {
-                _scaffoldKey.currentState!.openEndDrawer();
-              },
-              color: Colors.white,
+                    },
+                    color: Colors.white,
+                    tooltip: "Invite to Group",
+                  ),
+
+                  IconButton(
+                    icon: const Icon(Icons.group_rounded),
+                    onPressed: () {
+                      _scaffoldKey.currentState!.openEndDrawer();
+                    },
+                    color: Colors.white,
+                    tooltip: "Server Members",
+                  ),
+
+                  IconButton(
+                      icon: const Icon(Icons.door_back_door),
+                      onPressed:() {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text(
+                                  'Leave Server',
+                                ),
+                              content: Text(
+                                'Are you sure you want to leave $currentChatServerName?', // Center the body text horizontally
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _socket!.emit('leaveserver', {'username': widget.username, 'serverID': currentChatServer});
+                                  },
+                                  child: const Text('Leave'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      tooltip: 'Leave Group',
+                    ),
+                ]
+              )
             ),
+            Visibility(
+              visible: (!isServer && currentChatFriend != ""),
+              child: IconButton(
+                icon: const Icon(Icons.person_remove),
+                onPressed: () {
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Remove Friend'),
+                        content: Text(
+                          'Remove $currentChatFriend from friends?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              int index = getFriendIndex(currentChatFriend);
+                              _friendIDs.removeAt(index);
+                              setState(() {_friendsList.removeAt(index);});
+                              _socket!.emit('removefriend', {'userID': widget.username,'friendID': currentChatFriend});
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Remove'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              tooltip: "Remove Friend",
+            )
+          )
           }
         ],
       ),

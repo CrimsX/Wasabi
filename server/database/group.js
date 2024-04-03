@@ -65,3 +65,12 @@ export async function getServerMembers(serverID) {
     const [members] = await pool.query('SELECT UserID FROM partof WHERE ServerID = ?', [serverID]);
     return members;
 }
+
+export async function inviteToServer(data){
+    console.log(data);
+    await pool.query("INSERT INTO partof VALUES (?, ?);", [data.friendID, data.serverID]);
+}
+
+export async function leaveServer(data) {
+    await pool.query("DELETE FROM partof WHERE UserID = ? AND ServerID = ?",[data.username, data.serverID]);
+}

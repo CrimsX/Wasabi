@@ -26,10 +26,20 @@ import {
 } from './database/login.js'
 
 import {
+    updateDocumentTitle,
+    createNewDocument,
+    saveDocumentContent,
+    shareDocument,
+    shareDocumentGroup,
+    fetchDocuments,
+} from './database/collaborate/documents.js'
+
+import {
   getFriends,
   createChat,
   getChatRoom,
   addFriend,
+  removeFriend
 } from './database/individual.js'
 
 import {
@@ -39,6 +49,8 @@ import {
   createServer,
   getServerID,
   getServerMembers,
+  inviteToServer,
+  leaveServer
 } from './database/group.js'
 
 import {
@@ -56,6 +68,7 @@ const messages = []
 
 let callerId;
 let onlineUsers = {};
+let userRoom = {};
 
 let IO = new (Server) (port, {
   cors: {
@@ -82,8 +95,8 @@ IO.on("connection", (socket) => {
   console.log("User connected:", username)
 
   onlineUsers[username] = callerId;
-  //console.log(Object.keys(onlineUsers));
-
+  const firstRoom = Array.from(socket.rooms)[0];
+  userRoom[username]= firstRoom;
   const active = new Set();
   active.add(username);
 
@@ -93,6 +106,92 @@ IO.on("connection", (socket) => {
   * Account Creation
   ************************************************************************************/
   socketLogin(socket, IO);
+  
+  /************************************************************************************
+  * Document :
+  ************************************************************************************/
+
+  socket.on('updateDocumentTitle', async (data) => {
+      const { documentId, newTitle } = data;
+      try {
+        console.log('updateDocumentTitle function is being called...');
+        await updateDocumentTitle(documentId, newTitle);
+        socket.emit('documentTitleUpdated', { success: true, documentId, newTitle });
+      } catch (error) {
+        console.error('Error updating document title:', error);
+        socket.emit('documentTitleUpdateFailed', { success: false, error: error.message });
+      }
+    });
+
+  socket.on('saveDocumentContent', async (data) => {
+    const { documentId, content } = data;
+   // console.log('Socket save Doc')
+    try {
+      // Call a function to save the document content to the database
+      await saveDocumentContent(documentId, content);
+      socket.emit('documentContentSaved', { success: true });
+      //console.log('Socket save Doc 2')
+    } catch (error) {
+      console.error('Error saving document content:', error);
+      socket.emit('documentContentSaveFailed', { success: false, error: error.message });
+    }
+  });
+
+  socket.on('createNewDocument', async (data) => {
+    const { username } = data;
+    try {
+      // Insert a new document into the database
+      const { documentId, documentTitle, Content } = await createNewDocument(username);
+      // Emit the newly created document ID, title, and content back to the client
+      socket.emit('documentCreated', { documentId, documentTitle, Content });
+    } catch (error) {
+      console.error('Error creating new document:', error);
+      socket.emit('documentCreationFailed', { error: error.message });
+    }
+  });
+
+
+  socket.on('shareDocument', async (data) => {
+        await shareDocument(data);
+  });
+
+  socket.on('shareDocumentGroup', async (data) => {
+         await shareDocumentGroup(data);
+  });
+
+  socket.on('fetchDocuments', async (userID) => {
+    try {
+      const documents = await fetchDocuments(userID);
+      socket.emit('documents', documents);
+    } catch (error) {
+      console.error('Error:', error.message);
+      socket.emit('error', { message: 'Failed to fetch documents' });
+    }
+  });
+
+  // When a user connects (this works)
+  socket.on('joinRoom', ({ roomId }) => {
+    socket.join(roomId); // Join the room based on document ID
+    console.log(`User joined the room ${roomId}`);
+  });
+
+  // When a user disconnects or leaves the document (this works)
+  socket.on('leaveRoom', ({ roomId }) => {
+    socket.leave(roomId); // Leave the room based on document ID
+    console.log(`User left the room ${roomId}`);
+  });
+
+  // fetchDocumentContent is called , this does not update.
+  // I try to broadcast to documentId since thats the room, then emit'BroadcastContent' to pass on the documentId and
+  // content.
+
+  socket.on('fetchDocumentContent', ({ documentId, content }) => {
+      console.log('fetchDocumentContent called');
+      console.log(documentId),
+      console.log(content),
+       socket.broadcast.to(documentId).emit('BroadcastContent', { documentId, content }); // this does not work i think
+      console.log('Broadcast successful')
+  });
 
   /************************************************************************************
   * Calendar :
@@ -353,6 +452,10 @@ IO.on("connection", (socket) => {
     IO.to(socket.id).emit('addfriends', response);
   })
 
+  socket.on('removefriend', async (data) => {
+    await removeFriend(data.friendID, data.userID);
+  })
+
   /************************************************************************************
    * Group Messaging
    ************************************************************************************/
@@ -420,6 +523,18 @@ IO.on("connection", (socket) => {
         IO.to(socket.id).emit('r_VoIPID', onlineUsers[key]);
       }
     })
+  });
+
+  socket.on("invite", async (data) => {
+    console.log(data);
+    console.log(userRoom);
+    await inviteToServer(data);
+    IO.to(userRoom[data.friendID]).emit('invite', data);
+  });
+
+  socket.on("leaveserver", async (data) => {
+    await leaveServer(data);
+    IO.to(socket.id).emit('leaveserver', data);
   });
 
   /************************************************************************************

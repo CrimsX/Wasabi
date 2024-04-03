@@ -66,13 +66,12 @@ CREATE TABLE partof (
     );
 
 CREATE TABLE document (
-    DocumentID INTEGER PRIMARY KEY,
+    DocumentID INT AUTO_INCREMENT,
     UserID VARCHAR(20),
-    DocumentTitle VARCHAR(50),
-    Content VARCHAR(5000),
-    DateCreated VARCHAR(15),
-    LastModifiedDate VARCHAR(15),
-    FOREIGN Key (UserID) REFERENCES client(UserID)
+    DocumentTitle VARCHAR(50) NOT NULL,
+    Content JSON,
+    PRIMARY KEY (DocumentID, UserID),
+    FOREIGN KEY (UserID) REFERENCES client(UserID)
     );
 
 CREATE TABLE access (
