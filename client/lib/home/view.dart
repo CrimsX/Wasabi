@@ -925,6 +925,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   child: Row(
                     children: [
+                    // TODO: Send images
+                    /*
                       IconButton(
                         icon: const Icon(
                           Icons.image,
@@ -934,6 +936,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Handle image button tap
                         },
                       ),
+                      */
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(

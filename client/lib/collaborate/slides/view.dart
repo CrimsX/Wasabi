@@ -497,13 +497,15 @@ bulletController.text = data[0]['SlideContent'];
                                 ),
                                 SizedBox(height: 48),
                                 if (slideIndex.value != 1) ... {
-                                  TextFormField(
-                                    controller: bulletController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Bullet point',
-                                      border: OutlineInputBorder(),
+                                  Material(
+                                    child: TextFormField(
+                                      controller: bulletController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Bullet point',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      maxLines: null,
                                     ),
-                                    maxLines: 24,
                                   ),
                                 }
                               ],
