@@ -337,6 +337,7 @@ bulletController.text = data[0]['SlideContent'];
         );
       }
     }
+    if (mounted) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -355,13 +356,13 @@ bulletController.text = data[0]['SlideContent'];
               actions: <Widget>[
                 TextButton(
                   child: Text('No'),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.pop(context),
                 ),
 
                 TextButton(
                   child: Text('Yes'),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.pop(context);
                     downloadPresentation(pres);
                   },
                 ),
@@ -371,9 +372,14 @@ bulletController.text = data[0]['SlideContent'];
         );
       },
     );
+    }
   });
 
   widget.newSlide = false;
+  }
+
+  void dispose() {
+    super.dispose();
   }
 
   /*
