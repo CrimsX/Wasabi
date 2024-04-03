@@ -517,6 +517,7 @@ IO.on("connection", (socket) => {
   })
 
   socket.on("requestVoIPID", (data) => {
+    console.log(onlineUsers);
     var keys = Object.keys(onlineUsers);
     keys.forEach(key => {
       if (key == data) {

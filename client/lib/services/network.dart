@@ -25,7 +25,8 @@ class NetworkService {
     socket = io(serverIP, {
       "transports": ['websocket'],
       "query": {
-        "username": username
+        "username": username,
+        "callerId": selfCallerID
       }   
     });
 
