@@ -7,12 +7,12 @@ import 'package:provider/provider.dart';
 import 'package:client/home/view_model.dart';
 
 import 'package:client/login/view.dart';
-
+import 'package:client/collaborate/documents/landingpage.dart';
 import 'package:client/collaborate/Calendar.dart';
 import 'package:client/collaborate/Todo.dart';
 import 'package:client/collaborate/draw/view.dart';
 import 'package:client/collaborate/slides/view.dart';
-import 'package:client/collaborate/documents/view.dart';
+
 
 class userDrawer extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -246,7 +246,11 @@ class collabDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => ChangeNotifierProvider(
                     create: (context) => MessageProvider(),
-                    child: DocumentsScreen(),
+                    child: DocumentsMenu( //DocumentsScreen
+                        username: loggedInUsername,
+                        serverIP: serverIP,
+                        socket: _socket
+                    ),
                   ),
                 ),
               );
