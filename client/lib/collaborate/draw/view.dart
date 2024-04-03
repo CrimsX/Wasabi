@@ -59,8 +59,6 @@ class _DrawScreenState extends State <DrawScreen> {
     });
   }
 
-
-
   _addToWhiteboard(draw) {
     processDrawType(draw['type'], draw);
     drawingBoardJSONLen = _drawingController.getJsonList().length;

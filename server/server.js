@@ -50,6 +50,7 @@ import {
   createChat,
   getChatRoom,
   addFriend,
+  removeFriend
 } from './database/individual.js'
 
 import {
@@ -59,6 +60,8 @@ import {
   createServer,
   getServerID,
   getServerMembers,
+  inviteToServer,
+  leaveServer
 } from './database/group.js'
 
 import {
@@ -76,6 +79,7 @@ const messages = []
 
 let callerId;
 let onlineUsers = {};
+let userRoom = {};
 
 let IO = new (Server) (port, {
   cors: {
@@ -102,8 +106,8 @@ IO.on("connection", (socket) => {
   console.log("User connected:", username)
 
   onlineUsers[username] = callerId;
-  //console.log(Object.keys(onlineUsers));
-
+  const firstRoom = Array.from(socket.rooms)[0];
+  userRoom[username]= firstRoom;
   const active = new Set();
   active.add(username);
 
@@ -484,6 +488,10 @@ IO.on("connection", (socket) => {
     IO.to(socket.id).emit('addfriends', response);
   })
 
+  socket.on('removefriend', async (data) => {
+    await removeFriend(data.friendID, data.userID);
+  })
+
   /************************************************************************************
    * Group Messaging
    ************************************************************************************/
@@ -553,12 +561,24 @@ IO.on("connection", (socket) => {
     })
   });
 
+  socket.on("invite", async (data) => {
+    console.log(data);
+    console.log(userRoom);
+    await inviteToServer(data);
+    IO.to(userRoom[data.friendID]).emit('invite', data);
+  });
+
+  socket.on("leaveserver", async (data) => {
+    await leaveServer(data);
+    IO.to(socket.id).emit('leaveserver', data);
+  });
+
   /************************************************************************************
    * Powerpoint
    ************************************************************************************/
     // Wasabi Slides
     socketSlides(socket, IO);
-    
+
     // Web Slides
     socket.on('getpowerpoints', async (username) => {
       const ppts = await getPowerPoints(username);
