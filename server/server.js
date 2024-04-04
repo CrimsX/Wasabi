@@ -450,6 +450,7 @@ IO.on("connection", (socket) => {
       friendID: data.friendID
     };
     IO.to(socket.id).emit('addfriends', response);
+    IO.to(userRoom[data.friendID]).emit('receivefriends', {result: true, friendID: data.userID});
   })
 
   socket.on('removefriend', async (data) => {
