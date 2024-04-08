@@ -165,6 +165,13 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
+    _socket!.on('receivefriends', (data) {
+      if (data['result']) {
+        _friendsList.add(_buildFriendTile(data['friendID']));
+        setState(() {});
+      }
+    });
+
     _socket!.on('groupmsg',
       (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),

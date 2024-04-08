@@ -116,17 +116,6 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
-            /*
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(
-                  username: widget.username, // Ensure this variable holds the current username
-                  serverIP: widget.serverIP, // Ensure this variable holds the correct server IP
-                  socket: widget.socket, // Ensure this variable holds the socket connection
-                ),
-              ),
-            );*/
           },
         ),
       ),
