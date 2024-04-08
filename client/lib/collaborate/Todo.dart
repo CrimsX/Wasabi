@@ -275,8 +275,9 @@ class _TodoScreenState extends State<TodoScreen> {
                           'taskname': task.name
                           });
                       } else if (checkedItems[i] && option == 1) {
+                        var id= "g" + _groups[i]['ServerID'].toString();
                         widget.socket!.emit('sharetodogroup', {
-                          'group': _groups[i][key],
+                          'group': id,
                           'user': widget.username,
                           'taskid': task.id,
                           'taskname': task.name
