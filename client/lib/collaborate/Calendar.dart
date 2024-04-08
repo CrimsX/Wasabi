@@ -232,9 +232,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print("New event created: $eventData");
       if (mounted) {
         setState(() {
-          DateTime eventDateTime = DateTime.parse(eventData['eventTIME']).toLocal();
-          DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
-          TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+          DateTime eventDateTimeUTC = DateTime.parse(eventData['eventTIME']);
+          DateTime eventDateTimeAdjusted = eventDateTimeUTC.add(Duration(hours: 0)); // Add a fixed 0 hour offset
+          DateTime eventDate = DateTime(eventDateTimeAdjusted.year, eventDateTimeAdjusted.month, eventDateTimeAdjusted.day);
+          TimeOfDay eventTime = TimeOfDay(hour: eventDateTimeAdjusted.hour, minute: eventDateTimeAdjusted.minute);
+
+          // Format the event time before adding it to _events
+          String formattedEventTime = '${eventTime.hour}:${eventTime.minute}';
+
           var newEvent = CalendarEvent(name: eventData['eventNAME'], time: eventTime);
 
           DateTime normalizedEventDate = DateTime(eventDate.year, eventDate.month, eventDate.day);
@@ -252,6 +257,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
         });
       }
     });
+
+
 
 
   }
@@ -537,7 +544,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             emitCreateEvent(
                 eventName: eventName,
                 eventTime: eventTime);
-            // Do not call setState here
+
           }
         },
       ),
