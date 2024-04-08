@@ -587,6 +587,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
