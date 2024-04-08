@@ -128,6 +128,19 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => {
+              setState(() {
+                setState(() {
+                        _documents.clear();
+                        widget.socket!.emit('fetchDocuments', widget.username);
+                      });
+            })
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: <Widget>[

@@ -334,6 +334,17 @@ class _TodoScreenState extends State<TodoScreen> {
     appBar: AppBar(
       title: const Text('Todo list'),
       backgroundColor: Colors.green,
+      actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => {
+              setState(() {
+                _tasks.clear();
+                widget.socket!.emit('getTasks', widget.username);
+            })
+            },
+          ),
+        ],
     ),
       body: Column(
         children: [

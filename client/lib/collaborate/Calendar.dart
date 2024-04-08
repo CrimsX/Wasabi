@@ -350,6 +350,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
         title: const Text('Calendar'),
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => {
+              setState(() {
+                widget.socket!.emit('getEvents', widget.username);
+            })
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
