@@ -180,7 +180,7 @@ class _LoginState extends State<Login> {
           // Server Selection
           if (viewModel.selectedServer != Servers.server4) ... {
             Positioned(
-              bottom: -50,
+              bottom: 0,
               right: 0,
               child: DropdownMenu<Servers>(
                 initialSelection: Servers.server1,

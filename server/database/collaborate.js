@@ -73,13 +73,17 @@ export async function shareEvent(data) {
 }
 
 export async function shareEventGroup(data) {
+    console.log(data);
     const [members] = await pool.query('SELECT UserID from partof WHERE \
     ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
+    const [id] = await pool.query('SELECT eventsID,eventTIME from events where eventNAME = ? and UserID = ?',[data.eventname, data.user])
+    console.log(id);
     for (const username of members) {
         shareEvent({
-            user: username.UserID,
-            'eventsid': data.eventid,
+            'userID':  data.user,
+            'user': username.UserID,
             'eventname': data.eventname,
+            'eventTIME': id[0].eventTIME,
         })
     }
 }
@@ -161,6 +165,7 @@ export async function shareToDo(data) {
 export async function shareToDoGroup(data) {
     const [members] = await pool.query('SELECT UserID from partof WHERE \
     ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
+    console.log(members)
     for (const username of members) {
         shareToDo({
             user: username.UserID,

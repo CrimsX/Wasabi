@@ -165,15 +165,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           'userID': widget.username,
                         });
                       } else if (checkedItems[i] && option == 1) {
-                        print('Emitting shareEventGroup with data:');
-                        print({
-                          'group': _groups[i][key],
-                          'user': widget.username,
-                          'eventname': event.name,
-                          'eventTIME': event.time.toString(),
-                        });
+
+                        var id= "g" + _groups[i]['ServerID'].toString();
                         widget.socket!.emit('shareEventGroup', {
-                          'group': _groups[i][key],
+                          'group': id,
                           'user': widget.username,
                           'eventname': event.name,
                           'eventTIME': event.time.toString(),
