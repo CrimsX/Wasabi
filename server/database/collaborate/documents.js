@@ -49,9 +49,9 @@ export async function shareDocument(data) {
 
 
 export async function shareDocumentGroup(data) {
+    console.log(data)
     const [members] = await pool.query('SELECT UserID from partof WHERE \
     ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
-    console.log(data)
     for (const username of members) {
         shareDocument({
             friend: username.UserID,
