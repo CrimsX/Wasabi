@@ -20,7 +20,7 @@ class NetworkService {
   NetworkService._();
   static final instance = NetworkService._();
 
-  init({required String serverIP, required String username}) {
+  init({required String serverIP}) {
     // init Socket
     socket = io(serverIP, {
       "transports": ['websocket'],
@@ -31,7 +31,7 @@ class NetworkService {
     });
 
     this.serverIP = serverIP;
-    this.username = username;
+    //this.username = username;
     selfCallerID = selfCallerID;
 
     /*
@@ -95,6 +95,10 @@ class NetworkService {
     
     setFriend (String friend) {
       this.friend = friend;
+    }
+
+    setUsername (String username) {
+      this.username = username;
     }
 
     //String set setFriend(String friend) = friend;

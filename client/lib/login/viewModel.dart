@@ -37,7 +37,7 @@ class LoginViewModel extends ChangeNotifier {
   void connect(String serverIP, String username) {
     NetworkService.instance.init(
       serverIP: serverIP,
-      username: username,
+      //username: username,
     );
     _socket = NetworkService.instance.socket;
   }

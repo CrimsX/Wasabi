@@ -4,8 +4,6 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
 import 'package:client/voice/view.dart';
-import 'package:client/groupvoice/view.dart';
-
 
 class rAppBar extends StatelessWidget {
   String friend = NetworkService.instance.getFriend;

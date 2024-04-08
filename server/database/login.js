@@ -18,6 +18,12 @@ export async function socketLogin(socket, IO) {
     const result = await createAccount(data);
     socket.emit('createaccountResponse', {success: result.success, message: result.message});
   });
+
+  socket.on('fetchName', async (username) => {
+    const displayName = await getUserDisplayName(username);
+    console.log('Display name:', displayName);
+    socket.emit('fetchName', displayName);
+  });
 }
 
 export async function logIn(data) {
@@ -29,8 +35,8 @@ export async function logIn(data) {
         //console.log(rows[0]["Pass"])
         //console.log(password);
         //console.log(bcrypt.compareSync(password, rows[0]["Pass"]))
-        //if (bcrypt.compareSync(password, rows[0]["Pass"])) {
-        if (password === rows[0]["Pass"]) {
+        if (bcrypt.compareSync(password, rows[0]["Pass"])) {
+        //if (password === rows[0]["Pass"]) {
         // If a row is found, the password matches
             return { success: true, message: "Login successful" };
         } else {
@@ -64,5 +70,15 @@ export async function createAccount(data) {
     } catch (error) {
         console.error("Error creating account:", error.message);
         return { success: false, message: "Failed to create account.", error: error.message };
+    }
+}
+
+export async function getUserDisplayName(username) {
+    try {
+      const [rows] = await pool.query('SELECT displayName FROM client WHERE UserID = ?', [username]);
+      return rows[0]['displayName'];
+    } catch (error) {
+      console.error("Error getting user display name:", error.message);
+      return null;
     }
 }

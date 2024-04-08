@@ -4,7 +4,7 @@ USE wasabi;
 
 CREATE TABLE client (
     UserID VARCHAR(20) PRIMARY KEY,
-    displayname VARCHAR(20) NOT NULL,
+    displayName VARCHAR(20) NOT NULL,
     Pass VARCHAR(100) NOT NULL
 );
 

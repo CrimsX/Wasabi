@@ -13,7 +13,6 @@ import 'package:client/widgets/landingPage.dart';
 import 'package:client/widgets/hoverableTile.dart';
 
 import 'package:client/voice/view.dart';
-import 'package:client/groupvoice/view.dart';
 
 import 'package:intl/intl.dart';
 
@@ -78,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _connectSocket();
 
+    _socket!.emit('fetchName', widget.username);
     _socket!.emit('friends', widget.username);
     _socket!.emit('servers', widget.username);
 
@@ -98,6 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
   //
   // should be able to move this to network.dart
   _connectSocket() {
+    _socket!.on('fetchName', (data) {
+      widget.username = data;
+      NetworkService.instance.setUsername(widget.username);
+    });
+
     _socket!.on('message',
       (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
