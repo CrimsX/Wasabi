@@ -270,11 +270,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Process each event received from the backend
     for (var event in events) {
-      DateTime eventDateTime = DateTime.parse(event['eventTime']).toLocal(); // Convert to local time
-      DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
-      TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+      DateTime eventDateTimeUTC = DateTime.parse(event['eventTime']);
+      DateTime eventDateTimeAdjusted = eventDateTimeUTC.add(Duration(hours: 0)); // Add a fixed 0 hour offset
+      DateTime eventDate = DateTime(eventDateTimeAdjusted.year, eventDateTimeAdjusted.month, eventDateTimeAdjusted.day);
+      TimeOfDay eventTime = TimeOfDay(hour: eventDateTimeAdjusted.hour, minute: eventDateTimeAdjusted.minute);
 
       _events.putIfAbsent(eventDate, () => []).add(CalendarEvent(name: event['eventName'], time: eventTime));
+      print(eventDate);
     }
 
     // Trigger a UI refresh
@@ -343,10 +345,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text('Calendar'),
-      backgroundColor: Colors.green,
-    ),
+      appBar: AppBar(
+        title: const Text('Calendar'),
+        backgroundColor: Colors.green,
+      ),
       body: Column(
         children: [
           TableCalendar(
