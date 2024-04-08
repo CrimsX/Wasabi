@@ -151,17 +151,27 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       // BroadcastContent is called,
       widget.socket!.on('BroadcastContent', (data) {
         print('Received data: $data'); // This print statement is printing the right data,
-        setState(() {
-          // This should update the content.
-          String receivedContent = data['content'];
-          // Update the QuillController with the received content and decode the json
-          _controller = QuillController(
-            document: Document.fromJson(jsonDecode(receivedContent)),
-            selection: TextSelection.collapsed(offset: 0),
-          );
-        });
+        if (mounted) {
+          setState(() {
+            // This should update the content.
+            String receivedContent = data['content'];
+            // Update the QuillController with the received content and decode the json
+            _controller = QuillController(
+              document: Document.fromJson(jsonDecode(receivedContent)),
+              selection: TextSelection.collapsed(offset: 0),
+            );
+          });
+          _controller.document.changes.listen((event) {
+            String content = jsonEncode(_controller.document.toDelta().toJson());
+            _saveContent();
+            print(content);
+            widget.socket!.emit('fetchDocumentContent', {
+              'documentId': widget.documentId,
+              'content': content,
+            });
+          });
+        }
       });
-
     }
   }
 
@@ -370,7 +380,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             leaveRooms();
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
         actions: [

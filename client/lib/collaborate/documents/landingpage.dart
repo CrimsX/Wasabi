@@ -40,8 +40,47 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
       widget.socket!.on('connect_timeout', (data) => print('Connection timeout: $data'));
       widget.socket!.on('error', (data) => print('Error: $data'));
       widget.socket!.on('disconnect', (_) => print('Disconnected from the socket server'));
+      widget.socket!.on('documentCreated', (data) {
+        if (mounted) {
+          setState(() {
+            documentId = data['documentId'];
+            documentTitle = data['documentTitle'];
+            documentContent = data['Content'];
+            print('New document created with ID: $documentId');
+
+            // Navigate to DocumentsScreen after document creation
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DocumentsScreen(
+                  username: widget.username,
+                  serverIP: widget.serverIP,
+                  socket: widget.socket,
+                  documentId: documentId,
+                  documentTitle: documentTitle,
+                  documentContent: documentContent,
+                ),
+              ),
+            ).then((value) {
+                // Handle the refresh action here
+                if (value == true) {
+                  setState(() {
+                  _documents.clear();
+                  widget.socket!.emit('fetchDocuments', widget.username);
+                });
+                }
+              });
+          });
+        }
+      });
+      widget.socket!.on('documentCreationFailed', (data) {
+        if (mounted) {
+          print('Failed to create document: ${data['error']}');
+        }
+      });
     }
   }
+
 
   void fetchDocuments() {
     if (widget.socket != null) {
@@ -66,36 +105,7 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
   void createNewDocument() {
     if (widget.socket != null) {
       widget.socket!.emit('createNewDocument', {'username': widget.username});
-      widget.socket!.on('documentCreated', (data) {
-        if (mounted) {
-          setState(() {
-            documentId = data['documentId'];
-            documentTitle = data['documentTitle'];
-            documentContent = data['Content'];
-            print('New document created with ID: $documentId');
 
-            // Navigate to DocumentsScreen after document creation
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DocumentsScreen(
-                  username: widget.username,
-                  serverIP: widget.serverIP,
-                  socket: widget.socket,
-                  documentId: documentId,
-                  documentTitle: documentTitle,
-                  documentContent: documentContent,
-                ),
-              ),
-            );
-          });
-        }
-      });
-      widget.socket!.on('documentCreationFailed', (data) {
-        if (mounted) {
-          print('Failed to create document: ${data['error']}');
-        }
-      });
     }
   }
 
@@ -149,7 +159,15 @@ class _DocumentsMenuState extends State<DocumentsMenu> {
                           documentContent: document['Content'], // Pass the Content
                         ),
                       )
-                  );
+                  ).then((value) {
+                    // Handle the refresh action here
+                    if (value == true) {
+                      setState(() {
+                        _documents.clear();
+                        widget.socket!.emit('fetchDocuments', widget.username);
+                      });
+                    }
+                  });
                 },
               );
             },
