@@ -9,7 +9,7 @@ primary_region = 'sea'
 [build]
 
 [[services]]
-  internal_port = 3000
+  internal_port = 8080
   protocol = "tcp"
   auto_stop_machines = false
   auto_start_machines = false
