@@ -112,11 +112,7 @@ class NetworkService {
     
     setFriend (String friend) {
       this.friend = friend;
-    }
-
-    setUsername (String username) {
-      this.username = username;
-    }
+    } 
 
     //String set setFriend(String friend) = friend;
     /*

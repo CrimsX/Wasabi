@@ -61,7 +61,7 @@ class LoginViewModel extends ChangeNotifier {
     _socket!.on('loginResponse', (data) {
       // Handle login response
       if (data['success']) {
-        _socket!.emit('getUsername', username);
+        //_socket!.emit('getUsername', username);
 
         Navigator.push(
           context,
