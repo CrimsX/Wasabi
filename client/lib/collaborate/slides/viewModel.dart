@@ -55,6 +55,13 @@ class slidesViewModel extends ChangeNotifier {
     socket!.emit('buildgroupscollab', username);
   }
 
+  void refresh() {
+    model.WasabiSlides.clear();
+    model.powerpoints.clear();
+    socket!.emit('getpowerpoints', username);
+    socket!.emit('getSlides', username);
+  }
+
   // Create a new google slides
   void createPowerpoint(BuildContext context) {
     TextEditingController addTitleController = TextEditingController();
@@ -279,10 +286,11 @@ class slidesViewModel extends ChangeNotifier {
                             'user': NetworkService.instance.getusername,
                             'name': Ppt['Name'],
                             'friend': model.friends[i][key],
-                            }); 
+                            });
                         } else if (checkedItems[i] && option == 1) {
+                          var id = 'g' + model.groups[i]['ServerID'].toString();
                           socket!.emit('shareSlideServer', {
-                            'group': model.groups[i][key],
+                            'group': id,
                             'user': username,
                             'name': Ppt['Name'],
                           });
@@ -296,8 +304,10 @@ class slidesViewModel extends ChangeNotifier {
                             'Ppt': Ppt
                           });
                         } else if (checkedItems[i] && option == 1) {
+                          var id = 'g' + model.groups[i]['ServerID'].toString();
                           socket!.emit('sharepptgroup', {
-                            'group': model.groups[i][key],
+                            'group': id,
+                            'user': username,
                             'Ppt': Ppt
                           });
                         }
@@ -313,7 +323,7 @@ class slidesViewModel extends ChangeNotifier {
         );
       },
     );
-  } 
+  }
 }
 
 class wasabiSlidesViewModel extends ChangeNotifier {

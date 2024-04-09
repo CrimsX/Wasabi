@@ -345,9 +345,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           });
                         } else if (option == 1) {
                           // Share with collaborators logic
-                          print('Share with collaborators: ${items[i][key]}');
+                          print('Share with group: ${items[i][key]}');
+                          var id  = 'g' + _groups[i]['ServerID'].toString();
                           widget.socket!.emit('shareDocumentGroup', {
-                            'group': _groups[i][key],
+                            'group': id,
                             'user': widget.username,
                             'documentTitle': widget.documentTitle,
                             'content': _controller.document.toPlainText(),

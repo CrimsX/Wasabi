@@ -43,20 +43,21 @@ export async function shareDocument(data) {
     if (check.length === 0) {
         const contentString = JSON.stringify(data.content);
         await pool.query('INSERT INTO document (DocumentID, UserID, DocumentTitle, Content) VALUES (?, ?, ?, ?)',
-        [data.documentId, data.friendId, data.documentTitle, contentString]);
+        [data.documentId, data.friend, data.documentTitle, contentString]);
     }
 }
 
 
 export async function shareDocumentGroup(data) {
+    console.log(data)
     const [members] = await pool.query('SELECT UserID from partof WHERE \
     ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
     for (const username of members) {
         shareDocument({
-            user: username.UserID,
-            'DocumentID': data.documentId,
-            'DocumentTitle': data.documentTitle,
-            'Content': data.Content
+            friend: username.UserID,
+            documentId: data.documentId,
+            documentTitle: data.documentTitle,
+            content: data.content
         })
     }
 }

@@ -165,15 +165,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           'userID': widget.username,
                         });
                       } else if (checkedItems[i] && option == 1) {
-                        print('Emitting shareEventGroup with data:');
-                        print({
-                          'group': _groups[i][key],
-                          'user': widget.username,
-                          'eventname': event.name,
-                          'eventTIME': event.time.toString(),
-                        });
+
+                        var id= "g" + _groups[i]['ServerID'].toString();
                         widget.socket!.emit('shareEventGroup', {
-                          'group': _groups[i][key],
+                          'group': id,
                           'user': widget.username,
                           'eventname': event.name,
                           'eventTIME': event.time.toString(),
@@ -232,9 +227,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print("New event created: $eventData");
       if (mounted) {
         setState(() {
-          DateTime eventDateTime = DateTime.parse(eventData['eventTIME']).toLocal();
-          DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
-          TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+          DateTime eventDateTimeUTC = DateTime.parse(eventData['eventTIME']);
+          DateTime eventDateTimeAdjusted = eventDateTimeUTC.add(Duration(hours: 0)); // Add a fixed 0 hour offset
+          DateTime eventDate = DateTime(eventDateTimeAdjusted.year, eventDateTimeAdjusted.month, eventDateTimeAdjusted.day);
+          TimeOfDay eventTime = TimeOfDay(hour: eventDateTimeAdjusted.hour, minute: eventDateTimeAdjusted.minute);
+
+          // Format the event time before adding it to _events
+          String formattedEventTime = '${eventTime.hour}:${eventTime.minute}';
+
           var newEvent = CalendarEvent(name: eventData['eventNAME'], time: eventTime);
 
           DateTime normalizedEventDate = DateTime(eventDate.year, eventDate.month, eventDate.day);
@@ -254,6 +254,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
 
 
+
+
   }
 
 
@@ -270,11 +272,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Process each event received from the backend
     for (var event in events) {
-      DateTime eventDateTime = DateTime.parse(event['eventTime']).toLocal(); // Convert to local time
-      DateTime eventDate = DateTime(eventDateTime.year, eventDateTime.month, eventDateTime.day);
-      TimeOfDay eventTime = TimeOfDay(hour: eventDateTime.hour, minute: eventDateTime.minute);
+      DateTime eventDateTimeUTC = DateTime.parse(event['eventTime']);
+      DateTime eventDateTimeAdjusted = eventDateTimeUTC.add(Duration(hours: 0)); // Add a fixed 0 hour offset
+      DateTime eventDate = DateTime(eventDateTimeAdjusted.year, eventDateTimeAdjusted.month, eventDateTimeAdjusted.day);
+      TimeOfDay eventTime = TimeOfDay(hour: eventDateTimeAdjusted.hour, minute: eventDateTimeAdjusted.minute);
 
       _events.putIfAbsent(eventDate, () => []).add(CalendarEvent(name: event['eventName'], time: eventTime));
+      print(eventDate);
     }
 
     // Trigger a UI refresh
@@ -343,10 +347,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text('Calendar'),
-      backgroundColor: Colors.green,
-    ),
+      appBar: AppBar(
+        title: const Text('Calendar'),
+        backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => {
+              setState(() {
+                widget.socket!.emit('getEvents', widget.username);
+            })
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           TableCalendar(
@@ -535,7 +549,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             emitCreateEvent(
                 eventName: eventName,
                 eventTime: eventTime);
-            // Do not call setState here
+
           }
         },
       ),
@@ -577,6 +591,7 @@ class _AddEventDialogState extends State<AddEventDialog> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
