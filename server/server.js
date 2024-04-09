@@ -58,6 +58,10 @@ import {
   fetchChat,
 } from './database/messaging.js'
 
+import {
+  socketLiveKit,
+} from './livekit/room.js'
+
 let port = process.env.PORT || 8080;
 
 //const app = express();
@@ -91,7 +95,7 @@ IO.on("connection", (socket) => {
   console.log(socket.user, "Connected");
   socket.join(socket.user);
 
-  const username = socket.handshake.query.username
+  let username = socket.handshake.query.username
   console.log("User connected:", username)
 
   onlineUsers[username] = callerId;
@@ -105,7 +109,16 @@ IO.on("connection", (socket) => {
   /************************************************************************************
   * Account Creation
   ************************************************************************************/
-  socketLogin(socket, IO);
+  socket.on('getUsername', async (data) => {
+    username = data.username;
+  });
+
+  socketLogin(socket, IO); 
+
+  console.log('server');
+  console.log(username, userRoom[username])
+
+  socketLiveKit(socket, IO, username, userRoom[username]);
 
   /************************************************************************************
   * Document :

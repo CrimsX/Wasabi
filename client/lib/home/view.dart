@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 import 'model.dart';
 
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
 import 'package:client/widgets/userDrawer.dart';
@@ -77,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _connectSocket();
 
-    _socket!.emit('fetchName', widget.username);
     _socket!.emit('friends', widget.username);
     _socket!.emit('servers', widget.username);
 
@@ -98,11 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
   //
   // should be able to move this to network.dart
   _connectSocket() {
-    _socket!.on('fetchName', (data) {
-      widget.username = data;
-      NetworkService.instance.setUsername(widget.username);
-    });
-
     _socket!.on('message',
       (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
         Message.fromJson(data),
@@ -989,7 +983,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-
           if (incomingSDPOffer != null)
             /*
             Positioned(
