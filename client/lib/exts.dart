@@ -5,8 +5,8 @@ extension LKExampleExt on BuildContext {
   Future<bool?> showPublishDialog() => showDialog<bool>(
         context: this,
         builder: (ctx) => AlertDialog(
-          title: const Text('Publish'),
-          content: const Text('Would you like to publish your Camera & Mic ?'),
+          title: const Text('Audio & Video'),
+          content: const Text('Would you like to enable your microphone and camera?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),

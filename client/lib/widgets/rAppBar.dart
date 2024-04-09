@@ -65,6 +65,7 @@ class rAppBar extends StatelessWidget {
     
     return Row(
       children: [
+      /*
         IconButton(
           icon: const Icon(Icons.call),
           onPressed: () {
@@ -101,14 +102,19 @@ class rAppBar extends StatelessWidget {
           },
           color: Colors.white
         ),
+        */
 
         IconButton(
           icon: const Icon(Icons.video_call),
           onPressed: () {
             if (type == 'DM') {
-              NetworkService.instance.socket!.emit("createRoom");
-
-              Navigator.push(
+              socket!.emit("requestVoIPID", friend);
+              remoteCallerID = NetworkService.instance.getRemoteCallerID;
+              print(remoteCallerID);
+              if (remoteCallerID != 'Offline') {
+                  socket!.emit("joinRoom", {'userName': loggedInUsername, 'calleeId': remoteCallerID});
+                  socket!.emit("createRoom", {'roomName': loggedInUsername});
+                Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => RoomPage(
@@ -117,14 +123,15 @@ class rAppBar extends StatelessWidget {
                   ),
                 ),
               );
-              
+              }
+              //NetworkService.instance.socket!.emit("joinRoom", {'userName': loggedInUsername, 'friend': friend});
+
+                           
               //socket!.emit("createRoom");
               /*
               //_receiveFriendVoIPID(context);
               //NetworkService.instance.socket!.emit!("requestVoIPID");
-              socket!.emit("requestVoIPID", friend);
-              remoteCallerID = NetworkService.instance.getRemoteCallerID;
-              print(remoteCallerID);
+              
               print(friend);
 
               if (remoteCallerID != 'Offline') {
@@ -137,12 +144,25 @@ class rAppBar extends StatelessWidget {
               }
               */
             } else if (type == 'group') {
+              print(NetworkService.instance.roomName);
+              NetworkService.instance.socket!.emit("createRoom", {'roomName': NetworkService.instance.roomName});
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoomPage(
+                    NetworkService.instance.room,
+                    NetworkService.instance.getListener,
+                  ),
+                ),
+              );
+              /*
               for (int i = 0; i < groupNames.length; i++) {
                 socket!.emit("requestVoIPID", groupNames[i]);
                 //NetworkService.instance.addGroupCallerID(NetworkService.instance.getRemoteCallerID);
               }
               groupCallerID = NetworkService.instance.getGroupCallerID;
-
+*/
               /*
               for (int j = 0; j < groupCallerID.length; j++) {
                 print(groupCallerID[j]);
@@ -157,6 +177,8 @@ class rAppBar extends StatelessWidget {
                   }
                   */
 
+                  /*
+
               if (groupCallerID.isNotEmpty) {
                 _joingroupCall(
                   context,
@@ -165,6 +187,7 @@ class rAppBar extends StatelessWidget {
                   showVid: true,
                 );
               }
+              */
             }
 
                 /*

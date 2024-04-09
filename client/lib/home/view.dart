@@ -13,6 +13,7 @@ import 'package:client/widgets/landingPage.dart';
 import 'package:client/widgets/hoverableTile.dart';
 
 import 'package:client/voice/view.dart';
+import 'package:client/room/view.dart';
 
 import 'package:intl/intl.dart';
 
@@ -63,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // VoIP
   dynamic incomingSDPOffer;
+  dynamic offerRoom;
 
   bool isServer = false;
   bool start = true;
@@ -80,11 +82,20 @@ class _HomeScreenState extends State<HomeScreen> {
     _socket!.emit('friends', widget.username);
     _socket!.emit('servers', widget.username);
 
+    _socket!.on('joinRoom', (data) {
+      print(data);
+        if (mounted) {
+            setState(() => offerRoom = data);
+        }
+    });
+
+    /*
     _socket!.on("newCall", (data) {
       if (mounted) {
         setState(() => incomingSDPOffer = data);
       }
     });
+    */
   }
 
   @override
@@ -200,6 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
               print(currentChatServer);
               currentChatServerName= server['ServerName'];
               print(currentChatServerName);
+              NetworkService.instance.setRoomName(currentChatServerName);
               _connectToGroupChat(currentChatServer);
               _socket!.emit('getservermembers', currentChatServer);
               FocusScope.of(context).requestFocus(_focusNode);
@@ -983,7 +995,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          if (incomingSDPOffer != null)
+          if (offerRoom != null)
             /*
             Positioned(
               child: Row(
@@ -1000,7 +1012,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.call_end),
                   color: Colors.redAccent,
                   onPressed: () {
-                    setState(() => incomingSDPOffer = null);
+                    setState(() => offerRoom = null);
                   },
                 ),
 
@@ -1008,14 +1020,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.call),
                   color: Colors.greenAccent,
                   onPressed: () {
-                    if (!isServer) {
+                    print(offerRoom['roomOffer']);
+                    NetworkService.instance.socket!.emit("createRoom", {'roomName': offerRoom['roomOffer']});
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoomPage(
+                    NetworkService.instance.room,
+                    NetworkService.instance.getListener,
+                  ),
+                ),
+              );
+                    //if (!isServer) {
+                      /*
                       _joinCall(
                         callerId: incomingSDPOffer["callerId"]!,
                         calleeId: NetworkService.instance.getselfCallerID,
                         offer: incomingSDPOffer["sdpOffer"],
                         showVid: incomingSDPOffer["showVid"],
                       );
-                    } else {
+                      */
+                    //} else {
+                      /*
                       List<String> groupNames = NetworkService.instance.getGroupNames;
                       List<String> groupCallerID = [];
                       for (int i = 0; i < groupNames.length; i++) {
@@ -1031,7 +1058,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         offer: incomingSDPOffer["sdpOffer"],
                         showVid: incomingSDPOffer["showVid"],
                       );
-                    }
+                      */
+                   // }
                   },
                 ),
               ],
