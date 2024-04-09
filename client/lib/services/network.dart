@@ -1,6 +1,7 @@
 //import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart';
 
+import 'package:livekit_client/livekit_client.dart';
 
 import 'dart:math';
 
@@ -16,6 +17,8 @@ class NetworkService {
   String type = '';
   List<String> groupNames = [];
   List<String> groupCallerID = [];
+  final room = Room();
+
 
   NetworkService._();
   static final instance = NetworkService._();
@@ -57,10 +60,9 @@ class NetworkService {
     socket!.onConnectError((data) {
       log("Connect Error $data");
     });
-    
-    //socket!.onDisconnect((data) => print('Socket.IO server disconnected'));
-    
     */
+    
+    //socket!.onDisconnect((data) => print('Socket.IO server disconnected')); 
 
    socket!.on(
       'r_VoIPID',
@@ -69,6 +71,18 @@ class NetworkService {
 
     // connect socket
     //socket!.connect();
+     socket!.on('createRoom', (data) {
+      print('Room created');
+      print(data);
+       //var room = LK.Room();
+      room.connect('wss://wasabi-nue3z12n.livekit.cloud', data);
+      // Turns camera track on
+      room.localParticipant!.setCameraEnabled(true);
+
+      // Turns microphone track on
+      room.localParticipant!.setMicrophoneEnabled(true);
+      //final listener = room.createListener();
+    });
   }
 
    _responseFriendVoIPID(data) {
@@ -76,7 +90,8 @@ class NetworkService {
     groupCallerID.add(remoteCallerID);
     //print("test2");
     //NetworkService.instance.socket!.emit('s_VoIPID', "test");
-  }
+  } 
+
 
     // Getters
     String get getserverIP => serverIP;
@@ -87,6 +102,8 @@ class NetworkService {
     String get getType => type;
     List<String> get getGroupNames => groupNames;
     List<String> get getGroupCallerID => groupCallerID;
+    Room get getRoom => room;
+    EventsListener<RoomEvent> get getListener => room.createListener();
 
     // Setters
     set setRemoteCallerID(String remoteCallerID) {
@@ -95,7 +112,7 @@ class NetworkService {
     
     setFriend (String friend) {
       this.friend = friend;
-    }
+    } 
 
     //String set setFriend(String friend) = friend;
     /*

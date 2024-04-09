@@ -50,6 +50,8 @@ class LoginViewModel extends ChangeNotifier {
   // Send login request
   void userLogin(BuildContext context, String username, String password) {
     String serverIP = NetworkService.instance.serverIP;
+    print(username);
+    print(password);
 
     _socket!.emit('login', {
       'userID': username,
@@ -59,6 +61,8 @@ class LoginViewModel extends ChangeNotifier {
     _socket!.on('loginResponse', (data) {
       // Handle login response
       if (data['success']) {
+        //_socket!.emit('getUsername', username);
+
         Navigator.push(
           context,
           MaterialPageRoute(

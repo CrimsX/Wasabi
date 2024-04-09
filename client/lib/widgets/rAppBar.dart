@@ -4,8 +4,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
 import 'package:client/voice/view.dart';
-import 'package:client/groupvoice/view.dart';
-
+import 'package:client/room/view.dart';
 
 class rAppBar extends StatelessWidget {
   String friend = NetworkService.instance.getFriend;
@@ -107,6 +106,20 @@ class rAppBar extends StatelessWidget {
           icon: const Icon(Icons.video_call),
           onPressed: () {
             if (type == 'DM') {
+              NetworkService.instance.socket!.emit("createRoom");
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoomPage(
+                    NetworkService.instance.room,
+                    NetworkService.instance.getListener,
+                  ),
+                ),
+              );
+              
+              //socket!.emit("createRoom");
+              /*
               //_receiveFriendVoIPID(context);
               //NetworkService.instance.socket!.emit!("requestVoIPID");
               socket!.emit("requestVoIPID", friend);
@@ -122,6 +135,7 @@ class rAppBar extends StatelessWidget {
                   showVid: true,
                 );
               }
+              */
             } else if (type == 'group') {
               for (int i = 0; i < groupNames.length; i++) {
                 socket!.emit("requestVoIPID", groupNames[i]);

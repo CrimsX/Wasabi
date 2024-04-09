@@ -8,6 +8,7 @@ dotenv
 nodemon
 bcrypt
 prisma
+livekit-server-sdk
 
 Flutter:
 socket.io
@@ -26,6 +27,8 @@ path_provider
 hive_flutter
 peerdart
 flutter_quill
+livekit-client-sdk
+flutter_background
 
 fly.io
 planetscale

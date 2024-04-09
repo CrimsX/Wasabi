@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:provider/provider.dart';
 import 'view_model.dart';
 import 'model.dart';
 
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
 import 'package:client/widgets/userDrawer.dart';
@@ -13,7 +13,6 @@ import 'package:client/widgets/landingPage.dart';
 import 'package:client/widgets/hoverableTile.dart';
 
 import 'package:client/voice/view.dart';
-import 'package:client/groupvoice/view.dart';
 
 import 'package:intl/intl.dart';
 
@@ -984,7 +983,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-
           if (incomingSDPOffer != null)
             /*
             Positioned(
