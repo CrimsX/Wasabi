@@ -113,7 +113,7 @@ IO.on("connection", (socket) => {
     username = data.username;
   });
 
-  socketLogin(socket, IO); 
+  socketLogin(socket, IO);
 
   console.log('server');
   console.log(username, userRoom[username])
@@ -575,10 +575,12 @@ IO.on("connection", (socket) => {
    * Draw
    ************************************************************************************/
     socket.on('joinwhiteboard', () => {
+      console.log("connect to di")
       socket.join('d1');
     })
 
     socket.on('senddrawing', (data) => {
+      console.log(data)
       IO.to('d1').emit('fetchlive', (data));
     })
 

@@ -43,6 +43,7 @@ class _DrawScreenState extends State <DrawScreen> {
 
   _connectSocket() {
     widget.socket!.on('fetchlive', (data) => {
+      print(data),
       _addToWhiteboard(data)
     });
 
