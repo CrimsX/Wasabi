@@ -19,14 +19,14 @@ const createToken = async (username, room) => {
   });
   at.addGrant({ roomJoin: true, room: roomName });
 
-
   return await at.toJwt();
 }
 
-export async function socketLiveKit (socket, IO, username, room) {
-  socket.on('createRoom', async function() {
-    console.log(username, room)
-    const result = await createToken(username, room);
+export async function socketLiveKit (socket, IO, username) {
+  socket.on('createRoom', async (data) => {
+    console.log(data);
+    console.log(username, data.roomName);
+    const result = await createToken(username, data.roomName);
     console.log(result);
     IO.to(socket.id).emit('createRoom', result);
   });

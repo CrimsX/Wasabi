@@ -18,6 +18,7 @@ class NetworkService {
   List<String> groupNames = [];
   List<String> groupCallerID = [];
   final room = Room();
+  String roomName = '';
 
 
   NetworkService._();
@@ -131,5 +132,9 @@ class NetworkService {
 
     addGroupCallerID(String groupCallerID) {
       this.groupCallerID.add(groupCallerID);
+    }
+
+    setRoomName(String roomName) {
+      this.roomName = roomName;
     }
 }

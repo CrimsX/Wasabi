@@ -118,7 +118,20 @@ IO.on("connection", (socket) => {
   console.log('server');
   console.log(username, userRoom[username])
 
-  socketLiveKit(socket, IO, username, userRoom[username]);
+  socketLiveKit(socket, IO, username);
+  
+  socket.on("joinRoom", (data) => {
+    let calleeId = data.calleeId;
+    socket.to(calleeId).emit("joinRoom", {
+      roomOffer: data.userName,
+      //callerId: socket.user,
+      //sdpOffer: sdpOffer,
+      //showVid: showVid,
+    });
+    //console.log(sdpOffer);
+    //console.log("Call sent");
+    //console.log(showVid);
+  });
 
   /************************************************************************************
   * Document :
