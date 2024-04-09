@@ -17,11 +17,11 @@ class SlidesView extends StatefulWidget {
   _SlidesViewState createState() => _SlidesViewState();
 }
 
-class _SlidesViewState extends State<SlidesView> { 
+class _SlidesViewState extends State<SlidesView> {
   slidesViewModel viewModel = slidesViewModel();
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
 
     // Receive new slide from server
@@ -35,7 +35,7 @@ class _SlidesViewState extends State<SlidesView> {
 
     // Socket events
     viewModel.socketEvents();
- 
+
     // Delay to allow socket to connect
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {});
@@ -53,6 +53,16 @@ class _SlidesViewState extends State<SlidesView> {
         title: const Text('Slides', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => {
+              setState(() {
+                viewModel.refresh();
+            })
+            },
+          ),
+        ],
       ),
       // Background image
       body: new Stack(
@@ -204,7 +214,7 @@ class _SlidesViewState extends State<SlidesView> {
                     );
                   },
                 ),
-              ), 
+              ),
             ],
           ),
           // Change slide type
@@ -329,7 +339,7 @@ bulletController.text = data[0]['SlideContent'];
         pres.addTitleSlide(title: title.toTextValue(),);
       } else {
         String title = data[i]['SlideHeader'];
-        List<String> splitBullet = data[i]['SlideContent'].split('\n'); 
+        List<String> splitBullet = data[i]['SlideContent'].split('\n');
 
         pres.addTitleAndBulletsSlide(
           title: title.toTextValue(),
@@ -398,7 +408,7 @@ bulletController.text = data[0]['SlideContent'];
 
   int slideLength = 1;
 
-  final ValueNotifier<int> slideIndex = ValueNotifier(1); 
+  final ValueNotifier<int> slideIndex = ValueNotifier(1);
 
   void saveSlide(ValueNotifier<int> slideIndex, TextEditingController headingController, TextEditingController bulletController) {
     widget.socket?.emit('createSlide', {
@@ -425,6 +435,7 @@ bulletController.text = data[0]['SlideContent'];
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
+
           title: Row(
             children: [
               // Title input

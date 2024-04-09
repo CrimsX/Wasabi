@@ -27,7 +27,7 @@ export async function socketWasabiSlides(socket, IO) {
 
     socket.on('deleteSlide', async (data) => {
       await deleteSlide(data);
-    }) 
+    })
 
     socket.on('shareSlideFriend', async (data) => {
       await shareSlide(data);
@@ -76,7 +76,7 @@ export async function getAllSlides(userID) {
 export async function getSlide(data) {
     const [result] = await pool.query('SELECT * from WasabiSlides \
     WHERE userID = ? AND Name = ? AND SlideNum = ?', [data.username, data.name, data.slideNum]);
-    return result; 
+    return result;
 }
 
 export async function deleteSlide(data) {
@@ -84,6 +84,7 @@ export async function deleteSlide(data) {
 }
 
 export async function shareSlide(data) {
+  console.log(data);
   const [result] = await pool.query(
   'INSERT INTO WasabiSlides (userID, Name, SlideNum, SlideHeader, SlideContent) \
   SELECT ?, Name, SlideNum, SlideHeader, SlideContent \
@@ -103,12 +104,13 @@ export async function shareSlide(data) {
 }
 
 export async function shareSlideServer(data) {
+  console.log(data);
   const [members] = await pool.query('SELECT UserID from partof WHERE \
-    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.Ppt.UserID]);
+    ServerID = ? and UserID != ?', [parseInt(data.group.slice(1)), data.user]);
     for (const username of members) {
         shareSlide({
-            friend: data.friend,
-            user: username.UserID,
+            friend: username.UserID,
+            user: data.user,
             name: data.name
         })
     }
