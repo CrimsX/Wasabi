@@ -68,7 +68,7 @@ let port = process.env.PORT || 8080;
 //const httpServer = http.createServer(app);
 //const IO = new Server(httpServer);
 //
-const messages = []
+//const messages = []
 
 let callerId;
 let onlineUsers = {};
@@ -404,9 +404,9 @@ IO.on("connection", (socket) => {
       chatID: parseInt(data.chatroom, 10)
     };
     console.log(message);
-    storeMessage(message);
-    messages.push(message);
     IO.to(data.chatroom).emit('message', message)
+    storeMessage(message);
+    //messages.push(message);
   })
 
   /**
@@ -514,9 +514,9 @@ IO.on("connection", (socket) => {
     serverID: parseInt(data.serverID, 10)
     };
     console.log(message.serverID);
+    IO.to(room).emit('groupmsg', message)
     storeGroupMessage(message) //TODO make query
     const room = 'G' + data.serverID.toString();
-    IO.to(room).emit('groupmsg', message)
     })
 
     socket.on('fetchgroupchat', async (data) => {

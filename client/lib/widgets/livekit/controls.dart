@@ -104,7 +104,10 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   void _onTapDisconnect() async {
     final result = await context.showDisconnectDialog();
-    if (result == true) await widget.room.disconnect();
+    //if (result == true) await widget.room.disconnect();
+    if (result == true) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
