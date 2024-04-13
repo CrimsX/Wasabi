@@ -62,6 +62,12 @@ import {
   socketLiveKit,
 } from './livekit/room.js'
 
+import mysql from 'mysql2'
+import dotenv from 'dotenv'
+
+dotenv.config();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
+
 let port = process.env.PORT || 8080;
 
 //const app = express();
@@ -113,7 +119,7 @@ IO.on("connection", (socket) => {
     username = data.username;
   });
 
-  socketLogin(socket, IO);
+  socketLogin(socket, IO, pool);
 
   console.log('server');
   console.log(username, userRoom[username])
