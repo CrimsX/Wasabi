@@ -1,5 +1,6 @@
 import mysql from 'mysql2'
 import dotenv from 'dotenv'
+import crypto from 'crypto'
 
 dotenv.config()
 
@@ -20,8 +21,12 @@ async function getCurrentID(data) {
  * Stores message into tables messages, sentmessages, and receivedmessages
  */
 export async function storeMessage(data) {
+    const key = crypto.createCipher('aes-128-cbc', process.env.AES_KEY);
+    let encryptedMessage = key.update(data.message, 'utf8', 'hex');
+    encryptedMessage += key.final('hex');
+
     await pool.query('INSERT INTO messages (DateReceived, DataSent, MsgContent, EncryptID, ChatID) \
-    VALUES (?, ?, ?, ?, ?);' , [data.sentAt, 'text', data.message, null, data.chatID]);
+    VALUES (?, ?, ?, ?, ?);' , [data.sentAt, 'text', encryptedMessage, null, data.chatID]);
 
     const result = await getCurrentID(data);
     const msgID = result[0].MessageID;
