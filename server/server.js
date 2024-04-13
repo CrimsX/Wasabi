@@ -403,7 +403,7 @@ IO.on("connection", (socket) => {
       sentAt: Date.now(),
       chatID: parseInt(data.chatroom, 10)
     };
-    console.log(message);
+    //console.log(message);
     IO.to(data.chatroom).emit('message', message)
     storeMessage(message);
     //messages.push(message);
@@ -462,7 +462,7 @@ IO.on("connection", (socket) => {
   socket.on('fetchchat', async (data) => {
     console.log('fetching chat from chatID: ' + data.chatID);
     const result = await fetchChat(parseInt(data.chatID, 10));
-    console.log(result);
+    //console.log(result);
     IO.to(socket.id).emit('fetchchat', result);
   })
 
@@ -514,9 +514,9 @@ IO.on("connection", (socket) => {
     serverID: parseInt(data.serverID, 10)
     };
     console.log(message.serverID);
+    const room = 'G' + data.serverID.toString();
     IO.to(room).emit('groupmsg', message)
     storeGroupMessage(message) //TODO make query
-    const room = 'G' + data.serverID.toString();
     })
 
     socket.on('fetchgroupchat', async (data) => {

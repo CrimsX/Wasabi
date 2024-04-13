@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _socket!.emit('servers', widget.username);
 
     _socket!.on('joinRoom', (data) {
-      print(data);
+      //print(data);
         if (mounted) {
             setState(() => offerRoom = data);
         }
@@ -108,11 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
   //
   // should be able to move this to network.dart
   _connectSocket() {
-    _socket!.on('message',
-      (data) => Provider.of<MessageProvider>(context, listen: false).addNewMessage(
-        Message.fromJson(data),
-        ),
-    );
+    _socket!.on('message', (data) {
+      Provider.of<MessageProvider>(context, listen: false).addNewMessage(
+        Message.fromJson(data),);
+    });
 
     ///build list of friends based on userID
     ///builds tiles on the end drawer for each friend in the db
