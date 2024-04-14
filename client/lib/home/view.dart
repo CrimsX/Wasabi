@@ -7,6 +7,8 @@ import 'model.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
+import 'package:livekit_client/livekit_client.dart' as LK;
+
 import 'package:client/widgets/userDrawer.dart';
 import 'package:client/widgets/rAppBar.dart';
 import 'package:client/widgets/landingPage.dart';
@@ -68,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isServer = false;
   bool start = true;
+
 
   @override
   void initState() {
@@ -282,6 +285,34 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     });
+
+    _socket!.on('createRoom', (data) {
+      print('Room created');
+      final room = LK.Room();
+
+      //print(data);
+      //print(data['url']);
+      //print(data['result']);
+       //var room = LK.Room();
+      room.connect(data['url'], data['result']);
+      // Turns camera track on
+      //room.localParticipant!.setCameraEnabled(true);
+
+      // Turns microphone track on
+      //room.localParticipant!.setMicrophoneEnabled(true);
+      //final listener = room.createListener();
+      //NetworkService.instance.setRoom = room;
+      Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoomPage(
+                    room,
+                    room.createListener(),
+                  ),
+                ),
+              );
+    });
+
   }
 
   ///Helper functions

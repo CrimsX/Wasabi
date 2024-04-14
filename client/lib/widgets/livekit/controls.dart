@@ -106,6 +106,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     final result = await context.showDisconnectDialog();
     //if (result == true) await widget.room.disconnect();
     if (result == true) {
+      //widget.room.disconnect();
       Navigator.of(context).pop();
     }
   }

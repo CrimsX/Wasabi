@@ -28,6 +28,6 @@ export async function socketLiveKit (socket, IO, username) {
     console.log(username, data.roomName);
     const result = await createToken(username, data.roomName);
     console.log(result);
-    IO.to(socket.id).emit('createRoom', result);
+    IO.to(socket.id).emit('createRoom', {'url': process.env.PUBLIC_LIVEKIT_URL, 'result': result});
   });
 }
