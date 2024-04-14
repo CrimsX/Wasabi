@@ -72,18 +72,22 @@ class NetworkService {
 
     // connect socket
     //socket!.connect();
+    /*
      socket!.on('createRoom', (data) {
       print('Room created');
-      print(data);
+      //print(data);
+      //print(data['url']);
+      //print(data['result']);
        //var room = LK.Room();
-      room.connect('wss://wasabi-nue3z12n.livekit.cloud', data);
+      room.connect(data['url'], data['result']);
       // Turns camera track on
-      room.localParticipant!.setCameraEnabled(true);
+      //room.localParticipant!.setCameraEnabled(true);
 
       // Turns microphone track on
-      room.localParticipant!.setMicrophoneEnabled(true);
+      //room.localParticipant!.setMicrophoneEnabled(true);
       //final listener = room.createListener();
     });
+     */
   }
 
    _responseFriendVoIPID(data) {
@@ -133,6 +137,14 @@ class NetworkService {
     addGroupCallerID(String groupCallerID) {
       this.groupCallerID.add(groupCallerID);
     }
+    
+    set setRoom(Room room) => room = room;
+
+    /*
+    setRoom(Room room) {
+      this.room = room;
+    }
+    */
 
     setRoomName(String roomName) {
       this.roomName = roomName;

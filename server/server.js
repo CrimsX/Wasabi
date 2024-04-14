@@ -62,13 +62,21 @@ import {
   socketLiveKit,
 } from './livekit/room.js'
 
+import mysql from 'mysql2'
+import dotenv from 'dotenv'
+
+dotenv.config();
+const pool = mysql.createPool(process.env.DATABASE_URL).promise();
+
+import crypto from 'crypto'
+
 let port = process.env.PORT || 8080;
 
 //const app = express();
 //const httpServer = http.createServer(app);
 //const IO = new Server(httpServer);
 //
-const messages = []
+//const messages = []
 
 let callerId;
 let onlineUsers = {};
@@ -113,7 +121,7 @@ IO.on("connection", (socket) => {
     username = data.username;
   });
 
-  socketLogin(socket, IO);
+  socketLogin(socket, IO, pool);
 
   console.log('server');
   console.log(username, userRoom[username])
@@ -403,10 +411,10 @@ IO.on("connection", (socket) => {
       sentAt: Date.now(),
       chatID: parseInt(data.chatroom, 10)
     };
-    console.log(message);
+    //console.log(message);
+    IO.to(data.chatroom).emit('message', message);
     storeMessage(message);
-    messages.push(message);
-    IO.to(data.chatroom).emit('message', message)
+    //messages.push(message);
   })
 
   /**
@@ -462,7 +470,19 @@ IO.on("connection", (socket) => {
   socket.on('fetchchat', async (data) => {
     console.log('fetching chat from chatID: ' + data.chatID);
     const result = await fetchChat(parseInt(data.chatID, 10));
-    console.log(result);
+    
+    for (let i = 0; i < result.length; i++) {
+      try {
+      const key = crypto.createDecipher('aes-128-cbc', process.env.AES_KEY);
+      let decryptedMessage = key.update(result[i].message, 'hex', 'utf8');
+      decryptedMessage += key.final('utf8');
+      result[i].message = decryptedMessage;
+      } catch (error) {
+        continue;
+      }
+    }
+
+    //console.log(result);
     IO.to(socket.id).emit('fetchchat', result);
   })
 
@@ -514,9 +534,9 @@ IO.on("connection", (socket) => {
     serverID: parseInt(data.serverID, 10)
     };
     console.log(message.serverID);
-    storeGroupMessage(message) //TODO make query
     const room = 'G' + data.serverID.toString();
     IO.to(room).emit('groupmsg', message)
+    storeGroupMessage(message) //TODO make query
     })
 
     socket.on('fetchgroupchat', async (data) => {

@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: dart_webrtc
-      sha256: a51163a624bb4fe91a6df261a35c7758ec03b0310d516e3cbe821fa1451fc864
+      sha256: "7c2f527ff098dc33fcfc998487024cdb69bcc990721019aa91205c41209d1bc9"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.3"
+    version: "1.4.0"
   dbus:
     dependency: transitive
     description:
@@ -337,10 +337,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_webrtc
-      sha256: "2f17fb96e0c9c6ff75f6b1c36d94755461fc7f36a5c28386f5ee5a18b98688c8"
+      sha256: "20eac28848a2dffb26cc2b2870a5164613904511a0b7e8f4825e31a2768175d2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.48+hotfix.1"
+    version: "0.10.3"
   hashcodes:
     dependency: transitive
     description:
@@ -473,10 +473,10 @@ packages:
     dependency: "direct main"
     description:
       name: livekit_client
-      sha256: "39d21e33ad269fc997d6e811bd59cc6ce93dd807d2d7661427f92f853d837b59"
+      sha256: "002c7ee0439d6a10baec9c7d1104cadcefb9575a94366375ec43ddc6350e73e5"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.2"
   logging:
     dependency: transitive
     description:
@@ -561,10 +561,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "477184d672607c0a3bf68fbbf601805f92ef79c82b64b4d6eb318cbca4c48668"
+      sha256: "51f0d2c554cfbc9d6a312ab35152fc77e2f0b758ce9f1a444a3a1e5b8f3c6b7f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.2"
+    version: "2.2.3"
   path_provider_foundation:
     dependency: transitive
     description:

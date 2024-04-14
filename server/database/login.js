@@ -1,26 +1,26 @@
 import mysql from 'mysql2'
-import dotenv from 'dotenv'
+//import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 
-dotenv.config()
+//dotenv.config()
 
 //const pool = mysql.createConnection(process.env.DATABASE_URL).promise();
-const pool = mysql.createPool(process.env.DATABASE_URL).promise();
+//const pool = mysql.createPool(process.env.DATABASE_URL).promise();
 
-export async function socketLogin(socket, IO) {
+export async function socketLogin(socket, IO, pool) {
   socket.on('login', async (data) => {
     console.log('Attempting login for:', data.userID);
-    const result = await logIn(data);
+    const result = await logIn(pool, data);
     IO.to(socket.id).emit('loginResponse', result);
   });
 
   socket.on('createaccount', async (data) => {
-    const result = await createAccount(data);
+    const result = await createAccount(pool, data);
     socket.emit('createaccountResponse', {success: result.success, message: result.message});
   });
 }
 
-export async function logIn(data) {
+export async function logIn(pool, data) {
     try {
         const { userID, password } = data;
 
@@ -44,7 +44,7 @@ export async function logIn(data) {
 }
 
 // for create account to insert the username and password
-export async function createAccount(data) {
+export async function createAccount(pool, data) {
     try {
         const { userID, displayName, password } = data;
 
