@@ -6,12 +6,12 @@ A text and VoIP application focused on streamlining workflow for users through b
 **(Discord + Google Drive)**
 
 # Features
-- Real-time messaging using Socket.io
+- Real-time messaging using Socket.IO
 - Communication through messaging, voice or video calls
 - Encryption for 1:1 conversations
 - Collaborative document editing and whiteboard
 - Integrated calendars and checklists
-- Create and present PowerPoints
+- Create and present slides
 
 # Prerequisites
 - **Node version 20.x.x**
@@ -25,13 +25,15 @@ A text and VoIP application focused on streamlining workflow for users through b
 git clone https://github.com/CrimsX/Wasabi
 ```
 
-- Start the server
-
+- Create server .env file
 ```shell
-npm i --production
-npm start
-or
-npx nodemon
+DATABASE_URL=
+
+AES_KEY=
+
+PUBLIC_LIVEKIT_URL=
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
 ```
 
 - Create databases
@@ -39,6 +41,14 @@ npx nodemon
 ```shell
 mysql
 source schema.sql;
+source insertData.sql; (optional)
+```
+
+- Start the server
+
+```shell
+npm i --production
+npm start
 ```
 
 - Start the app
