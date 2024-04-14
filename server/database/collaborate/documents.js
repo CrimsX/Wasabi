@@ -38,7 +38,7 @@ export async function saveDocumentContent(documentId, content) {
 
 export async function shareDocument(data) {
     const [check] = await pool.query('SELECT * FROM document \
-    WHERE DocumentID = ? AND UserID = ?', [data.documentId, data.friendId]);
+    WHERE DocumentID = ? AND UserID = ?', [data.documentId, data.friend]);
     console.log(check.length===0);
     if (check.length === 0) {
         const contentString = JSON.stringify(data.content);
