@@ -114,6 +114,7 @@ class rAppBar extends StatelessWidget {
               if (remoteCallerID != 'Offline') {
                   socket!.emit("joinRoom", {'userName': loggedInUsername, 'calleeId': remoteCallerID});
                   socket!.emit("createRoom", {'roomName': loggedInUsername});
+                  /*
                 Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -123,6 +124,7 @@ class rAppBar extends StatelessWidget {
                   ),
                 ),
               );
+                */
               }
               //NetworkService.instance.socket!.emit("joinRoom", {'userName': loggedInUsername, 'friend': friend});
 

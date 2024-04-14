@@ -338,7 +338,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           // Share with friends logic
                           print('Share with friend: ${items[i][key]}');
                           widget.socket!.emit('shareDocument', {
-                            'friendId': items[i][key],
+                            'friend': items[i][key],
                             'documentTitle': widget.documentTitle,
                             'content': _controller.document.toPlainText(),
                             'documentId': widget.documentId,

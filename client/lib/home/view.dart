@@ -1052,7 +1052,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     print(offerRoom['roomOffer']);
                     NetworkService.instance.socket!.emit("createRoom", {'roomName': offerRoom['roomOffer']});
-
+/*
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1062,6 +1062,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               );
+              */
                     //if (!isServer) {
                       /*
                       _joinCall(
