@@ -72,7 +72,7 @@ class NetworkService {
 
     // connect socket
     //socket!.connect();
-    /*
+    
      socket!.on('createRoom', (data) {
       print('Room created');
       //print(data);
@@ -87,7 +87,6 @@ class NetworkService {
       //room.localParticipant!.setMicrophoneEnabled(true);
       //final listener = room.createListener();
     });
-     */
   }
 
    _responseFriendVoIPID(data) {

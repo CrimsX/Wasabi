@@ -114,7 +114,7 @@ class rAppBar extends StatelessWidget {
               if (remoteCallerID != 'Offline') {
                   socket!.emit("joinRoom", {'userName': loggedInUsername, 'calleeId': remoteCallerID});
                   socket!.emit("createRoom", {'roomName': loggedInUsername});
-                  /*
+                  
                 Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -124,7 +124,7 @@ class rAppBar extends StatelessWidget {
                   ),
                 ),
               );
-                */
+                
               }
               //NetworkService.instance.socket!.emit("joinRoom", {'userName': loggedInUsername, 'friend': friend});
 
@@ -148,7 +148,7 @@ class rAppBar extends StatelessWidget {
             } else if (type == 'group') {
               print(NetworkService.instance.roomName);
               NetworkService.instance.socket!.emit("createRoom", {'roomName': NetworkService.instance.roomName});
-/*
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -157,7 +157,7 @@ class rAppBar extends StatelessWidget {
                     NetworkService.instance.getListener,
                   ),
                 ),
-              );*/
+              );
               /*
               for (int i = 0; i < groupNames.length; i++) {
                 socket!.emit("requestVoIPID", groupNames[i]);

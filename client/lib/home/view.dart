@@ -7,7 +7,7 @@ import 'model.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:client/services/network.dart';
 
-import 'package:livekit_client/livekit_client.dart' as LK;
+//import 'package:livekit_client/livekit_client.dart' as LK;
 
 import 'package:client/widgets/userDrawer.dart';
 import 'package:client/widgets/rAppBar.dart';
@@ -286,6 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
+    /*
     _socket!.on('createRoom', (data) {
       print('Room created');
       final room = LK.Room();
@@ -312,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
     });
-
+*/
   }
 
   ///Helper functions
@@ -1052,7 +1053,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     print(offerRoom['roomOffer']);
                     NetworkService.instance.socket!.emit("createRoom", {'roomName': offerRoom['roomOffer']});
-/*
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1062,7 +1062,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               );
-              */
+
                     //if (!isServer) {
                       /*
                       _joinCall(
